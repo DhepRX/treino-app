@@ -1133,8 +1133,9 @@ details.how .lbl{font-weight:700}
       }
       let kg = kgIn ? num(kgIn.value) : null;
       let reps = num(repIn.value);
-      if (novo && reps === null) { reps = e.r[0]; repIn.value = fmt(reps); }
-      if (novo && kgIn && kg === null) { const sg = suggest(e); kg = sg.kg || null; if (kg) kgIn.value = fmt(kg); }
+      // Campo vazio: repete o da série anterior deste treino; se não tiver, usa a sugestão.
+      if (novo && reps === null) { reps = anterior(exId, i, 'reps') ?? e.r[0]; repIn.value = fmt(reps); }
+      if (novo && kgIn && kg === null) { kg = anterior(exId, i, 'kg') ?? (suggest(e).kg || null); if (kg) kgIn.value = fmt(kg); }
       setVal(exId, i, { kg, reps, done:novo });
       rowNow.classList.toggle('ok', novo);
       rowNow.querySelector('[data-done]').setAttribute('aria-pressed', String(novo));
@@ -1149,22 +1150,47 @@ details.how .lbl{font-weight:700}
       return;
     }
   });
+  // ---------------- peso digitado uma vez só ----------------
+  // O peso de uma série vale para as séries seguintes do mesmo exercício que ainda
+  // estão vazias ou acompanhando o valor antigo. Série marcada ou trocada na mão não muda.
+  function anterior(exId, i, campo){
+    for (let k = i - 1; k >= 0; k--) { const cs = curSet(exId, k); if (cs && cs[campo] !== null && cs[campo] !== undefined) return cs[campo]; }
+    return null;
+  }
+  function segueKg(inp, exId, i){
+    const antes = inp.dataset.seguindo || '';
+    for (let j = i + 1; j < EX[exId].s; j++) {
+      const cs = curSet(exId, j);
+      if (cs && cs.done) continue;
+      const outro = document.querySelector('.setrow[data-ex="' + exId + '"][data-i="' + j + '"] [data-f="kg"]');
+      if (!outro || (outro.value !== '' && outro.value !== antes)) continue;
+      outro.value = inp.value;
+      setVal(exId, j, { kg:num(inp.value) });
+    }
+    inp.dataset.seguindo = inp.value;
+  }
+  $('workout').addEventListener('focusin', ev => {
+    const inp = ev.target.closest('.setrow input[data-f="kg"]');
+    if (inp) inp.dataset.seguindo = inp.value;
+  });
   $('workout').addEventListener('input', ev => {
     const inp = ev.target.closest('.setrow input');
     if (!inp) return;
     const row = inp.closest('.setrow');
-    const exId = row.dataset.ex, i = Number(row.dataset.i);
+    const exId = row.dataset.ex, i = Number(row.dataset.i), f = inp.dataset.f;
     if (!state.cur) {
-      const valor = inp.value;
+      const valor = inp.value, seguindo = inp.dataset.seguindo || '';
       if (!startSession(sel)) return;
-      const again = document.querySelector('.setrow[data-ex="' + exId + '"][data-i="' + i + '"] [data-f="' + inp.dataset.f + '"]');
-      if (again) { again.value = valor; again.focus(); }
-      setVal(exId, i, { [inp.dataset.f]: num(valor) });
+      const again = document.querySelector('.setrow[data-ex="' + exId + '"][data-i="' + i + '"] [data-f="' + f + '"]');
+      if (again) { again.value = valor; again.focus(); again.dataset.seguindo = seguindo; }
+      setVal(exId, i, { [f]: num(valor) });
+      if (f === 'kg' && again) segueKg(again, exId, i);
       commit();
       return;
     }
     if (state.cur.wid !== EX[exId].w) return;
-    setVal(exId, i, { [inp.dataset.f]: num(inp.value) });
+    setVal(exId, i, { [f]: num(inp.value) });
+    if (f === 'kg') segueKg(inp, exId, i);
     commit();
   });
 
