@@ -165,6 +165,14 @@ h1{font-size:1.75rem;font-weight:800;font-stretch:78%;margin:8px 0 2px;line-heig
 .backup .bklast{margin:8px 0 0}
 .backup.due{border:2px solid var(--tag)}
 .backup.due .bklast{color:var(--ink);font-weight:700}
+.nuvem{margin:16px 0 0;padding:14px 0 0;border-top:1px solid var(--line)}
+.nuvem h3{margin:0 0 4px;font-size:1.05rem;font-weight:800}
+.nuvem.on .nvstatus{color:var(--ink);font-weight:700}
+.nuvem.falha .nvstatus{color:var(--ink);font-weight:700;border-left:4px solid var(--tag);padding-left:8px}
+.nuvem details.how ol{font-size:.92rem;color:var(--muted)}
+.nuvem details.how .lnk{display:inline;min-height:0}
+.nvcampo{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;margin:10px 0 0;font-size:.9rem;font-weight:700}
+.nvcampo input{box-sizing:border-box;width:100%;min-width:0;min-height:44px;border:1px solid var(--line);border-radius:9px;background:var(--bg);padding:0 10px;font-size:16px;font-weight:400}
 details.how{flex:1 1 100%}
 details.how summary{cursor:pointer;font-weight:700;min-height:40px;display:flex;align-items:center}
 details.how ol{margin:6px 0 8px;padding-left:1.3rem}
@@ -280,6 +288,24 @@ details.how .lbl{font-weight:700}
       <input type="file" id="bkFile" class="sr" accept=".json,application/json" tabindex="-1" aria-hidden="true">
     </div>
     <p class="bkmsg" id="bkMsg" role="status"></p>
+    <div class="nuvem" id="nuvem">
+      <h3>Backup automático no GitHub</h3>
+      <p class="nvstatus" id="nvStatus"></p>
+      <div class="bkrow"><button type="button" class="btn" id="nvRestaurar" hidden>Restaurar do GitHub</button></div>
+      <details class="how" id="nvConfig">
+        <summary>Configurar</summary>
+        <ol>
+          <li>Crie um repositório <b>privado</b> chamado <b>treino-dados</b>, marcando <b>Add a README file</b>: <a class="lnk" href="https://github.com/new" target="_blank" rel="noopener">github.com/new</a></li>
+          <li>Crie uma chave em <a class="lnk" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Fine-grained token</a>. Em <b>Repository access</b>, escolha <b>Only select repositories</b> e o <b>treino-dados</b>. Em <b>Permissions</b>, ponha <b>Contents</b> em <b>Read and write</b>. Toque em <b>Generate token</b> e copie.</li>
+          <li>Cole a chave aqui embaixo e toque em <b>Ligar e testar</b>.</li>
+        </ol>
+        <label class="nvcampo">Repositório<input id="nvRepo" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="DhepRX/treino-dados"></label>
+        <label class="nvcampo">Chave de acesso<input id="nvToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="github_pat_…"></label>
+        <div class="bkrow"><button type="button" class="btn primary" id="nvLigar">Ligar e testar</button><button type="button" class="btn quiet" id="nvDesligar" hidden>Desligar</button></div>
+        <p class="bkmsg" id="nvMsg" role="status"></p>
+        <p>A chave fica guardada só neste celular e só consegue mexer no repositório escolhido. Configure pelo app da Tela de Início, não pelo Safari.</p>
+      </details>
+    </div>
   </section>
   <p class="fine">O descanso começa sozinho quando você marca a série, e dá pra tocar no descanso de qualquer série para começar ou pular. Cada exercício tem um vídeo que abre dentro do próprio app. Os vídeos precisam de internet; o resto funciona sem sinal. As cargas de partida vieram do seu app da Smart Fit; os exercícios sem carga você escolhe no primeiro treino.</p>
   <p class="fine" id="dica">Pra usar como aplicativo: abra o endereço do app no Safari, toque em ••• e depois em Compartilhar e Adicionar à Tela de Início.</p>
@@ -376,9 +402,9 @@ details.how .lbl{font-weight:700}
       { id:'d3', vid:'BH9jVp2cx3w', nome:'Elevação lateral na polia', maq:'polia baixa, um braço de cada vez', s:3, r:[12,15], lado:true, rest:60, kg:null, inc:2.5, yt:'elevação lateral na polia unilateral como fazer',
         como:['De lado para a polia baixa, com o cabo passando na frente do corpo e o pegador na mão de fora.','Suba o braço para o lado até a altura do ombro, cotovelo levemente dobrado.','Desça devagar.'],
         erros:'inclinar o corpo, passar da linha do ombro e encolher o ombro.', troca:'elevação lateral com halteres.' },
-      { id:'d4', vid:'fEh2649poQY', nome:'Rosca Scott na máquina', maq:'máquina de rosca Scott', s:3, r:[10,12], rest:0, par:'d5', parCurto:'tríceps', kg:null, inc:5, yt:'rosca scott máquina como fazer',
-        como:['Axilas encaixadas no apoio e braços apoiados.','Suba dobrando o cotovelo.','Desça devagar até quase esticar o braço.'],
-        erros:'tirar o braço do apoio e soltar o peso na descida.', troca:'rosca Scott no banco com barra W.' },
+      { id:'d4', nome:'Rosca Scott alternada com halteres', maq:'banco Scott (apoio para o braço) e 2 halteres; a carga é de um halter', s:3, r:[10,12], lado:true, braco:true, rest:0, par:'d5', parCurto:'tríceps', kg:null, inc:2, yt:'rosca scott alternada com halteres como fazer',
+        como:['Sente com as axilas encaixadas no topo do apoio, um halter em cada mão, palmas para cima e a parte de trás dos braços toda apoiada.','Suba um braço de cada vez, dobrando só o cotovelo, e desça devagar até quase esticar antes de subir o outro.','Conte as repetições de cada braço: 10 a 12 de cada lado por série.'],
+        erros:'tirar o braço do apoio, girar o tronco para ajudar e soltar o halter na descida.', troca:'rosca Scott com barra W ou rosca alternada em pé com halteres.' },
       { id:'d5', vid:'GrNRu7j3z9M', nome:'Tríceps testa na polia com corda', maq:'polia baixa com corda e banco reto', s:3, r:[10,12], rest:90, kg:20, inc:2.5, yt:'tríceps testa na polia com corda deitado como fazer',
         como:['Deite no banco com a cabeça para o lado da polia baixa e segure a corda com os braços apontando para o teto.','Dobre só o cotovelo, levando a corda para trás da testa.','Estique de volta até os braços apontarem para cima.'],
         erros:'abrir os cotovelos, mexer o ombro e descer rápido.', troca:'tríceps testa com barra W.' },
@@ -585,6 +611,7 @@ details.how .lbl{font-weight:700}
     regOpen = false;
     commit();
     renderAll();
+    nuvemAgendar();
     say((WB[wid] ? 'Treino ' + wid : 'Outro treino') + ' registrado.');
   }
   function apagar(id){
@@ -593,6 +620,7 @@ details.how .lbl{font-weight:700}
     if (state.hist.length === antes) return;
     commit();
     renderAll();
+    nuvemAgendar();
     say('Registro apagado.');
   }
 
@@ -692,7 +720,7 @@ details.how .lbl{font-weight:700}
     else if (e.kg) info += '<p class="last">Primeira vez aqui: comece com ' + fmt(e.kg) + ' kg (a carga do seu app).</p>';
     else if (!e.tempo) info += '<p class="last">Primeira vez: escolha uma carga em que a última repetição saia com esforço, sobrando 1 ou 2.</p>';
     if (sg.up) info += '<span class="up">' + (e.tempo ? 'Hora de subir: tente ' + sg.secs + ' s' : 'Hora de subir: ' + fmt(sg.kg) + ' kg') + '</span>';
-    const alvo = e.s + ' × ' + faixa(e) + (e.tempo ? ' s' : '') + (e.lado ? (e.perna ? ' cada perna' : ' cada lado') : '');
+    const alvo = e.s + ' × ' + faixa(e) + (e.tempo ? ' s' : '') + (e.lado ? (e.perna ? ' cada perna' : e.braco ? ' cada braço' : ' cada lado') : '');
     const desc = e.par ? 'sem descanso: vai direto pro próximo' : 'descanso ' + descansoTxt(e.rest);
     let rows = '';
     if (e.tempo) {
@@ -868,6 +896,7 @@ details.how .lbl{font-weight:700}
     html += '<button type="button" class="btn" data-gocal>Ver no calendário</button></div>';
     lastSummary = feitas ? { wid:w.id, html } : null;
     renderAll();
+    if (feitas) nuvemAgendar();
     say('Treino salvo.');
   }
   function discardSession(){
@@ -1133,8 +1162,9 @@ details.how .lbl{font-weight:700}
       }
       let kg = kgIn ? num(kgIn.value) : null;
       let reps = num(repIn.value);
-      if (novo && reps === null) { reps = e.r[0]; repIn.value = fmt(reps); }
-      if (novo && kgIn && kg === null) { const sg = suggest(e); kg = sg.kg || null; if (kg) kgIn.value = fmt(kg); }
+      // Campo vazio: repete o da série anterior deste treino; se não tiver, usa a sugestão.
+      if (novo && reps === null) { reps = anterior(exId, i, 'reps') ?? e.r[0]; repIn.value = fmt(reps); }
+      if (novo && kgIn && kg === null) { kg = anterior(exId, i, 'kg') ?? (suggest(e).kg || null); if (kg) kgIn.value = fmt(kg); }
       setVal(exId, i, { kg, reps, done:novo });
       rowNow.classList.toggle('ok', novo);
       rowNow.querySelector('[data-done]').setAttribute('aria-pressed', String(novo));
@@ -1149,22 +1179,47 @@ details.how .lbl{font-weight:700}
       return;
     }
   });
+  // ---------------- peso digitado uma vez só ----------------
+  // O peso de uma série vale para as séries seguintes do mesmo exercício que ainda
+  // estão vazias ou acompanhando o valor antigo. Série marcada ou trocada na mão não muda.
+  function anterior(exId, i, campo){
+    for (let k = i - 1; k >= 0; k--) { const cs = curSet(exId, k); if (cs && cs[campo] !== null && cs[campo] !== undefined) return cs[campo]; }
+    return null;
+  }
+  function segueKg(inp, exId, i){
+    const antes = inp.dataset.seguindo || '';
+    for (let j = i + 1; j < EX[exId].s; j++) {
+      const cs = curSet(exId, j);
+      if (cs && cs.done) continue;
+      const outro = document.querySelector('.setrow[data-ex="' + exId + '"][data-i="' + j + '"] [data-f="kg"]');
+      if (!outro || (outro.value !== '' && outro.value !== antes)) continue;
+      outro.value = inp.value;
+      setVal(exId, j, { kg:num(inp.value) });
+    }
+    inp.dataset.seguindo = inp.value;
+  }
+  $('workout').addEventListener('focusin', ev => {
+    const inp = ev.target.closest('.setrow input[data-f="kg"]');
+    if (inp) inp.dataset.seguindo = inp.value;
+  });
   $('workout').addEventListener('input', ev => {
     const inp = ev.target.closest('.setrow input');
     if (!inp) return;
     const row = inp.closest('.setrow');
-    const exId = row.dataset.ex, i = Number(row.dataset.i);
+    const exId = row.dataset.ex, i = Number(row.dataset.i), f = inp.dataset.f;
     if (!state.cur) {
-      const valor = inp.value;
+      const valor = inp.value, seguindo = inp.dataset.seguindo || '';
       if (!startSession(sel)) return;
-      const again = document.querySelector('.setrow[data-ex="' + exId + '"][data-i="' + i + '"] [data-f="' + inp.dataset.f + '"]');
-      if (again) { again.value = valor; again.focus(); }
-      setVal(exId, i, { [inp.dataset.f]: num(valor) });
+      const again = document.querySelector('.setrow[data-ex="' + exId + '"][data-i="' + i + '"] [data-f="' + f + '"]');
+      if (again) { again.value = valor; again.focus(); again.dataset.seguindo = seguindo; }
+      setVal(exId, i, { [f]: num(valor) });
+      if (f === 'kg' && again) segueKg(again, exId, i);
       commit();
       return;
     }
     if (state.cur.wid !== EX[exId].w) return;
-    setVal(exId, i, { [inp.dataset.f]: num(inp.value) });
+    setVal(exId, i, { [f]: num(inp.value) });
+    if (f === 'kg') segueKg(inp, exId, i);
     commit();
   });
 
@@ -1255,9 +1310,9 @@ details.how .lbl{font-weight:700}
     r.onerror = () => erro(r.error);
     r.readAsText(file);
   });
-  async function restaurarBackup(file){
+  // Junta os treinos de um backup com os do celular, sem apagar nada.
+  function juntarBackup(txt, avisar){
     try {
-      const txt = await lerTexto(file);
       const d = sanitize(JSON.parse(txt));
       const ids = new Set(state.hist.map(h => h.id));
       const novos = d.hist.filter(h => !ids.has(h.id));
@@ -1266,8 +1321,13 @@ details.how .lbl{font-weight:700}
       compact();
       commit();
       renderAll();
-      bk(novos.length ? novos.length + (novos.length > 1 ? ' treinos restaurados.' : ' treino restaurado.') : 'Esse backup não tinha treinos novos.');
-    } catch (e) { bk('Esse arquivo não é um backup do app de treino.'); }
+      if (novos.length) nuvemAgendar();
+      avisar(novos.length ? novos.length + (novos.length > 1 ? ' treinos restaurados.' : ' treino restaurado.') : 'Esse backup não tinha treinos novos.');
+    } catch (e) { avisar('Esse arquivo não é um backup do app de treino.'); }
+  }
+  async function restaurarBackup(file){
+    try { juntarBackup(await lerTexto(file), bk); }
+    catch (e) { bk('Esse arquivo não é um backup do app de treino.'); }
   }
   $('bkSave').addEventListener('click', salvarBackup);
   $('bkOpen').addEventListener('click', () => $('bkFile').click());
@@ -1276,6 +1336,123 @@ details.how .lbl{font-weight:700}
     if (f) restaurarBackup(f);
     $('bkFile').value = '';
   });
+
+  // ---------------- backup automático no GitHub ----------------
+  // Depois de cada treino finalizado (e ao registrar, apagar ou restaurar), grava o backup
+  // em backup.json num repositório privado do GitHub. O histórico do GitHub guarda cada versão.
+  // Sem internet, tenta de novo quando o app volta para a tela ou o sinal volta.
+  const LS_NV = 'treino-renan-nuvem';
+  const ARQ_NV = 'backup.json';
+  let nv = {}, enviando = false;
+  try { nv = JSON.parse(localStorage.getItem(LS_NV)) || {}; } catch (e) {}
+  function gravarNv(){ try { localStorage.setItem(LS_NV, JSON.stringify(nv)); } catch (e) {} }
+  const nvLigado = () => !!(nv.repo && nv.token);
+  const nvMsg = t => { $('nvMsg').textContent = t; };
+  function gh(caminho, opts = {}){
+    const headers = Object.assign({ Authorization:'Bearer ' + nv.token, Accept:'application/vnd.github+json' }, opts.headers || {});
+    return fetch('https://api.github.com/repos/' + nv.repo + caminho, Object.assign({}, opts, { headers, cache:'no-store' }));
+  }
+  function erroGh(status){
+    if (status === 401) return 'A chave não vale mais (venceu ou foi apagada). Crie outra em Configurar.';
+    if (status === 403) return 'A chave não tem permissão para gravar. Confira Contents em Read and write.';
+    if (status === 404) return 'Não achei o repositório. Confira o nome e se a chave tem acesso a ele.';
+    return 'O GitHub não aceitou agora (erro ' + status + '). O app tenta de novo depois.';
+  }
+  const SEM_REDE = 'Sem internet agora. O app envia sozinho quando o sinal voltar.';
+  const base64 = txt => {
+    const b = new TextEncoder().encode(txt);
+    let s = '';
+    for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000));
+    return btoa(s);
+  };
+  const quando = t => { const d = new Date(t), n = diasEntre(d, new Date()); return (n <= 0 ? 'hoje' : n === 1 ? 'ontem' : dm(d)) + ' às ' + d.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }); };
+
+  function renderNuvem(){
+    const on = nvLigado();
+    let t;
+    if (!on) t = 'Desligado. Configure uma vez e cada treino finalizado vai sozinho para o GitHub.';
+    else if (nv.erro) t = nv.erro;
+    else if (nv.pendente) t = 'Enviando o backup…';
+    else t = 'Ligado.' + (nv.ultimo ? ' Último envio: ' + quando(nv.ultimo) + '.' : '');
+    $('nvStatus').textContent = t;
+    $('nuvem').classList.toggle('on', on && !nv.erro);
+    $('nuvem').classList.toggle('falha', on && !!nv.erro);
+    $('nvRestaurar').hidden = !on;
+    $('nvDesligar').hidden = !on;
+    $('nvToken').placeholder = on ? 'Chave salva (…' + nv.token.slice(-4) + '). Cole outra para trocar.' : 'github_pat_…';
+  }
+  function nuvemAgendar(){
+    if (!nvLigado()) return;
+    nv.pendente = true; gravarNv(); renderNuvem();
+    setTimeout(nuvemEnviar, 1500);
+  }
+  async function nuvemEnviar(){
+    if (!nvLigado() || !nv.pendente || enviando) return;
+    enviando = true;
+    nv.pendente = false; gravarNv();
+    try {
+      const atual = await gh('/contents/' + ARQ_NV);
+      let sha;
+      if (atual.ok) sha = (await atual.json()).sha;
+      else if (atual.status !== 404) throw { status:atual.status };
+      const agora = new Date();
+      const resp = await gh('/contents/' + ARQ_NV, {
+        method:'PUT',
+        headers:{ 'Content-Type':'application/json' },
+        body:JSON.stringify({ message:'Backup ' + dm(agora) + ' ' + agora.toTimeString().slice(0, 5) + ' (' + state.hist.length + ' treinos)', content:base64(JSON.stringify(state)), sha })
+      });
+      if (!resp.ok) throw { status:resp.status };
+      nv.ultimo = Date.now(); nv.erro = '';
+      gravarNv();
+      marcarBackup();
+    } catch (e) {
+      nv.pendente = true;
+      nv.erro = e && e.status ? erroGh(e.status) : SEM_REDE;
+      gravarNv();
+    } finally {
+      enviando = false;
+      renderNuvem();
+      if (nv.pendente && !nv.erro) setTimeout(nuvemEnviar, 1500); // mudou durante o envio
+    }
+  }
+  async function nuvemLigar(){
+    const repo = $('nvRepo').value.trim().replace(/^https?:\/\/github\.com\//, '').replace(/\/+$/, '');
+    const token = $('nvToken').value.trim() || nv.token || '';
+    if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) return nvMsg('Escreva o repositório assim: usuario/nome (ex.: DhepRX/treino-dados).');
+    if (!token) return nvMsg('Cole a chave de acesso.');
+    const antes = nv;
+    nv = Object.assign({}, nv, { repo, token });
+    nvMsg('Testando…');
+    try {
+      const r = await gh('');
+      if (!r.ok) { nv = antes; return nvMsg(r.status === 401 ? 'Essa chave não funcionou. Confira se copiou ela inteira.' : erroGh(r.status)); }
+      if (!(await r.json()).private) { nv = antes; return nvMsg('Esse repositório é público: qualquer um veria seus treinos. Use um privado.'); }
+    } catch (e) { nv = antes; return nvMsg('Sem internet agora. Tente de novo com sinal.'); }
+    $('nvToken').value = '';
+    nv.pendente = true; nv.erro = '';
+    gravarNv();
+    await nuvemEnviar();
+    nvMsg(nv.erro ? nv.erro : 'Pronto: backup automático ligado e primeiro envio feito.');
+  }
+  async function nuvemRestaurar(){
+    nvMsg('Buscando o backup no GitHub…');
+    $('nvConfig').open = true;
+    try {
+      const r = await gh('/contents/' + ARQ_NV, { headers:{ Accept:'application/vnd.github.raw+json' } });
+      if (!r.ok) return nvMsg(r.status === 404 ? 'Ainda não tem backup no GitHub.' : erroGh(r.status));
+      juntarBackup(await r.text(), nvMsg);
+    } catch (e) { nvMsg('Sem internet agora. Tente de novo com sinal.'); }
+  }
+  $('nvRepo').value = nv.repo || 'DhepRX/treino-dados';
+  $('nvLigar').addEventListener('click', nuvemLigar);
+  $('nvRestaurar').addEventListener('click', nuvemRestaurar);
+  $('nvDesligar').addEventListener('click', ev => arm(ev.currentTarget, 'Toque de novo para desligar', () => {
+    nv = {}; gravarNv(); renderNuvem(); nvMsg('Backup automático desligado. A chave foi apagada deste celular.');
+  }));
+  window.addEventListener('online', nuvemEnviar);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') nuvemEnviar(); });
+  renderNuvem();
+  nuvemEnviar();
   const instalado = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
   if (instalado) $('dica').hidden = true;
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
