@@ -146,6 +146,9 @@ h1{font-size:1.75rem;font-weight:800;font-stretch:78%;margin:8px 0 2px;line-heig
 .card.mini{padding:0}
 .minirow{width:100%;display:flex;align-items:center;gap:12px;min-height:60px;padding:10px 14px;border:0;border-radius:14px;background:transparent;text-align:left;cursor:pointer}
 .minirow .num{background:var(--go);color:var(--go-ink)}
+.minirow .num.pend{background:var(--soft);color:var(--ink)}
+.listbar{display:flex;justify-content:flex-end;gap:8px;margin:0 0 10px;scroll-margin-top:16px}
+.listbar .minbtn{margin:0}
 .minirow .num svg{width:18px;height:18px}
 .minirow .mt{display:flex;flex-direction:column;min-width:0;flex:1}
 .minirow .mt b{font-weight:750;line-height:1.25}
@@ -464,6 +467,7 @@ details.how .lbl{font-weight:700}
   const esquecido = c => !!(c && Date.now() - c.start > ESQUECIDO);
   let sel = null;
   const abertos = new Set(); // cards completos que você abriu de novo
+  const fechados = new Set(); // cards minimizados na mão antes de terminar
   const seriesAbertas = new Set(); // séries feitas abertas para editar ('exId:i')
   let lastSummary = null;
 
@@ -763,9 +767,18 @@ details.how .lbl{font-weight:700}
   function feitasEx(e){ return state.cur && state.cur.wid === e.w ? (state.cur.sets[e.id] || []).filter(x => x && x.done) : []; }
   function exHTML(e, idx, lock){
     const feitas = feitasEx(e), completo = feitas.length >= e.s;
-    if (completo && !abertos.has(e.id)) {
+    const alvo = e.s + ' × ' + faixa(e) + (e.tempo ? ' s' : '') + (e.lado ? (e.perna ? ' cada perna' : e.braco ? ' cada braço' : ' cada lado') : '');
+    if ((completo && !abertos.has(e.id)) || (!completo && fechados.has(e.id))) {
+      let resumo;
+      if (completo) resumo = seriesTxt(e, feitas);
+      else {
+        // Minimizado antes de terminar: quantas séries faltam, a meta e o peso da próxima.
+        const prox = (state.cur && state.cur.wid === e.w && (state.cur.sets[e.id] || []).find(x => x && !x.done && x.kg)) || null;
+        const kg = prox ? prox.kg : suggest(e).kg;
+        resumo = feitas.length + ' de ' + e.s + ' séries · ' + alvo + (kg && !e.tempo ? ' · ' + fmt(kg) + ' kg' : '');
+      }
       return '<li class="card ex mini" id="ex-' + e.id + '"><button type="button" class="minirow" data-abrir="' + e.id + '" aria-expanded="false">' +
-        '<span class="num">' + CHECK + '</span><span class="mt"><b>' + esc(e.nome) + '</b><small>' + esc(seriesTxt(e, feitas)) + '</small></span>' +
+        '<span class="num' + (completo ? '' : ' pend') + '">' + (completo ? CHECK : idx + 1) + '</span><span class="mt"><b>' + esc(e.nome) + '</b><small>' + esc(resumo) + '</small></span>' +
         '<span class="abrir">Abrir</span></button></li>';
     }
     const sg = suggest(e);
@@ -775,7 +788,6 @@ details.how .lbl{font-weight:700}
     else if (e.kg) info += '<p class="last">Primeira vez aqui: comece com ' + fmt(e.kg) + ' kg (a carga do seu app).</p>';
     else if (!e.tempo) info += '<p class="last">Primeira vez: escolha uma carga em que a última repetição saia com esforço, sobrando 1 ou 2.</p>';
     if (sg.up) info += '<span class="up">' + (e.tempo ? 'Hora de subir: tente ' + sg.secs + ' s' : 'Hora de subir: ' + fmt(sg.kg) + ' kg') + '</span>';
-    const alvo = e.s + ' × ' + faixa(e) + (e.tempo ? ' s' : '') + (e.lado ? (e.perna ? ' cada perna' : e.braco ? ' cada braço' : ' cada lado') : '');
     const desc = e.par ? 'sem descanso: vai direto pro próximo' : 'descanso ' + descansoTxt(e.rest);
     let rows = '';
     if (e.tempo) {
@@ -791,7 +803,7 @@ details.how .lbl{font-weight:700}
     const par = e.par ? '<p class="pair">Faça junto com o <b>' + esc(EX[e.par].nome.toLowerCase()) + '</b>: uma série de cada, sem pausa, e descanse depois do tríceps.</p>' : '';
     return '<li class="card ex" id="ex-' + e.id + '">' +
       '<div class="exhead"><span class="num">' + (idx + 1) + '</span><div><h3>' + esc(e.nome) + '</h3><p class="maq">Na Smart Fit: ' + esc(e.maq) + '</p></div>' +
-      (completo ? '<button type="button" class="minbtn" data-fechar="' + e.id + '">Minimizar</button>' : '') + '</div>' +
+      '<button type="button" class="minbtn" data-fechar="' + e.id + '">Minimizar</button></div>' +
       '<p class="target"><strong>' + esc(alvo) + '</strong><span>' + esc(desc) + '</span></p>' + par + info +
       '<div class="sets">' + rows + '</div>' +
       '<div class="exfoot">' +
@@ -833,11 +845,12 @@ details.how .lbl{font-weight:700}
     ];
     const warm = state.cur && state.cur.wid === w.id ? state.cur.warm : {};
     const completo = itens.every((t, i) => warm[i]);
-    if (completo && !abertos.has('warm')) {
+    if ((completo && !abertos.has('warm')) || (!completo && fechados.has('warm'))) {
+      const n = itens.filter((t, i) => warm[i]).length;
       return '<article class="card warm mini"><button type="button" class="minirow" data-abrir="warm" aria-expanded="false">' +
-        '<span class="num">' + CHECK + '</span><span class="mt"><b>Aquecimento</b><small>Feito</small></span><span class="abrir">Abrir</span></button></article>';
+        '<span class="num' + (completo ? '' : ' pend') + '">' + (completo ? CHECK : FLAME) + '</span><span class="mt"><b>Aquecimento</b><small>' + (completo ? 'Feito' : n + ' de 3 feitos') + '</small></span><span class="abrir">Abrir</span></button></article>';
     }
-    return '<article class="card warm"><div class="whead2"><h3>Aquecimento</h3>' + (completo ? '<button type="button" class="minbtn" data-fechar="warm">Minimizar</button>' : '') + '</div><ul>' + itens.map((t, i) =>
+    return '<article class="card warm"><div class="whead2"><h3>Aquecimento</h3><button type="button" class="minbtn" data-fechar="warm">Minimizar</button></div><ul>' + itens.map((t, i) =>
       '<li><button type="button" class="done chk" data-warm="' + i + '" aria-pressed="' + !!warm[i] + '" aria-label="' + esc(t) + '"' + (lock ? ' disabled' : '') + '>' + CHECK + '</button><span>' + esc(t) + '</span></li>').join('') + '</ul></article>';
   }
 
@@ -861,6 +874,7 @@ details.how .lbl{font-weight:700}
     }
     html += '</div>';
     if (lastSummary && lastSummary.wid === w.id && !c) html += lastSummary.html;
+    html += '<div class="listbar"><button type="button" class="minbtn" data-todos="fechar">Minimizar todos</button><button type="button" class="minbtn" data-todos="abrir">Abrir todos</button></div>';
     html += warmHTML(w, outro);
     html += '<ol class="exlist">' + w.ex.map((e, i) => exHTML(e, i, outro)).join('') + '</ol>';
     if (ativo) {
@@ -1132,6 +1146,8 @@ details.how .lbl{font-weight:700}
     if (id === 'warm') return !!(state.cur && ['0', '1', '2'].every(x => state.cur.warm[x]));
     return feitasEx(EX[id]).length >= EX[id].s;
   }
+  function abrir(id){ fechados.delete(id); abertos.add(id); }
+  function minimizar(id){ abertos.delete(id); fechados.add(id); }
   // Depois da última série, espera um instante para você ver o ✓, minimiza e mostra o próximo.
   function fecharDepois(id){
     abertos.delete(id);
@@ -1145,6 +1161,10 @@ details.how .lbl{font-weight:700}
       }
       const novo = redesenhar(id);
       if (novo && novo.classList.contains('mini')) {
+        // Se o próximo exercício por fazer estava minimizado, abre ele.
+        const ids = WB[sel].ex.map(x => x.id), k = id === 'warm' ? -1 : ids.indexOf(id);
+        const prox = ids.slice(k + 1).find(x => !estaCompleto(x));
+        if (prox && fechados.has(prox)) { fechados.delete(prox); redesenhar(prox); }
         const suave = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
         novo.scrollIntoView({ block:'start', behavior:suave ? 'smooth' : 'auto' });
       }
@@ -1183,9 +1203,18 @@ details.how .lbl{font-weight:700}
   });
   $('workout').addEventListener('click', ev => {
     const ab = ev.target.closest('[data-abrir]');
-    if (ab) { abertos.add(ab.dataset.abrir); const c = redesenhar(ab.dataset.abrir); if (c) { const f = c.querySelector('.minbtn'); if (f) f.focus({ preventScroll:true }); } return; }
+    if (ab) { abrir(ab.dataset.abrir); const c = redesenhar(ab.dataset.abrir); if (c) { const f = c.querySelector('.minbtn'); if (f) f.focus({ preventScroll:true }); } return; }
     const fe = ev.target.closest('[data-fechar]');
-    if (fe) { abertos.delete(fe.dataset.fechar); const c = redesenhar(fe.dataset.fechar); if (c) c.querySelector('.minirow').focus({ preventScroll:true }); return; }
+    if (fe) { minimizar(fe.dataset.fechar); const c = redesenhar(fe.dataset.fechar); if (c) c.querySelector('.minirow').focus({ preventScroll:true }); return; }
+    const td = ev.target.closest('[data-todos]');
+    if (td) {
+      const ids = ['warm'].concat(WB[sel].ex.map(x => x.id));
+      ids.forEach(td.dataset.todos === 'fechar' ? minimizar : abrir);
+      renderWorkout();
+      const barra = document.querySelector('#workout .listbar');
+      if (barra) barra.scrollIntoView({ block:'start' });
+      return;
+    }
     const ed = ev.target.closest('[data-editar-serie]');
     if (ed) {
       // Abre os campos de uma série feita; quando você sai deles, volta a ser uma linha.
@@ -1316,27 +1345,27 @@ details.how .lbl{font-weight:700}
       return;
     }
   });
-  // ---------------- peso digitado uma vez só ----------------
-  // O peso de uma série vale para as séries seguintes do mesmo exercício que ainda
-  // estão vazias ou acompanhando o valor antigo. Série marcada ou trocada na mão não muda.
+  // ---------------- peso e repetições digitados uma vez só ----------------
+  // O peso (ou as repetições) de uma série vale para as séries seguintes do mesmo exercício
+  // que ainda estão vazias ou acompanhando o valor antigo. Série marcada ou trocada na mão não muda.
   function anterior(exId, i, campo){
     for (let k = i - 1; k >= 0; k--) { const cs = curSet(exId, k); if (cs && cs[campo] !== null && cs[campo] !== undefined) return cs[campo]; }
     return null;
   }
-  function segueKg(inp, exId, i){
-    const antes = inp.dataset.seguindo || '';
+  function segue(inp, exId, i){
+    const f = inp.dataset.f, antes = inp.dataset.seguindo || '';
     for (let j = i + 1; j < EX[exId].s; j++) {
       const cs = curSet(exId, j);
       if (cs && cs.done) continue;
-      const outro = document.querySelector('.setrow[data-ex="' + exId + '"][data-i="' + j + '"] [data-f="kg"]');
+      const outro = document.querySelector('.setrow[data-ex="' + exId + '"][data-i="' + j + '"] [data-f="' + f + '"]');
       if (!outro || (outro.value !== '' && outro.value !== antes)) continue;
       outro.value = inp.value;
-      setVal(exId, j, { kg:num(inp.value) });
+      setVal(exId, j, { [f]:num(inp.value) });
     }
     inp.dataset.seguindo = inp.value;
   }
   $('workout').addEventListener('focusin', ev => {
-    const inp = ev.target.closest('.setrow input[data-f="kg"]');
+    const inp = ev.target.closest('.setrow input');
     if (inp) inp.dataset.seguindo = inp.value;
   });
   $('workout').addEventListener('input', ev => {
@@ -1350,13 +1379,13 @@ details.how .lbl{font-weight:700}
       const again = document.querySelector('.setrow[data-ex="' + exId + '"][data-i="' + i + '"] [data-f="' + f + '"]');
       if (again) { again.value = valor; again.focus(); again.dataset.seguindo = seguindo; }
       setVal(exId, i, { [f]: num(valor) });
-      if (f === 'kg' && again) segueKg(again, exId, i);
+      if (again) segue(again, exId, i);
       commit();
       return;
     }
     if (state.cur.wid !== EX[exId].w) return;
     setVal(exId, i, { [f]: num(inp.value) });
-    if (f === 'kg') segueKg(inp, exId, i);
+    segue(inp, exId, i);
     commit();
   });
 
