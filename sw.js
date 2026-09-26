@@ -1,10 +1,17 @@
 // Guarda o app no celular para abrir sem internet.
 // Ao publicar uma versão nova, troque o número da VERSAO.
-const VERSAO = 'treino-renan-v3';
+const VERSAO = 'treino-renan-v4';
 const ARQUIVOS = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
+// Com sinal fraco (academia), espera a internet no máximo isso antes de abrir a cópia guardada.
+const ESPERA_MS = 3000;
 
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(VERSAO).then(cache => cache.addAll(ARQUIVOS)).then(() => self.skipWaiting()));
+  // cache:'reload' pula o cache do navegador, para guardar sempre a versão recém-publicada.
+  event.waitUntil(
+    caches.open(VERSAO)
+      .then(cache => cache.addAll(ARQUIVOS.map(u => new Request(u, { cache: 'reload' }))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', event => {
@@ -15,44 +22,46 @@ self.addEventListener('activate', event => {
   );
 });
 
+// Busca na internet e guarda uma cópia, sem atrasar a resposta.
+function buscar(event, req, chave, pode) {
+  const rede = fetch(req).then(resp => {
+    if (pode(resp)) {
+      const copia = resp.clone();
+      event.waitUntil(caches.open(VERSAO).then(cache => cache.put(chave, copia)));
+    }
+    return resp;
+  });
+  event.waitUntil(rede.catch(() => {}));
+  return rede;
+}
+
 self.addEventListener('fetch', event => {
   const req = event.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
-  // A página: tenta a internet primeiro, para receber as atualizações, e usa a cópia guardada quando está sem sinal.
+  // A página: tenta a internet primeiro, para receber as atualizações.
+  // Sem sinal, com erro ou demorando mais de ESPERA_MS, abre a cópia guardada.
   if (req.mode === 'navigate') {
-    event.respondWith(
-      fetch(req)
-        .then(resp => {
-          if (resp.ok) {
-            const copia = resp.clone();
-            caches.open(VERSAO).then(cache => cache.put('./index.html', copia));
-          }
-          return resp;
-        })
-        .catch(() => caches.match('./index.html').then(r => r || caches.match('./')))
-    );
+    const rede = buscar(event, req, './index.html', r => r.ok && !r.redirected);
+    const guardada = () => caches.match('./index.html').then(r => r || caches.match('./'));
+    event.respondWith(new Promise(responder => {
+      let pronto = false;
+      const usar = r => { if (r && !pronto) { pronto = true; responder(r); } };
+      const espera = setTimeout(() => guardada().then(usar), ESPERA_MS);
+      rede.then(
+        r => { clearTimeout(espera); if (r.ok) usar(r); else guardada().then(g => usar(g || r)); },
+        () => { clearTimeout(espera); guardada().then(g => usar(g || Response.error())); }
+      );
+    }));
     return;
   }
 
   // Arquivos do próprio app e a fonte do Google: usa a cópia guardada e atualiza por trás.
   const fonte = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
   if (url.origin === self.location.origin || fonte) {
-    event.respondWith(
-      caches.match(req).then(guardado => {
-        const daRede = fetch(req)
-          .then(resp => {
-            if (resp.ok || resp.type === 'opaque') {
-              const copia = resp.clone();
-              caches.open(VERSAO).then(cache => cache.put(req, copia));
-            }
-            return resp;
-          })
-          .catch(() => guardado || Response.error());
-        return guardado || daRede;
-      })
-    );
+    const rede = buscar(event, req, req, r => r.ok || r.type === 'opaque');
+    event.respondWith(caches.match(req).then(guardado => guardado || rede));
   }
   // O resto (os vídeos do YouTube) passa direto pela internet.
 });

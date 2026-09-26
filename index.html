@@ -7,6 +7,7 @@
 <title>Treino</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -43,6 +44,9 @@ html{background:var(--band);scroll-padding-top:calc(env(safe-area-inset-top,0px)
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Archivo","Arial Narrow",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.4}
 body.running{padding-bottom:84px}
 button,input{font:inherit;color:inherit}
+button,input,a,summary{touch-action:manipulation}
+/* No app da Tela de Início a barra de status é transparente: esta faixa evita o conteúdo passar por baixo do relógio. */
+body::before{content:"";position:fixed;left:0;right:0;top:0;height:env(safe-area-inset-top,0px);background:var(--band);z-index:30;pointer-events:none}
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .wrap{max-width:720px;margin:0 auto;padding:12px 16px 40px}
 h1{font-size:1.75rem;font-weight:800;font-stretch:78%;margin:8px 0 2px;line-height:1.1}
@@ -158,6 +162,9 @@ h1{font-size:1.75rem;font-weight:800;font-stretch:78%;margin:8px 0 2px;line-heig
 .backup p{margin:0;color:var(--muted);font-size:.92rem}
 .bkrow{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0}
 .backup .bkmsg{margin:8px 0 0;color:var(--ink);font-weight:600;min-height:1.2em}
+.backup .bklast{margin:8px 0 0}
+.backup.due{border:2px solid var(--tag)}
+.backup.due .bklast{color:var(--ink);font-weight:700}
 details.how{flex:1 1 100%}
 details.how summary{cursor:pointer;font-weight:700;min-height:40px;display:flex;align-items:center}
 details.how ol{margin:6px 0 8px;padding-left:1.3rem}
@@ -263,9 +270,10 @@ details.how .lbl{font-weight:700}
   </div>
   <section id="vSemanas" hidden></section>
   <section id="vCal" hidden aria-label="Calendário de treinos"></section>
-  <section class="backup" aria-labelledby="bkTitle">
+  <section class="backup" id="backup" aria-labelledby="bkTitle">
     <h2 id="bkTitle">Backup dos treinos</h2>
     <p>Fora do Claude, os treinos ficam salvos só neste celular. Salve um backup de vez em quando e guarde no Arquivos, no iCloud Drive ou no WhatsApp.</p>
+    <p class="bklast" id="bkLast"></p>
     <div class="bkrow">
       <button type="button" class="btn" id="bkSave">Salvar backup</button>
       <button type="button" class="btn" id="bkOpen">Restaurar backup</button>
@@ -811,6 +819,7 @@ details.how .lbl{font-weight:700}
     renderHist();
     renderSemanas();
     renderCal();
+    renderBackup();
     updateDock();
   }
 
@@ -873,9 +882,22 @@ details.how .lbl{font-weight:700}
 
   // ---------------- descanso e relógio ----------------
   let rest = null, audio = null, hold = null;
+  // O iPhone só libera o som durante um toque, e trava de novo quando o app vai para o fundo.
+  // Chamado a cada toque que começa um descanso ou o cronômetro, para o apito do fim tocar.
+  function somOn(){
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.state !== 'running' && audio.resume) Promise.resolve(audio.resume()).catch(() => {});
+      const b = audio.createBufferSource();
+      b.buffer = audio.createBuffer(1, 1, 22050);
+      b.connect(audio.destination);
+      b.start(0);
+    } catch (e) {}
+  }
   function beep(){
     try {
       audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.state !== 'running' && audio.resume) Promise.resolve(audio.resume()).catch(() => {});
       const t = audio.currentTime;
       [0, 0.25].forEach(dt => {
         const o = audio.createOscillator(), g = audio.createGain();
@@ -887,7 +909,7 @@ details.how .lbl{font-weight:700}
   }
   function startRest(sec, nome, exId, i){
     if (!sec) return;
-    try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+    somOn();
     rest = { end:Date.now() + sec * 1000, total:sec, nome, exId, i, avisou:false };
     updateDock();
   }
@@ -967,6 +989,25 @@ details.how .lbl{font-weight:700}
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && state.cur) { lock = null; wake(true); } });
 
   function say(t){ $('live').textContent = t; }
+
+  // ---------------- virada do dia ----------------
+  // O iPhone deixa o app da Tela de Início parado em segundo plano em vez de fechar.
+  // Ao voltar em outro dia, atualiza o "hoje", o calendário e o próximo treino.
+  let diaTela = ymd(new Date());
+  function viraDia(){
+    const hoje = ymd(new Date());
+    if (hoje === diaTela) return;
+    const digitando = document.activeElement && document.activeElement.closest && document.activeElement.closest('.setrow');
+    if (digitando) return;
+    if (calSel === diaTela) { const n = new Date(); calSel = hoje; calY = n.getFullYear(); calM = n.getMonth(); regOpen = false; }
+    diaTela = hoje;
+    lastSummary = null;
+    if (!state.cur) sel = todayInfo().wid;
+    renderAll();
+  }
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') viraDia(); });
+  window.addEventListener('pageshow', viraDia);
+  setInterval(viraDia, 60000);
 
   // ---------------- confirmação de dois toques ----------------
   let armed = null;
@@ -1066,7 +1107,7 @@ details.how .lbl{font-weight:700}
           if (old) { old.textContent = 'Iniciar'; old.classList.remove('on'); }
         }
         hold = { exId, i, start:Date.now(), alvo:suggest(e).secs || e.r[0], avisou:false };
-        try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); } catch (err) {}
+        somOn();
         rest = null;
         updateDock();
       }
@@ -1172,6 +1213,20 @@ details.how .lbl{font-weight:700}
 
   // ---------------- backup (fora do Claude, os dados ficam só no aparelho) ----------------
   const bk = t => { $('bkMsg').textContent = t; };
+  // Data do último backup, para lembrar de salvar outro depois de uma semana com treinos novos.
+  const LS_BK = 'treino-renan-backup';
+  function ultimoBackup(){ try { return Number(localStorage.getItem(LS_BK)) || 0; } catch (e) { return 0; } }
+  function marcarBackup(){ try { localStorage.setItem(LS_BK, String(Date.now())); } catch (e) {} renderBackup(); }
+  function renderBackup(){
+    const ult = ultimoBackup();
+    const dias = ult ? diasEntre(new Date(ult), new Date()) : null;
+    const atrasado = state.upd > ult && (dias === null || dias >= 7);
+    let txt;
+    if (dias === null) txt = 'Nenhum backup salvo ainda neste aparelho.';
+    else txt = 'Último backup: ' + (dias <= 0 ? 'hoje' : dias === 1 ? 'ontem' : 'há ' + dias + ' dias') + '.' + (atrasado ? ' Hora de salvar outro.' : '');
+    $('bkLast').textContent = txt;
+    $('backup').classList.toggle('due', atrasado);
+  }
   async function salvarBackup(){
     const txt = JSON.stringify(state);
     const nome = 'treino-backup-' + ymd(new Date()) + '.json';
@@ -1179,6 +1234,7 @@ details.how .lbl{font-weight:700}
       const f = new File([txt], nome, { type:'application/json' });
       if (navigator.canShare && navigator.canShare({ files:[f] })) {
         await navigator.share({ files:[f], title:'Backup do treino' });
+        marcarBackup();
         bk('Backup pronto: ' + nome + '.');
         return;
       }
@@ -1189,6 +1245,7 @@ details.how .lbl{font-weight:700}
       a.href = url; a.download = nome;
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 5000);
+      marcarBackup();
       bk('Backup salvo: ' + nome + '.');
     } catch (e) { bk('Este navegador não deixou salvar o arquivo.'); }
   }
