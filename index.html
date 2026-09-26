@@ -106,6 +106,7 @@ h1{font-size:1.75rem;font-weight:800;font-stretch:78%;margin:8px 0 2px;line-heig
 .whead p{margin:3px 0 0;color:var(--muted)}
 .startrow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:6px 0 14px}
 .startrow p{margin:0;color:var(--muted)}
+.startrow .aviso-aberto{flex:1 1 100%;color:var(--ink);font-weight:600;background:var(--soft);border-left:4px solid var(--tag);border-radius:8px;padding:10px 12px}
 
 .btn{min-height:46px;padding:0 18px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-weight:700;cursor:pointer}
 .btn.primary{background:var(--go);color:var(--go-ink);border-color:var(--go)}
@@ -433,10 +434,8 @@ details.how .lbl{font-weight:700}
   const EX = {};
   W.forEach(w => w.ex.forEach(e => { e.w = w.id; EX[e.id] = e; }));
   const WB = Object.fromEntries(W.map(w => [w.id, w]));
-  const DIAS = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
   const LS = 'treino-renan-v1';
   const MAX_HIST = 1200, KEEP_DETAIL = 60;
-  const WD = ['dom','seg','ter','qua','qui','sex','sáb'];
   const pad2 = n => String(n).padStart(2, '0');
   const ymd = d => d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
   const dm = d => pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1);
@@ -460,6 +459,9 @@ details.how .lbl{font-weight:700}
   const descansoTxt = s => s >= 60 ? (s % 60 ? (s / 60).toString().replace('.', ',') + ' min' : (s / 60) + ' min') : s + ' s';
 
   let state = { v:1, cur:null, hist:[], upd:0 };
+  // Treino aberto há mais de 5 h: você provavelmente esqueceu de finalizar.
+  const ESQUECIDO = 5 * 3600000;
+  const esquecido = c => !!(c && Date.now() - c.start > ESQUECIDO);
   let sel = null;
   const abertos = new Set(); // cards completos que você abriu de novo
   const seriesAbertas = new Set(); // séries feitas abertas para editar ('exId:i')
@@ -521,7 +523,9 @@ details.how .lbl{font-weight:700}
   function seriesTxt(e, sets){
     if (e.tempo) return joinPt(sets.map(s => (s.reps || 0) + ' s'));
     const kgs = sets.map(s => s.kg || 0);
-    if (kgs.every(k => k === kgs[0])) return fmt(kgs[0]) + ' kg, ' + joinPt(sets.map(s => String(s.reps || 0))) + ' repetições';
+    const reps = joinPt(sets.map(s => fmt(s.reps || 0))) + ' repetições';
+    if (kgs.every(k => !k)) return reps; // sem peso anotado
+    if (kgs.every(k => k === kgs[0])) return fmt(kgs[0]) + ' kg, ' + reps;
     return joinPt(sets.map(s => fmt(s.kg || 0) + ' kg × ' + (s.reps || 0)));
   }
   function lastTxt(e, last){ return 'Última vez: ' + seriesTxt(e, last); }
@@ -551,7 +555,7 @@ details.how .lbl{font-weight:700}
     const now = new Date(), k = ymd(now);
     const nx = proximo(), nome = nx + ' (' + WB[nx].nome + ')';
     const feitos = diasTreinados();
-    if (state.cur) return { txt:'Treino ' + state.cur.wid + ' em andamento.', wid:state.cur.wid };
+    if (state.cur) return { txt:'Treino ' + state.cur.wid + (esquecido(state.cur) ? ' ficou aberto: finalize ou descarte.' : ' em andamento.'), wid:state.cur.wid };
     if (feitos.has(k)) return { txt:'Treino de hoje feito. Próximo: ' + nome + '.', wid:nx };
     const d1 = new Date(now); d1.setDate(now.getDate() - 1);
     const d2 = new Date(now); d2.setDate(now.getDate() - 2);
@@ -616,7 +620,7 @@ details.how .lbl{font-weight:700}
     if (w && h.sets && Object.keys(h.sets).length) {
       return '<ul>' + w.ex.filter(e => h.sets[e.id] && h.sets[e.id].some(x => x && x.done)).map(e => {
         const d = h.sets[e.id].filter(x => x && x.done);
-        return '<li>' + esc(e.nome) + ': ' + esc(e.tempo ? joinPt(d.map(x => (x.reps || 0) + ' s')) : joinPt(d.map(x => fmt(x.kg || 0) + ' kg × ' + (x.reps || 0)))) + '</li>';
+        return '<li>' + esc(e.nome) + ': ' + esc(seriesTxt(e, d)) + '</li>';
       }).join('') + '</ul>';
     }
     return '<p class="dnote">' + (h.manual ? (h.fonte ? 'Veio do calendário da ' + h.fonte + ', sem as séries.' : 'Marcado sem as séries.') : 'Treino antigo: só o resumo fica guardado.') + '</p>';
@@ -844,9 +848,12 @@ details.how .lbl{font-weight:700}
     const outro = c && c.wid !== w.id;
     let html = '<div class="whead"><div class="letter" aria-hidden="true">' + w.id + '</div><div><h2>' + esc(w.nome) + '</h2><p>Uns ' + w.min + ' min: ' + esc(w.foco) + '.</p></div></div>';
     html += '<div class="startrow">';
-    if (ativo) {
-      const feitas = countDone(c);
-      html += '<p>Em andamento desde ' + new Date(c.start).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }) + '. ' + feitas + ' de ' + totalSets(w) + ' séries feitas.</p>';
+    if (ativo && esquecido(c)) {
+      const quando = new Date(c.start).toLocaleString('pt-BR', { weekday:'long', hour:'2-digit', minute:'2-digit' });
+      html += '<p class="aviso-aberto">Esse treino começou ' + esc(quando) + ' e ficou aberto. Se já acabou, finalize: o app salva com a duração normal do treino.</p>' +
+        '<button type="button" class="btn primary" data-act="finish">Finalizar treino</button><button type="button" class="btn quiet" data-act="discard">Descartar</button>';
+    } else if (ativo) {
+      html += '<p id="progresso"></p>';
     } else if (outro) {
       html += '<p>O Treino ' + c.wid + ' está em andamento. Termine ou descarte ele para começar este.</p><button type="button" class="btn" data-go="' + c.wid + '">Voltar para o Treino ' + c.wid + '</button>';
     } else {
@@ -861,6 +868,7 @@ details.how .lbl{font-weight:700}
     }
     html += '<p class="note">Perdeu um dia? Não pula treino: faça o próximo da ordem. No máximo 2 dias seguidos, depois 1 de descanso.</p>';
     $('workout').innerHTML = html;
+    progressText();
   }
 
   function renderHist(){
@@ -894,7 +902,7 @@ details.how .lbl{font-weight:700}
   }
 
   function progressText(){
-    const p = document.querySelector('.startrow p');
+    const p = $('progresso');
     if (p && state.cur) p.textContent = 'Em andamento desde ' + new Date(state.cur.start).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }) + '. ' + countDone(state.cur) + ' de ' + totalSets(WB[state.cur.wid]) + ' séries feitas.';
   }
   const totalSets = w => w.ex.reduce((a, e) => a + e.s, 0);
@@ -926,8 +934,10 @@ details.how .lbl{font-weight:700}
     const sets = {};
     for (const [k, arr] of Object.entries(c.sets)) if (arr.some(x => x && x.done)) sets[k] = arr;
     const feitas = countDone(c);
-    const min = Math.max(1, Math.round((Date.now() - c.start) / 60000));
-    if (feitas) addEntry({ id:String(c.start), wid:c.wid, start:c.start, end:Date.now(), sets });
+    // Esqueceu aberto: salva com a duração normal do treino em vez de horas.
+    const fim = esquecido(c) ? c.start + w.min * 60000 : Date.now();
+    const min = Math.max(1, Math.round((fim - c.start) / 60000));
+    if (feitas) addEntry({ id:String(c.start), wid:c.wid, start:c.start, end:fim, sets });
     state.cur = null;
     commit();
     wake(false);
@@ -941,7 +951,7 @@ details.how .lbl{font-weight:700}
     lastSummary = feitas ? { wid:w.id, html } : null;
     renderAll();
     if (feitas) nuvemAgendar();
-    say('Treino salvo.');
+    say(feitas ? 'Treino salvo.' : 'Nenhuma série marcada: nada foi salvo.');
   }
   function discardSession(){
     state.cur = null;
@@ -1014,6 +1024,8 @@ details.how .lbl{font-weight:700}
     }
   }
   const mmss = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
+  // Tempo de treino: passa a mostrar as horas depois de 60 min (1:15:10).
+  const relogio = ms => { const s = Math.max(0, Math.floor(ms / 1000)), h = Math.floor(s / 3600); return h ? h + ':' + pad2(Math.floor(s / 60) % 60) + ':' + pad2(s % 60) : mmss(ms); };
   function updateDock(){
     paintRestRows();
     paintHold();
@@ -1041,8 +1053,8 @@ details.how .lbl{font-weight:700}
       }
       const fresh = rest && rest.fim && now - rest.fim < 4000;
       dock.classList.toggle('resting', !!fresh);
-      $('dockLabel').textContent = fresh ? 'Bora, próxima série' : 'Treino ' + c.wid + ' em andamento';
-      $('dockClock').textContent = mmss(now - c.start);
+      $('dockLabel').textContent = fresh ? 'Bora, próxima série' : 'Treino ' + c.wid + (esquecido(c) ? ' ficou aberto' : ' em andamento');
+      $('dockClock').textContent = relogio(now - c.start);
       if ($('dockBtns').dataset.mode !== 'run') {
         $('dockBtns').innerHTML = '<button type="button" data-go="' + c.wid + '">Ver treino</button>';
         $('dockBtns').dataset.mode = 'run';

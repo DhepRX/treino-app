@@ -1,6 +1,6 @@
 // Guarda o app no celular para abrir sem internet.
 // Ao publicar uma versão nova, troque o número da VERSAO.
-const VERSAO = 'treino-renan-v8';
+const VERSAO = 'treino-renan-v9';
 const ARQUIVOS = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
 // Com sinal fraco (academia), espera a internet no máximo isso antes de abrir a cópia guardada.
 const ESPERA_MS = 3000;

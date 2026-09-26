@@ -40,6 +40,10 @@ No celular, se algum botão não aparecer, toque em **aA** na barra do Safari e 
 
 ## 4. Bom saber
 
+- Digite o peso só na série 1: as séries seguintes do exercício já vêm com ele.
+- Ao marcar uma série, ela vira uma linha (ex.: "18 kg × 8"). Toque em **editar** para corrigir, ou no ✓ para desmarcar.
+- Quando todas as séries de um exercício estão feitas, o card inteiro minimiza e a tela vai para o próximo. Toque em **Abrir** para ver de novo.
+- Esqueceu de finalizar? O app avisa que o treino ficou aberto; ao finalizar, salva com a duração normal do treino.
 - Os vídeos precisam de internet. O resto funciona sem sinal depois da primeira abertura.
 - Com sinal fraco, o app espera a internet por até 3 segundos e depois abre a cópia guardada no celular.
 - Se algum vídeo sair do ar, use **Outros vídeos no YouTube**, que fica logo abaixo.
