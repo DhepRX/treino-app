@@ -150,6 +150,11 @@ h1{font-size:1.75rem;font-weight:800;font-stretch:78%;margin:8px 0 2px;line-heig
 .minirow .mt b{font-weight:750;line-height:1.25}
 .minirow .mt small{color:var(--muted);font-size:.88rem;line-height:1.3}
 .minirow .abrir{flex:none;font-size:.85rem;font-weight:700;color:var(--muted);text-decoration:underline;text-underline-offset:3px}
+.setrow.mini{grid-template-columns:2.2rem minmax(0,1fr) 48px}
+.setrow.mini .done{height:40px}
+.setmini{min-height:40px;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:8px;border:0;border-radius:9px;background:var(--soft);padding:0 12px;font-weight:750;font-variant-numeric:tabular-nums;text-align:left;cursor:pointer}
+.setmini small{flex:none;font-size:.8rem;font-weight:700;color:var(--muted);text-decoration:underline;text-underline-offset:2px}
+.restbtn.feita:not(.on),.restnote.feita{display:none}
 .minbtn{margin-left:auto;flex:none;align-self:flex-start;min-height:36px;padding:0 12px;border-radius:8px;border:1px solid var(--line);background:transparent;font-weight:700;font-size:.85rem;cursor:pointer}
 .warm .whead2{display:flex;align-items:center;gap:12px}
 .restbtn{display:flex;align-items:center;gap:8px;width:100%;min-height:38px;border:0;border-radius:8px;background:transparent;color:var(--muted);font-weight:650;font-size:.9rem;padding:0 10px 0 calc(2.2rem + 8px);cursor:pointer;position:relative;overflow:hidden;text-align:left}
@@ -457,6 +462,7 @@ details.how .lbl{font-weight:700}
   let state = { v:1, cur:null, hist:[], upd:0 };
   let sel = null;
   const abertos = new Set(); // cards completos que você abriu de novo
+  const seriesAbertas = new Set(); // séries feitas abertas para editar ('exId:i')
   let lastSummary = null;
 
   function sanitize(d){
@@ -720,9 +726,33 @@ details.how .lbl{font-weight:700}
     return c.sets[exId][i] || null;
   }
 
-  function restRowHTML(e, i, dis){
-    if (e.par) return '<p class="restnote">Sem descanso: vai pro ' + esc(e.parCurto || EX[e.par].nome.toLowerCase()) + '</p>';
-    return '<button type="button" class="restbtn" data-rs="' + e.id + ':' + i + '"' + dis + '><span class="bar"></span>' + CLOCK + '<span class="rt">Descanso ' + mmssS(e.rest) + '</span></button>';
+  function restRowHTML(e, i, dis, feita){
+    const f = feita ? ' feita' : '';
+    if (e.par) return '<p class="restnote' + f + '" data-rn="' + e.id + ':' + i + '">Sem descanso: vai pro ' + esc(e.parCurto || EX[e.par].nome.toLowerCase()) + '</p>';
+    return '<button type="button" class="restbtn' + f + '" data-rs="' + e.id + ':' + i + '"' + dis + '><span class="bar"></span>' + CLOCK + '<span class="rt">Descanso ' + mmssS(e.rest) + '</span></button>';
+  }
+
+  // Uma série. Feita, vira uma linha fina ("18 kg × 8"); "editar" abre os campos de novo.
+  function setRowHTML(e, i, sg, dis){
+    const cs = curSet(e.id, i), done = !!(cs && cs.done);
+    const attrs = '" data-ex="' + e.id + '" data-i="' + i + '"><span class="sn">' + (i + 1) + '</span>';
+    const btnDone = '<button type="button" class="done" data-done aria-pressed="' + done + '" aria-label="Série ' + (i + 1) + ' feita"' + dis + '>' + CHECK + '</button>';
+    if (done && !seriesAbertas.has(e.id + ':' + i)) {
+      const txt = e.tempo ? fmt(cs.reps || 0) + ' s' : (cs.kg !== null && cs.kg !== undefined ? fmt(cs.kg) + ' kg × ' : '') + fmt(cs.reps || 0);
+      return '<div class="setrow mini ok' + attrs +
+        '<button type="button" class="setmini" data-editar-serie aria-label="Série ' + (i + 1) + ': ' + esc(txt) + '. Editar"' + dis + '><span>' + esc(txt) + '</span><small>editar</small></button>' + btnDone + '</div>';
+    }
+    if (e.tempo) {
+      const secs = cs && cs.reps !== null && cs.reps !== undefined ? fmt(cs.reps) : '';
+      return '<div class="setrow time' + (done ? ' ok' : '') + attrs +
+        '<input data-f="reps" inputmode="numeric" placeholder="' + (sg.secs || faixa(e)) + '" value="' + secs + '" aria-label="Série ' + (i + 1) + ', segundos"' + dis + '>' +
+        '<button type="button" class="hold" data-hold' + dis + '>Iniciar</button>' + btnDone + '</div>';
+    }
+    const kgVal = cs && cs.kg !== null && cs.kg !== undefined ? fmt(cs.kg) : (sg.kg ? fmt(sg.kg) : '');
+    const repsVal = cs && cs.reps !== null && cs.reps !== undefined ? fmt(cs.reps) : '';
+    return '<div class="setrow' + (done ? ' ok' : '') + attrs +
+      '<input data-f="kg" inputmode="decimal" placeholder="kg" value="' + kgVal + '" aria-label="Série ' + (i + 1) + ', carga em kg"' + dis + '>' +
+      '<input data-f="reps" inputmode="numeric" placeholder="' + faixa(e) + '" value="' + repsVal + '" aria-label="Série ' + (i + 1) + ', repetições"' + dis + '>' + btnDone + '</div>';
   }
 
   // Séries feitas deste exercício no treino em andamento.
@@ -749,25 +779,10 @@ details.how .lbl{font-weight:700}
     } else {
       rows += '<div class="setrow head"><span>Série</span><span>Carga (kg)</span><span>Repetições</span><span></span></div>';
     }
+    const dis = lock ? ' disabled' : '';
     for (let i = 0; i < e.s; i++) {
       const cs = curSet(e.id, i);
-      const done = !!(cs && cs.done);
-      const dis = lock ? ' disabled' : '';
-      if (e.tempo) {
-        const secs = cs && cs.reps !== null && cs.reps !== undefined ? fmt(cs.reps) : '';
-        rows += '<div class="setrow time' + (done ? ' ok' : '') + '" data-ex="' + e.id + '" data-i="' + i + '"><span class="sn">' + (i + 1) + '</span>' +
-          '<input data-f="reps" inputmode="numeric" placeholder="' + (sg.secs || faixa(e)) + '" value="' + secs + '" aria-label="Série ' + (i + 1) + ', segundos"' + dis + '>' +
-          '<button type="button" class="hold" data-hold' + dis + '>Iniciar</button>' +
-          '<button type="button" class="done" data-done aria-pressed="' + done + '" aria-label="Série ' + (i + 1) + ' feita"' + dis + '>' + CHECK + '</button></div>';
-      } else {
-        const kgVal = cs && cs.kg !== null && cs.kg !== undefined ? fmt(cs.kg) : (sg.kg ? fmt(sg.kg) : '');
-        const repsVal = cs && cs.reps !== null && cs.reps !== undefined ? fmt(cs.reps) : '';
-        rows += '<div class="setrow' + (done ? ' ok' : '') + '" data-ex="' + e.id + '" data-i="' + i + '"><span class="sn">' + (i + 1) + '</span>' +
-          '<input data-f="kg" inputmode="decimal" placeholder="kg" value="' + kgVal + '" aria-label="Série ' + (i + 1) + ', carga em kg"' + dis + '>' +
-          '<input data-f="reps" inputmode="numeric" placeholder="' + faixa(e) + '" value="' + repsVal + '" aria-label="Série ' + (i + 1) + ', repetições"' + dis + '>' +
-          '<button type="button" class="done" data-done aria-pressed="' + done + '" aria-label="Série ' + (i + 1) + ' feita"' + dis + '>' + CHECK + '</button></div>';
-      }
-      rows += restRowHTML(e, i, dis);
+      rows += setRowHTML(e, i, sg, dis) + restRowHTML(e, i, dis, !!(cs && cs.done));
     }
     const par = e.par ? '<p class="pair">Faça junto com o <b>' + esc(EX[e.par].nome.toLowerCase()) + '</b>: uma série de cada, sem pausa, e descanse depois do tríceps.</p>' : '';
     return '<li class="card ex" id="ex-' + e.id + '">' +
@@ -890,6 +905,7 @@ details.how .lbl{font-weight:700}
     if (state.cur) return state.cur.wid === wid;
     state.cur = { wid, start:Date.now(), sets:{}, warm:{} };
     abertos.clear();
+    seriesAbertas.clear();
     lastSummary = null;
     commit();
     wake(true);
@@ -1088,6 +1104,18 @@ details.how .lbl{font-weight:700}
     card.replaceWith(novo);
     return novo;
   }
+  // Redesenha uma série (e esconde o descanso dela quando já foi feita).
+  function trocarSerie(exId, i){
+    const e = EX[exId], row = document.querySelector('.setrow[data-ex="' + exId + '"][data-i="' + i + '"]');
+    if (!row) return null;
+    const tmp = document.createElement('div');
+    tmp.innerHTML = setRowHTML(e, i, suggest(e), '');
+    const novo = tmp.firstElementChild;
+    row.replaceWith(novo);
+    const cs = curSet(exId, i), resto = document.querySelector('[data-rs="' + exId + ':' + i + '"], [data-rn="' + exId + ':' + i + '"]');
+    if (resto) resto.classList.toggle('feita', !!(cs && cs.done));
+    return novo;
+  }
   function estaCompleto(id){
     if (id === 'warm') return !!(state.cur && ['0', '1', '2'].every(x => state.cur.warm[x]));
     return feitasEx(EX[id]).length >= EX[id].s;
@@ -1146,6 +1174,26 @@ details.how .lbl{font-weight:700}
     if (ab) { abertos.add(ab.dataset.abrir); const c = redesenhar(ab.dataset.abrir); if (c) { const f = c.querySelector('.minbtn'); if (f) f.focus({ preventScroll:true }); } return; }
     const fe = ev.target.closest('[data-fechar]');
     if (fe) { abertos.delete(fe.dataset.fechar); const c = redesenhar(fe.dataset.fechar); if (c) c.querySelector('.minirow').focus({ preventScroll:true }); return; }
+    const ed = ev.target.closest('[data-editar-serie]');
+    if (ed) {
+      // Abre os campos de uma série feita; quando você sai deles, volta a ser uma linha.
+      const row = ed.closest('.setrow'), exId = row.dataset.ex, i = Number(row.dataset.i), key = exId + ':' + i;
+      seriesAbertas.add(key);
+      const aberta = trocarSerie(exId, i);
+      if (!aberta) return;
+      const campo = aberta.querySelector('input');
+      if (campo) campo.focus();
+      aberta.addEventListener('focusout', function sair(){
+        setTimeout(() => {
+          if (!aberta.isConnected || aberta.contains(document.activeElement)) return;
+          aberta.removeEventListener('focusout', sair);
+          seriesAbertas.delete(key);
+          const cs = curSet(exId, i);
+          if (cs && cs.done) trocarSerie(exId, i);
+        }, 250);
+      });
+      return;
+    }
     const vbtn = ev.target.closest('[data-video]');
     if (vbtn) { toggleVideo(vbtn); return; }
     const act = ev.target.closest('[data-act]');
@@ -1193,11 +1241,11 @@ details.how .lbl{font-weight:700}
         const btn = r.querySelector('[data-hold]');
         btn.textContent = 'Iniciar'; btn.classList.remove('on');
         setVal(exId, i, { reps:secs, done:true });
-        r.classList.add('ok');
-        r.querySelector('[data-done]').setAttribute('aria-pressed', 'true');
         commit();
         startRest(e.rest, e.nome, exId, i);
         progressText();
+        seriesAbertas.delete(exId + ':' + i);
+        trocarSerie(exId, i);
         if (feitasEx(e).length >= e.s) fecharDepois(exId);
       } else {
         if (hold) {
@@ -1220,6 +1268,14 @@ details.how .lbl{font-weight:700}
       if (!state.cur) { startSession(sel); }
       if (!state.cur || state.cur.wid !== e.w) return;
       const rowNow = document.querySelector('.setrow[data-ex="' + exId + '"][data-i="' + i + '"]');
+      if (rowNow.classList.contains('mini')) {
+        // Desmarcar uma série que já virou linha: volta com os campos preenchidos.
+        setVal(exId, i, { done:false });
+        trocarSerie(exId, i);
+        commit();
+        progressText();
+        return;
+      }
       const kgIn = rowNow.querySelector('[data-f="kg"]');
       const repIn = rowNow.querySelector('[data-f="reps"]');
       if (hold && hold.exId === exId && hold.i === i) {
@@ -1235,8 +1291,8 @@ details.how .lbl{font-weight:700}
       if (novo && reps === null) { reps = anterior(exId, i, 'reps') ?? e.r[0]; repIn.value = fmt(reps); }
       if (novo && kgIn && kg === null) { kg = anterior(exId, i, 'kg') ?? (suggest(e).kg || null); if (kg) kgIn.value = fmt(kg); }
       setVal(exId, i, { kg, reps, done:novo });
-      rowNow.classList.toggle('ok', novo);
-      rowNow.querySelector('[data-done]').setAttribute('aria-pressed', String(novo));
+      seriesAbertas.delete(exId + ':' + i);
+      trocarSerie(exId, i);
       if (novo) {
         const quantos = (state.cur.sets[exId] || []).filter(x => x && x.done).length;
         if (!e.par) startRest(e.rest, e.nome, exId, i);
