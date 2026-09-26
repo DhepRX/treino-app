@@ -402,9 +402,9 @@ details.how .lbl{font-weight:700}
       { id:'d3', vid:'BH9jVp2cx3w', nome:'Elevação lateral na polia', maq:'polia baixa, um braço de cada vez', s:3, r:[12,15], lado:true, rest:60, kg:null, inc:2.5, yt:'elevação lateral na polia unilateral como fazer',
         como:['De lado para a polia baixa, com o cabo passando na frente do corpo e o pegador na mão de fora.','Suba o braço para o lado até a altura do ombro, cotovelo levemente dobrado.','Desça devagar.'],
         erros:'inclinar o corpo, passar da linha do ombro e encolher o ombro.', troca:'elevação lateral com halteres.' },
-      { id:'d4', nome:'Rosca Scott com barra W', maq:'banco Scott (apoio para o braço) e barra W', s:3, r:[10,12], rest:0, par:'d5', parCurto:'tríceps', kg:null, inc:2, yt:'rosca scott banco barra W como fazer',
-        como:['Ajuste o banco para a axila ficar encaixada no topo do apoio, com a parte de trás do braço toda apoiada.','Segure a barra W na pegada do meio, palmas para cima.','Suba dobrando só o cotovelo e desça devagar até quase esticar, sem travar embaixo.'],
-        erros:'tirar o braço do apoio, jogar o corpo para trás e soltar o peso na descida.', troca:'rosca Scott com halter, um braço de cada vez, ou rosca direta com barra W.' },
+      { id:'d4', nome:'Rosca Scott alternada com halteres', maq:'banco Scott (apoio para o braço) e 2 halteres; a carga é de um halter', s:3, r:[10,12], lado:true, braco:true, rest:0, par:'d5', parCurto:'tríceps', kg:null, inc:2, yt:'rosca scott alternada com halteres como fazer',
+        como:['Sente com as axilas encaixadas no topo do apoio, um halter em cada mão, palmas para cima e a parte de trás dos braços toda apoiada.','Suba um braço de cada vez, dobrando só o cotovelo, e desça devagar até quase esticar antes de subir o outro.','Conte as repetições de cada braço: 10 a 12 de cada lado por série.'],
+        erros:'tirar o braço do apoio, girar o tronco para ajudar e soltar o halter na descida.', troca:'rosca Scott com barra W ou rosca alternada em pé com halteres.' },
       { id:'d5', vid:'GrNRu7j3z9M', nome:'Tríceps testa na polia com corda', maq:'polia baixa com corda e banco reto', s:3, r:[10,12], rest:90, kg:20, inc:2.5, yt:'tríceps testa na polia com corda deitado como fazer',
         como:['Deite no banco com a cabeça para o lado da polia baixa e segure a corda com os braços apontando para o teto.','Dobre só o cotovelo, levando a corda para trás da testa.','Estique de volta até os braços apontarem para cima.'],
         erros:'abrir os cotovelos, mexer o ombro e descer rápido.', troca:'tríceps testa com barra W.' },
@@ -720,7 +720,7 @@ details.how .lbl{font-weight:700}
     else if (e.kg) info += '<p class="last">Primeira vez aqui: comece com ' + fmt(e.kg) + ' kg (a carga do seu app).</p>';
     else if (!e.tempo) info += '<p class="last">Primeira vez: escolha uma carga em que a última repetição saia com esforço, sobrando 1 ou 2.</p>';
     if (sg.up) info += '<span class="up">' + (e.tempo ? 'Hora de subir: tente ' + sg.secs + ' s' : 'Hora de subir: ' + fmt(sg.kg) + ' kg') + '</span>';
-    const alvo = e.s + ' × ' + faixa(e) + (e.tempo ? ' s' : '') + (e.lado ? (e.perna ? ' cada perna' : ' cada lado') : '');
+    const alvo = e.s + ' × ' + faixa(e) + (e.tempo ? ' s' : '') + (e.lado ? (e.perna ? ' cada perna' : e.braco ? ' cada braço' : ' cada lado') : '');
     const desc = e.par ? 'sem descanso: vai direto pro próximo' : 'descanso ' + descansoTxt(e.rest);
     let rows = '';
     if (e.tempo) {
