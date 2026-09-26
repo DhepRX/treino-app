@@ -31,6 +31,10 @@ No celular, se algum botão não aparecer, toque em **aA** na barra do Safari e 
 - No primeiro uso, o app já vem com os 8 treinos registrados até 26/09/2026.
 - Depois disso, os treinos ficam salvos só neste celular. Toque em **Salvar backup** de vez em quando e guarde o arquivo no Arquivos, no iCloud Drive ou no WhatsApp. O app mostra a data do último backup e destaca a seção quando passa de 7 dias com treinos novos.
 - **Restaurar backup** junta os treinos do arquivo com os do celular, sem apagar nada.
+- **Backup automático no GitHub** (recomendado): em **Backup dos treinos > Backup automático no GitHub > Configurar**, siga os 3 passos uma vez.
+  Depois disso, cada treino finalizado (e cada registro feito ou apagado no calendário) vai sozinho para o `backup.json` do repositório privado `treino-dados`.
+  Sem internet, o app envia quando o sinal voltar. Em outro celular, configure com a mesma chave e toque em **Restaurar do GitHub**.
+  O GitHub guarda cada versão no histórico do repositório. Quando a chave vencer, o app avisa; crie outra e cole em **Configurar**.
 - Este app e o app de dentro do Claude são separados: o que você marca em um não aparece no outro.
 - Apagar o app da Tela de Início apaga os treinos junto. Salve um backup antes.
 
