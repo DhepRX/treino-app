@@ -19,10 +19,10 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
 ## Regras que não podem quebrar
 
 1. **Caminhos relativos** (`./sw.js`, `icon-192.png`). O site roda na subpasta `/treino-app/`.
-2. **Ao publicar qualquer mudança, troque `VERSAO` em `sw.js`** (hoje `treino-renan-v10`) para o celular pegar a versão nova.
+2. **Ao publicar qualquer mudança, troque `VERSAO` em `sw.js`** (hoje `treino-renan-v11`) para o celular pegar a versão nova.
 3. **Não mude o formato dos dados salvos sem migração.** Os treinos ficam só no celular (`localStorage`); perder o formato é perder o histórico.
 4. **Não renomeie os `id` dos exercícios** (`a1`…`d6`): eles são as chaves do histórico e da sugestão de carga. Para trocar um exercício, mude `nome`, `maq`, `como` etc. e mantenha o `id`.
-5. Sem bibliotecas externas além da fonte Archivo do Google Fonts. Sem framework, sem npm.
+5. Sem bibliotecas externas além da fonte Archivo do Google Fonts. Sem framework nem dependências npm no app. Playwright é permitido somente para testes; veja `testes/README.md`.
 6. Tudo precisa funcionar offline, menos os vídeos e o backup no GitHub.
 
 ## Dados (localStorage)
@@ -59,6 +59,10 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
 - O app da Tela de Início e o Safari guardam dados separados.
 
 ## Como testar
+
+Rode `node testes/rodar.js` após preparar o Playwright conforme `testes/README.md`. O comando inicia e encerra o servidor e executa os nove roteiros sequencialmente, também no PowerShell. Os testes devem falhar com saída diferente de zero quando uma asserção falhar. Chromium com tela de iPhone não substitui validação no Safari e na PWA instalada.
+
+Alternativa manual para Bash:
 
 ```bash
 mkdir -p /tmp/site && ln -s "$PWD" /tmp/site/treino-app
