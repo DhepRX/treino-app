@@ -27,8 +27,10 @@ const D26 = { id: 'd26', wid: 'D', start: H(17), end: H(18), sets: {
   console.log('1. cabeçalho:', await p.textContent('#today'), '| aba aberta:', await p.textContent('#tabs [aria-pressed="true"]'));
   console.log('   título:', await p.textContent('.whead h2'), '| foco:', await p.textContent('.whead p'));
   // 2. Adaptação: 2 séries em tudo e aviso.
-  assert.match(await p.textContent('.aviso-treino'), /Semana de adaptação/);
-  assert.match(await p.textContent('.aviso-treino'), /faltam A, B, C e D/);
+  assert.match(await p.textContent('.aviso-treino'), /Primeira semana da ficha nova/);
+  assert.match(await p.textContent('.aviso-treino'), /fizer A, B, C e D uma vez, os exercícios principais passam para 3 séries/);
+  assert.equal(await p.textContent('#ex-a1 .target strong'), '2 séries de 8–12 repetições');
+  assert.equal(await p.textContent('#ex-a5 .target strong'), '2 séries de 12–15 repetições');
   assert.equal(await cards(), 'a1:2 b1:2 e5:2 a2:2 a5:2 a7:2 b5:2');
   assert.ok(await p.locator('.seguranca').isVisible());
   console.log('2. aviso:', await p.textContent('.aviso-treino'));
@@ -77,7 +79,7 @@ const D26 = { id: 'd26', wid: 'D', start: H(17), end: H(18), sets: {
     await p.click('.setrow[data-ex="c1"][data-i="0"] [data-done]'); await p.click('.setrow[data-ex="c1"][data-i="1"] [data-done]'); };
   await fazer('A', serie1);
   await p.click('[data-tab="B"]');
-  assert.match(await p.textContent('.aviso-treino'), /faltam B, C e D/);
+  assert.match(await p.textContent('.aviso-treino'), /fizer B, C e D uma vez/);
   console.log('   depois do A:', await p.textContent('.aviso-treino'));
   await fazer('B', legTopo);
   await p.click('[data-tab="D"]');
@@ -85,7 +87,7 @@ const D26 = { id: 'd26', wid: 'D', start: H(17), end: H(18), sets: {
   console.log('6. leg press depois de 1 treino no topo (100 × 15, 15):', await sugestao('c1'), '| "Hora de subir"?', await p.locator('#ex-c1 .up').count());
   await fazer('C', serie1);
   await p.click('[data-tab="D"]');
-  assert.match(await p.textContent('.aviso-treino'), /falta D\)/);
+  assert.match(await p.textContent('.aviso-treino'), /fizer o D uma vez/);
   await fazer('D', async () => { await p.fill('.setrow[data-ex="c1"][data-i="0"] [data-f="kg"]', '100'); await p.fill('.setrow[data-ex="c1"][data-i="0"] [data-f="reps"]', '15');
     await p.click('.setrow[data-ex="c1"][data-i="0"] [data-done]'); await p.click('.setrow[data-ex="c1"][data-i="1"] [data-done]'); });
   const s2 = await st();
@@ -96,7 +98,9 @@ const D26 = { id: 'd26', wid: 'D', start: H(17), end: H(18), sets: {
   assert.equal(await cards(), 'c1:3 c4:3 c5:2 c2:2 c6:3 a5:3 b6:2 e4:2');
   console.log('4. depois do ciclo, B:', await cards());
   console.log('   aviso:', await p.textContent('.aviso-treino'));
-  assert.doesNotMatch(await p.textContent('.aviso-treino'), /adaptação/);
+  assert.doesNotMatch(await p.textContent('.aviso-treino'), /Primeira semana/);
+  assert.equal(await p.textContent('#ex-c1 .target strong'), '3 séries de 10–15 repetições');
+  assert.equal(await p.textContent('#ex-e4 .target strong'), '2 séries de 5 repetições cada lado, segure 5 s em cada');
   assert.equal(await sugestao('c1'), '105');
   console.log('6. leg press depois de 2 treinos no topo:', await sugestao('c1'), '| "Hora de subir"?', await p.locator('#ex-c1 .up').textContent().catch(() => 'não'));
   await p.click('[data-tab="A"]');

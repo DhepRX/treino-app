@@ -84,7 +84,7 @@ Se o aparelho não conseguir salvar, aparece um aviso com **Salvar backup agora*
 ## 6. Atualizar o app
 
 1. Troque o `index.html` no repositório (Add file > Upload files, com o mesmo nome).
-2. No `sw.js`, troque o número de `VERSAO` (por exemplo, de `v17` para `v18`) e suba ele também.
+2. No `sw.js`, troque o número de `VERSAO` (por exemplo, de `v18` para `v19`) e suba ele também.
 3. No iPhone, feche o app (arraste para cima na troca de apps) e abra de novo. Com internet, a versão nova aparece na hora.
 
 Os treinos salvos no celular continuam.
