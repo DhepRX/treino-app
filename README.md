@@ -53,10 +53,12 @@ A ficha tira carga direta da coluna (sem afundo com carga, abdominal com carga n
 - **Restaurar backup** junta os treinos do arquivo com os do celular, sem apagar nada.
 - **Backup automático no GitHub** (recomendado): em **Backup dos treinos > Backup automático no GitHub > Configurar**, siga os 3 passos uma vez.
   Depois disso, cada treino finalizado (e cada registro feito ou apagado no calendário) vai sozinho para o `backup.json` do repositório privado `treino-dados`.
-  Sem internet, o app envia quando o sinal voltar. Em outro celular, configure com a mesma chave e toque em **Restaurar do GitHub**.
+  Sem internet, o app envia quando o sinal voltar. Em outro celular, configure com a mesma chave: o histórico existente é recuperado antes de habilitar novos envios. A configuração preserva o arquivo remoto; o próximo treino finalizado envia o histórico reunido. **Restaurar do GitHub** continua disponível para repetir a recuperação.
   O GitHub guarda cada versão no histórico do repositório. Quando a chave vencer, o app avisa; crie outra e cole em **Configurar**.
 - Este app e o app de dentro do Claude são separados: o que você marca em um não aparece no outro.
 - Apagar o app da Tela de Início apaga os treinos junto. Salve um backup antes.
+
+Se o aparelho não conseguir salvar, aparece um aviso com **Salvar backup agora**. Esse botão exporta os dados que ainda estão na tela. Não feche o app antes de guardar esse arquivo; o aviso só desaparece quando uma nova gravação local funciona.
 
 ## 5. Bom saber
 
@@ -74,7 +76,7 @@ A ficha tira carga direta da coluna (sem afundo com carga, abdominal com carga n
 ## 6. Atualizar o app
 
 1. Troque o `index.html` no repositório (Add file > Upload files, com o mesmo nome).
-2. No `sw.js`, troque o número de `VERSAO` (por exemplo, de `v11` para `v12`) e suba ele também.
+2. No `sw.js`, troque o número de `VERSAO` (por exemplo, de `v12` para `v13`) e suba ele também.
 3. No iPhone, feche o app (arraste para cima na troca de apps) e abra de novo. Com internet, a versão nova aparece na hora.
 
 Os treinos salvos no celular continuam.
