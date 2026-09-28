@@ -5,7 +5,7 @@ const { chromium, devices } = require('playwright');
 const URL_APP = 'http://127.0.0.1:8766/treino-app/';
 
 // GitHub de mentira: repositório privado DhepRX/treino-dados e público DhepRX/publico.
-const gh = { arquivo: null, sha: null, puts: [], semRede: false };
+const gh = { arquivo: null, sha: null, puts: [], semRede: false, segurarPut: false };
 async function api(route) {
   if (gh.semRede) return route.abort('internetdisconnected');
   const req = route.request(), url = new URL(req.url()), auth = req.headers()['authorization'];
@@ -20,6 +20,8 @@ async function api(route) {
     return json(200, { sha: gh.sha });
   }
   if (req.method() === 'PUT') {
+    // Envio que nunca responde: simula o iPhone fechando o app no meio.
+    if (gh.segurarPut) { gh.segurarPut = false; return new Promise(() => {}); }
     const b = JSON.parse(req.postData());
     if (gh.sha && b.sha !== gh.sha) return json(409, { message: 'sha mismatch' });
     gh.arquivo = Buffer.from(b.content, 'base64').toString('utf8');
@@ -99,10 +101,39 @@ async function api(route) {
   assert.equal(await p2.evaluate(() => JSON.parse(localStorage.getItem('treino-renan-v1')).cur.sets.d1[0].done), true, 'Recuperar histórico deve manter treino local em andamento');
   console.log('7. celular novo:', antes, 'treinos ->', depois, '|', await p2.textContent('#nvMsg'));
 
+  // 7b. O iPhone fecha o app no meio do envio: ao abrir de novo, o backup vai.
+  const pa = await ctx.newPage(); pa.on('pageerror', e => erros.push('pa: ' + e.message));
+  await pa.goto(URL_APP);
+  gh.segurarPut = true;
+  const putsMeio = gh.puts.length;
+  await pa.click('[data-view="cal"]'); await pa.click('[data-reg-open]'); await pa.click('[data-reg="X"]');
+  await pa.waitForTimeout(2500);
+  assert.equal(await pa.evaluate(() => JSON.parse(localStorage.getItem('treino-renan-nuvem')).pendente), true, 'Pendente continua gravado durante o envio');
+  await pa.close();
+  const pb = await ctx.newPage(); pb.on('pageerror', e => erros.push('pb: ' + e.message));
+  await pb.goto(URL_APP);
+  await pb.waitForFunction(() => !JSON.parse(localStorage.getItem('treino-renan-nuvem')).pendente);
+  const localAgora = await pb.evaluate(() => JSON.parse(localStorage.getItem('treino-renan-v1')).hist.length);
+  assert.equal(gh.puts.length, putsMeio + 1);
+  assert.equal(JSON.parse(gh.arquivo).hist.length, localAgora);
+  console.log('7b. app fechado no meio do envio: ao abrir, enviou | treinos no GitHub:', JSON.parse(gh.arquivo).hist.length);
+  await pb.close();
+
   // 8. Chave vencida depois de ligada.
   await p.evaluate(() => { const n = JSON.parse(localStorage.getItem('treino-renan-nuvem')); n.token = 'github_pat_VENCIDA'; localStorage.setItem('treino-renan-nuvem', JSON.stringify(n)); });
   await p.reload(); await p.click('[data-view="cal"]'); await p.click('[data-reg-open]'); await p.click('[data-reg="X"]'); await p.waitForTimeout(2500);
   console.log('8. chave vencida:', await status());
+  // 8b. Cola uma chave nova: o treino que falhou com a chave vencida vai junto.
+  assert.equal(await p.evaluate(() => JSON.parse(localStorage.getItem('treino-renan-nuvem')).pendente), true);
+  const putsAntes8 = gh.puts.length;
+  await p.click('#nvConfig summary'); await p.fill('#nvToken', 'github_pat_BOM1234'); await p.click('#nvLigar');
+  await p.waitForFunction(() => document.querySelector('#nvMsg').textContent.includes('enviado'));
+  assert.equal(gh.puts.length, putsAntes8 + 1);
+  const local8 = await p.evaluate(() => JSON.parse(localStorage.getItem('treino-renan-v1')).hist.length);
+  assert.equal(JSON.parse(gh.arquivo).hist.length, local8, 'O GitHub fica com todos os treinos');
+  assert.equal(await p.evaluate(() => JSON.parse(localStorage.getItem('treino-renan-nuvem')).pendente), false);
+  console.log('8b. chave nova:', await p.textContent('#nvMsg'), '| treinos no GitHub:', local8);
+  await p.click('#nvConfig summary');
 
   // 9. Desligar (dois toques) apaga a chave.
   await p.click('#nvConfig summary'); await p.click('#nvDesligar'); await p.click('#nvDesligar');

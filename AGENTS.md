@@ -20,12 +20,13 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
 ## Regras que não podem quebrar
 
 1. **Caminhos relativos** (`./sw.js`, `icon-192.png`). O site roda na subpasta `/treino-app/`.
-2. **Ao publicar qualquer mudança, troque `VERSAO` em `sw.js`** (hoje `treino-renan-v12`) para o celular pegar a versão nova.
+2. **Ao publicar qualquer mudança, troque `VERSAO` em `sw.js`** (hoje `treino-renan-v13`) para o celular pegar a versão nova.
 3. **Não mude o formato dos dados salvos sem migração.** Os treinos ficam só no celular (`localStorage`); perder o formato é perder o histórico.
 4. **Não renomeie os `id` dos exercícios** (`a1`…`d6`, `e1`…`e4`): eles são as chaves do histórico e da sugestão de carga. Para trocar um exercício, mude `nome`, `maq`, `como` etc. e mantenha o `id`. Movimento novo ganha id novo (próximo: `e5`).
 5. Sem bibliotecas externas além da fonte Archivo do Google Fonts. Sem framework nem dependências npm no app. Playwright é permitido somente para testes; veja `testes/README.md`.
 6. Tudo precisa funcionar offline, menos os vídeos e o backup no GitHub.
 7. **Não apague a ficha 1** (`W1`): o histórico antigo usa os nomes dela. Treino salvo sem o campo `ficha` é da ficha 1.
+8. **Tema sempre claro**, mesmo com o iPhone no modo escuro: foi o estilo que o dono escolheu. Não volte o `prefers-color-scheme: dark`.
 
 ## Dados (localStorage)
 
@@ -33,11 +34,13 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
   - `cur`: treino em andamento `{ wid, start, sets:{ [exId]: [{kg, reps, done}] }, warm }` ou `null`
   - `cur` também tem `ficha` (1 ou 2); sem o campo, é da ficha 1 e continua sendo mostrado com a ficha 1 até finalizar.
   - `hist`: treinos feitos `[{ id, wid, ficha?, start, end, sets, manual?, n?, rot?, fonte? }]`; `wid` é `A`–`D` ou `X` (outro treino); `ficha` ausente = ficha 1
+  - Treino marcado à mão no calendário ganha a ficha atual se for hoje, ou a que valia na data (`fichaDoDia()`; a ficha 2 começa em 28/09/2026).
   - Tudo que entra passa por `sanitize()`. Ao ler, o app chama `sanitize(JSON.parse(...))`.
   - Na primeira abertura, carrega `SEED` (treinos até 26/09/2026).
 - `treino-renan-backup`: data (ms) do último backup, manual ou automático.
 - `treino-renan-curta`: versão curta do treino em andamento `{ start, tronco }` (fica fora dos dados do treino).
 - `treino-renan-nuvem`: backup automático `{ repo, token, pendente, ultimo, erro }`. Grava `backup.json` num repositório **privado** via GitHub Contents API (`PUT /repos/{repo}/contents/backup.json`), com uma chave fine-grained. O token fica só no aparelho; nunca coloque token no código.
+  `pendente` só vira `false` quando o GitHub confirma o envio. Ao configurar num celular com `backup.json` já no GitHub, o app junta o histórico de lá e só envia se este celular tiver treinos que o GitHub não tem.
 
 ## Onde mexer no `index.html`
 
@@ -51,6 +54,7 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
 - **Séries que valem hoje:** `S(e)`. Na **adaptação** (`adaptacao()`: até fazer A, B, C e D uma vez na ficha 2) e na **versão curta** (`curtaAtiva()`, `exibidos()`), no máximo 2.
 - **Sugestão de carga:** `suggest()` sobe `inc` quando todas as séries feitas (pelo menos 2) bateram o topo da faixa. Com `pernas`, só depois de 2 treinos seguidos no topo, com a mesma carga (`sessoes()`, `bateuTopo()`).
 - **Avisos da ficha 2:** `avisosHTML()` (adaptação ou esforço, cargas antigas de perna, segurança).
+- **Séries do treino em andamento:** `curSet()` só devolve séries quando o treino em andamento é o da tela (os ids se repetem entre os treinos da ficha 2).
 - **Peso e repetições digitados uma vez:** `segue()` copia o valor para as séries seguintes; `anterior()` repete o valor da série anterior ao marcar.
 - **Séries e cards minimizados:** `setRowHTML()` desenha uma série (feita vira linha "18 kg × 8 · editar"); `trocarSerie()` redesenha só ela.
   `exHTML()` / `warmHTML()` viram uma linha quando o exercício/aquecimento está completo; `fecharDepois()` minimiza e rola para o próximo;
@@ -70,7 +74,7 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
 
 ## Como testar
 
-Rode `node testes/rodar.js` após preparar o Playwright conforme `testes/README.md`. O comando inicia e encerra o servidor e executa os nove roteiros sequencialmente, também no PowerShell. Os testes devem falhar com saída diferente de zero quando uma asserção falhar. Chromium com tela de iPhone não substitui validação no Safari e na PWA instalada.
+Rode `node testes/rodar.js` após preparar o Playwright conforme `testes/README.md`. O comando inicia e encerra o servidor e executa os onze roteiros sequencialmente, também no PowerShell. Os testes devem falhar com saída diferente de zero quando uma asserção falhar. Chromium com tela de iPhone não substitui validação no Safari e na PWA instalada.
 
 Alternativa manual para Bash:
 

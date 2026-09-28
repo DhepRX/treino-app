@@ -1,6 +1,6 @@
 // Guarda o app no celular para abrir sem internet.
 // Ao publicar uma versão nova, troque o número da VERSAO.
-const VERSAO = 'treino-renan-v12';
+const VERSAO = 'treino-renan-v13';
 const ARQUIVOS = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
 // Com sinal fraco (academia), espera a internet no máximo isso antes de abrir a cópia guardada.
 const ESPERA_MS = 3000;
@@ -40,17 +40,23 @@ self.addEventListener('fetch', event => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
-  // A página: tenta a internet primeiro, para receber as atualizações.
+  // A página do app: tenta a internet primeiro, para receber as atualizações.
   // Sem sinal, com erro ou demorando mais de ESPERA_MS, abre a cópia guardada.
   if (req.mode === 'navigate') {
+    // Outras páginas publicadas na mesma pasta (README.md, testes) passam direto:
+    // não podem virar a cópia guardada do app.
+    const pasta = new URL(self.registration.scope).pathname;
+    if (url.origin !== self.location.origin || (url.pathname !== pasta && url.pathname !== pasta + 'index.html')) return;
     const rede = buscar(event, req, './index.html', r => r.ok && !r.redirected);
     const guardada = () => caches.match('./index.html').then(r => r || caches.match('./'));
+    // Redirecionamento (endereço novo do site) vai para o navegador seguir.
+    const direto = r => r.ok || r.type === 'opaqueredirect' || (r.status >= 300 && r.status < 400);
     event.respondWith(new Promise(responder => {
       let pronto = false;
       const usar = r => { if (r && !pronto) { pronto = true; responder(r); } };
       const espera = setTimeout(() => guardada().then(usar), ESPERA_MS);
       rede.then(
-        r => { clearTimeout(espera); if (r.ok) usar(r); else guardada().then(g => usar(g || r)); },
+        r => { clearTimeout(espera); if (direto(r)) usar(r); else guardada().then(g => usar(g || r)); },
         () => { clearTimeout(espera); guardada().then(g => usar(g || Response.error())); }
       );
     }));

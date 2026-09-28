@@ -2,7 +2,7 @@
 const { spawn, spawnSync } = require('node:child_process');
 const path = require('node:path');
 const net = require('node:net');
-const testes = ['ficha2','serie','peso','mini','todos','revisao','nuvem','armazenamento','geral','sinal-fraco'];
+const testes = ['ficha2','correcoes','serie','peso','mini','todos','revisao','nuvem','armazenamento','geral','sinal-fraco'];
 const BASE = 'http://127.0.0.1:8766';
 const pausa = ms => new Promise(resolve => setTimeout(resolve, ms));
 // O servidor fecha conexões paradas; o fetch do Node às vezes reaproveita uma já fechada

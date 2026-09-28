@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0A0A0A">
+<meta name="color-scheme" content="light">
 <title>Treino</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -17,6 +18,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap" rel="stylesheet">
 <style>
 [hidden]{display:none!important}
+/* Sempre o tema claro, mesmo com o iPhone no modo escuro: é o estilo que o dono escolheu. */
 :root{
   --bg:#F2F2F2; --surface:#FFFFFF; --ink:#141414; --muted:#5E5E5E; --line:#DADADA;
   --tag:#FFC400; --tag-ink:#141414;
@@ -26,18 +28,6 @@
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#0A0A0A; --surface:#171717; --ink:#F2F2F2; --muted:#A3A3A3; --line:#2B2B2B;
-    --tag:#FFC400; --tag-ink:#111111; --go:#FFC400; --go-ink:#111111; --soft:#262009; --focus:#8AB4FF; --band:#000000; --band-ink:#FFFFFF; --sel:#FFC400; --sel-ink:#111111; --mk:#FFC400;
-    color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#0A0A0A; --surface:#171717; --ink:#F2F2F2; --muted:#A3A3A3; --line:#2B2B2B;
-  --tag:#FFC400; --tag-ink:#111111; --go:#FFC400; --go-ink:#111111; --soft:#262009; --focus:#8AB4FF; --band:#000000; --band-ink:#FFFFFF; --sel:#FFC400; --sel-ink:#111111; --mk:#FFC400;
-  color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:inherit}
 html{background:var(--band);scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px);-webkit-text-size-adjust:100%}
@@ -111,6 +101,8 @@ h1{font-size:1.75rem;font-weight:800;font-stretch:78%;margin:8px 0 2px;line-heig
 .aviso-treino{margin:0 0 10px;padding:10px 12px;border-radius:10px;background:var(--soft);border-left:4px solid var(--tag);font-size:.95rem}
 .seguranca{margin:0 0 14px;padding-left:10px;border-left:3px solid var(--line);color:var(--muted);font-size:.84rem;line-height:1.45}
 .wk.trip .rules{margin:4px 0 0}
+#saveWarning{margin:12px 0 0;padding:12px;border-radius:10px;background:var(--soft);border-left:4px solid var(--tag);font-weight:600}
+#saveWarning p{margin:0 0 10px}
 .startrow .aviso-aberto{flex:1 1 100%;color:var(--ink);font-weight:600;background:var(--soft);border-left:4px solid var(--tag);border-radius:8px;padding:10px 12px}
 
 .btn{min-height:46px;padding:0 18px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-weight:700;cursor:pointer}
@@ -338,7 +330,7 @@ details.how .lbl{font-weight:700}
       </details>
     </div>
   </section>
-  <p class="fine">O descanso começa sozinho quando você marca a série, e dá pra tocar no descanso de qualquer série para começar ou pular. Cada exercício tem um vídeo que abre dentro do próprio app. Os vídeos precisam de internet; o resto funciona sem sinal. As cargas de partida vieram do seu app da Smart Fit; os exercícios sem carga você escolhe no primeiro treino.</p>
+  <p class="fine">O descanso começa sozinho quando você marca a série, e dá pra tocar no descanso de qualquer série para começar ou pular. Quase todos os exercícios têm um vídeo que abre dentro do próprio app; os outros têm a busca no YouTube. Os vídeos precisam de internet; o resto funciona sem sinal. As cargas de partida vieram do seu app da Smart Fit; os exercícios sem carga você escolhe no primeiro treino.</p>
   <p class="fine" id="dica">Pra usar como aplicativo: abra o endereço do app no Safari, toque em ••• e depois em Compartilhar e Adicionar à Tela de Início.</p>
   <p class="fine" id="sync">Salvando neste aparelho.</p>
 </main>
@@ -513,6 +505,10 @@ details.how .lbl{font-weight:700}
   }
   const FICHAS = { 1:montar(1, W1), 2:montar(2, W2) };
   const ATUAL = 2;
+  // Ficha de um treino marcado à mão: hoje, a atual (igual a um treino feito pelo app);
+  // num dia antigo, a que valia na data (a ficha 2 começou em 28/09/2026).
+  const INICIO_ATUAL = new Date(2026, 8, 28).getTime();
+  const fichaDoDia = k => k === ymd(new Date()) || parseKey(k).getTime() >= INICIO_ATUAL ? ATUAL : 1;
   const W = FICHAS[ATUAL].treinos, WB = FICHAS[ATUAL].porId;
   const CONHECIDOS = new Set();
   Object.values(FICHAS).forEach(f => f.treinos.forEach(w => w.ex.forEach(e => CONHECIDOS.add(e.id))));
@@ -618,9 +614,14 @@ details.how .lbl{font-weight:700}
     return { kg:bateu ? Math.round((maxKg + e.inc) * 100) / 100 : maxKg, up:bateu, last };
   }
   // Primeiro ciclo da ficha nova, até fazer A, B, C e D uma vez nela: 2 séries em tudo.
+  // Guardado até o histórico mudar: S() chama isto várias vezes em cada desenho.
+  let adaptMemo = null;
   function adaptacao(){
-    const feitos = new Set(state.hist.filter(h => h.ficha === ATUAL).map(h => h.wid));
-    return !ORDEM.every(l => feitos.has(l));
+    const h = state.hist;
+    if (adaptMemo && adaptMemo.h === h && adaptMemo.n === h.length) return adaptMemo.v;
+    const feitos = new Set(h.filter(x => x.ficha === ATUAL).map(x => x.wid));
+    adaptMemo = { h, n:h.length, v:!ORDEM.every(l => feitos.has(l)) };
+    return adaptMemo.v;
   }
   // Versão curta (dia cansado): só os 4 primeiros exercícios, com 2 séries; no B e no D, o de tronco se quiser.
   // Fica fora dos dados do treino: { start do treino em andamento, tronco }.
@@ -744,7 +745,7 @@ details.how .lbl{font-weight:700}
     const hoje = ymd(new Date());
     if (calSel > hoje) return;
     const start = calSel === hoje ? Date.now() : parseKey(calSel).setHours(7, 0, 0, 0);
-    addEntry({ id:'m' + start.toString(36) + Math.random().toString(36).slice(2, 6), wid, ficha:ATUAL, start, end:start, sets:{}, manual:true });
+    addEntry({ id:'m' + start.toString(36) + Math.random().toString(36).slice(2, 6), wid, ficha:fichaDoDia(calSel), start, end:start, sets:{}, manual:true });
     regOpen = false;
     commit();
     renderAll();
@@ -813,8 +814,9 @@ details.how .lbl{font-weight:700}
     html += '<section class="dayd" aria-labelledby="ddTitle"><div class="ddhead"><h3 id="ddTitle">' + esc(titulo) + '</h3>' +
       (calSel <= hoje ? '<button type="button" class="btn ghost" data-reg-open aria-expanded="' + regOpen + '">+ Registrar treino</button>' : '') + '</div>';
     if (regOpen) {
+      const fichaDia = fichaDoDia(calSel);
       html += '<div class="regpick"><p>Qual treino você fez' + (calSel === hoje ? ' hoje' : ' nesse dia') + '?</p><div class="regbtns">' +
-        ORDEM.map(x => '<button type="button" class="regb' + (x === nx ? ' rec' : '') + '" data-reg="' + x + '"><i class="chip">' + x + '</i>' + esc(WB[x].nome) + (x === nx ? '<small>próximo</small>' : '') + '</button>').join('') +
+        ORDEM.map(x => '<button type="button" class="regb' + (x === nx ? ' rec' : '') + '" data-reg="' + x + '"><i class="chip">' + x + '</i>' + esc(treinoDe(fichaDia, x).nome) + (x === nx ? '<small>próximo</small>' : '') + '</button>').join('') +
         '<button type="button" class="regb" data-reg="X"><i class="chip">' + CHECK + '</i>Outro treino</button></div>' +
         '<p class="dnote">Outro serve para cardio ou treino fora da ordem: conta no calendário, mas não muda o próximo treino.</p>' +
         '<button type="button" class="btn quiet" data-reg-cancel>Cancelar</button></div>';
@@ -838,9 +840,11 @@ details.how .lbl{font-weight:700}
       (state.cur && state.cur.wid === w.id ? ' class="live"' : '') + '><b>' + w.id + '</b><small>' + esc(treinoTela(w.id).curto || treinoTela(w.id).nome.split(' ')[0]) + '</small></button>').join('');
   }
 
+  // Série do treino em andamento, só quando ele é o treino na tela: o mesmo exercício
+  // (c4, a5…) aparece em mais de um treino e não pode mostrar as séries do outro.
   function curSet(exId, i){
     const c = state.cur;
-    if (!c || !c.sets[exId]) return null;
+    if (!c || c.wid !== sel || !c.sets[exId]) return null;
     return c.sets[exId][i] || null;
   }
 
@@ -1051,13 +1055,16 @@ details.how .lbl{font-weight:700}
     if (p && state.cur) p.textContent = 'Em andamento desde ' + new Date(state.cur.start).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }) + '. ' + countDone(state.cur) + ' de ' + totalSets(treinoTela(state.cur.wid)) + ' séries feitas.';
   }
   const totalSets = w => exibidos(w).reduce((a, e) => a + S(e), 0);
-  const countDone = c => Object.values(c.sets).reduce((a, arr) => a + arr.filter(x => x && x.done).length, 0);
+  // Séries feitas dos exercícios na tela (na versão curta, só os que aparecem), até as séries que valem hoje.
+  const countDone = c => exibidos(treinoDe(c.ficha, c.wid)).reduce((a, e) => a + Math.min(S(e), (c.sets[e.id] || []).filter(x => x && x.done).length), 0);
 
   // ---------------- sessão ----------------
   function startSession(wid){
     if (state.cur) return state.cur.wid === wid;
     state.cur = { wid, ficha:ATUAL, start:Date.now(), sets:{}, warm:{} };
+    // Treino novo começa com tudo aberto (os ids se repetem entre os treinos da ficha 2).
     abertos.clear();
+    fechados.clear();
     seriesAbertas.clear();
     lastSummary = null;
     commit();
@@ -1078,11 +1085,11 @@ details.how .lbl{font-weight:700}
     const w = treinoDe(c.ficha, c.wid), total = totalSets(w);
     const sets = {};
     for (const [k, arr] of Object.entries(c.sets)) if (arr.some(x => x && x.done)) sets[k] = arr;
-    const feitas = countDone(c);
+    const feitas = countDone(c), salvar = Object.keys(sets).length > 0;
     // Esqueceu aberto: salva com a duração normal do treino em vez de horas.
     const fim = esquecido(c) ? c.start + w.min * 60000 : Date.now();
     const min = Math.max(1, Math.round((fim - c.start) / 60000));
-    if (feitas) addEntry({ id:String(c.start), wid:c.wid, ficha:c.ficha, start:c.start, end:fim, sets });
+    if (salvar) addEntry({ id:String(c.start), wid:c.wid, ficha:c.ficha, start:c.start, end:fim, sets });
     gravarCurta(null);
     state.cur = null;
     commit();
@@ -1094,10 +1101,10 @@ details.how .lbl{font-weight:700}
     html += subir.length ? '<p>Na próxima, sobe a carga em:</p><ul>' + subir.map(x => '<li>' + esc(x.e.nome) + ': ' + (x.e.tempo ? x.sg.secs + ' s' : fmt(x.sg.kg) + ' kg') + '</li>').join('') + '</ul>'
       : '<p>Na próxima, repita as cargas e tente mais repetições.</p>';
     html += '<button type="button" class="btn" data-gocal>Ver no calendário</button></div>';
-    lastSummary = feitas ? { wid:w.id, html } : null;
+    lastSummary = salvar ? { wid:w.id, html } : null;
     renderAll();
-    if (feitas) nuvemAgendar();
-    say(feitas ? 'Treino salvo.' : 'Nenhuma série marcada: nada foi salvo.');
+    if (salvar) nuvemAgendar();
+    say(salvar ? 'Treino salvo.' : 'Nenhuma série marcada: nada foi salvo.');
   }
   function discardSession(){
     state.cur = null;
@@ -1145,7 +1152,7 @@ details.how .lbl{font-weight:700}
   }
   function paintRestRows(){
     const now = Date.now();
-    const key = rest && rest.exId && rest.end > now ? rest.exId + ':' + rest.i : null;
+    const key = rest && rest.exId && rest.end > now && state.cur && state.cur.wid === sel ? rest.exId + ':' + rest.i : null;
     document.querySelectorAll('.restbtn').forEach(b => {
       if (b.dataset.rs === key) {
         b.classList.add('on');
@@ -1161,7 +1168,7 @@ details.how .lbl{font-weight:700}
   }
   function paintHold(){
     if (!hold) return;
-    const b = document.querySelector('.setrow[data-ex="' + hold.exId + '"][data-i="' + hold.i + '"] [data-hold]');
+    const b = state.cur && state.cur.wid === sel && document.querySelector('.setrow[data-ex="' + hold.exId + '"][data-i="' + hold.i + '"] [data-hold]');
     const s = Math.floor((Date.now() - hold.start) / 1000);
     if (b) { b.classList.add('on'); b.textContent = 'Parar ' + mmssS(s); }
     if (!hold.avisou && s >= hold.alvo) {
@@ -1259,7 +1266,7 @@ details.how .lbl{font-weight:700}
     const card = id === 'warm' ? document.querySelector('#workout .card.warm') : $('ex-' + id);
     if (!card || (id !== 'warm' && !w.porEx[id])) return null;
     const tmp = document.createElement('div');
-    tmp.innerHTML = id === 'warm' ? warmHTML(w, outro) : exHTML(w.porEx[id], w.ex.indexOf(w.porEx[id]), outro);
+    tmp.innerHTML = id === 'warm' ? warmHTML(w, outro) : exHTML(w.porEx[id], exibidos(w).indexOf(w.porEx[id]), outro);
     const novo = tmp.firstElementChild;
     card.replaceWith(novo);
     return novo;
@@ -1368,15 +1375,6 @@ details.how .lbl{font-weight:700}
       if (!aberta) return;
       const campo = aberta.querySelector('input');
       if (campo) campo.focus();
-      aberta.addEventListener('focusout', function sair(){
-        setTimeout(() => {
-          if (!aberta.isConnected || aberta.contains(document.activeElement)) return;
-          aberta.removeEventListener('focusout', sair);
-          seriesAbertas.delete(key);
-          const cs = curSet(exId, i);
-          if (cs && cs.done) trocarSerie(exId, i);
-        }, 250);
-      });
       return;
     }
     const vbtn = ev.target.closest('[data-video]');
@@ -1395,7 +1393,9 @@ details.how .lbl{font-weight:700}
       const k = wb.dataset.warm;
       state.cur.warm[k] = !state.cur.warm[k];
       if (!state.cur.warm[k]) delete state.cur.warm[k];
-      wb.setAttribute('aria-pressed', String(!!state.cur.warm[k]));
+      // Se o toque começou o treino, a tela foi redesenhada: atualiza o botão novo.
+      const wbNow = document.querySelector('#workout [data-warm="' + k + '"]') || wb;
+      wbNow.setAttribute('aria-pressed', String(!!state.cur.warm[k]));
       commit();
       if (['0', '1', '2'].every(x => state.cur.warm[x])) fecharDepois('warm');
       return;
@@ -1508,6 +1508,20 @@ details.how .lbl{font-weight:700}
     }
     inp.dataset.seguindo = inp.value;
   }
+  // Série feita aberta para editar: volta a ser linha quando você sai dos campos dela.
+  // Procura a linha de novo, porque a tela pode ter sido redesenhada (trocar de aba, minimizar).
+  $('workout').addEventListener('focusout', ev => {
+    const row = ev.target.closest && ev.target.closest('.setrow');
+    if (!row || !seriesAbertas.has(row.dataset.ex + ':' + row.dataset.i)) return;
+    const exId = row.dataset.ex, i = Number(row.dataset.i);
+    setTimeout(() => {
+      const atual = document.querySelector('#workout .setrow[data-ex="' + exId + '"][data-i="' + i + '"]');
+      if (atual && atual.contains(document.activeElement)) return;
+      seriesAbertas.delete(exId + ':' + i);
+      const cs = curSet(exId, i);
+      if (atual && cs && cs.done) trocarSerie(exId, i);
+    }, 250);
+  });
   $('workout').addEventListener('focusin', ev => {
     const inp = ev.target.closest('.setrow input');
     if (inp) inp.dataset.seguindo = inp.value;
@@ -1629,19 +1643,23 @@ details.how .lbl{font-weight:700}
     r.onerror = () => erro(r.error);
     r.readAsText(file);
   });
-  // Junta os treinos de um backup com os do celular, sem apagar nada.
+  // Junta treinos de um backup (já passados pelo sanitize) com os do celular, sem apagar nada.
+  // Devolve quantos eram novos.
+  function juntarHist(hist){
+    const ids = new Set(state.hist.map(h => h.id));
+    const novos = hist.filter(h => !ids.has(h.id) && ids.add(h.id));
+    novos.forEach(h => state.hist.push(h));
+    state.hist.sort((a, b) => a.start - b.start);
+    compact();
+    commit();
+    renderAll();
+    return novos.length;
+  }
   function juntarBackup(txt, avisar){
     try {
-      const d = sanitize(JSON.parse(txt));
-      const ids = new Set(state.hist.map(h => h.id));
-      const novos = d.hist.filter(h => !ids.has(h.id));
-      novos.forEach(h => state.hist.push(h));
-      state.hist.sort((a, b) => a.start - b.start);
-      compact();
-      commit();
-      renderAll();
-      if (novos.length) nuvemAgendar();
-      avisar(novos.length ? novos.length + (novos.length > 1 ? ' treinos restaurados.' : ' treino restaurado.') : 'Esse backup não tinha treinos novos.');
+      const n = juntarHist(sanitize(JSON.parse(txt)).hist);
+      if (n) nuvemAgendar();
+      avisar(n ? n + (n > 1 ? ' treinos restaurados.' : ' treino restaurado.') : 'Esse backup não tinha treinos novos.');
     } catch (e) { avisar('Esse arquivo não é um backup do app de treino.'); }
   }
   async function restaurarBackup(file){
@@ -1663,7 +1681,7 @@ details.how .lbl{font-weight:700}
   // Sem internet, tenta de novo quando o app volta para a tela ou o sinal volta.
   const LS_NV = 'treino-renan-nuvem';
   const ARQ_NV = 'backup.json';
-  let nv = {}, enviando = false, configurando = false;
+  let nv = {}, enviando = false, configurando = false, mudancas = 0;
   try { nv = JSON.parse(localStorage.getItem(LS_NV)) || {}; } catch (e) {}
   function gravarNv(){ try { localStorage.setItem(LS_NV, JSON.stringify(nv)); } catch (e) {} }
   const nvLigado = () => !!(nv.repo && nv.token);
@@ -1703,13 +1721,16 @@ details.how .lbl{font-weight:700}
   }
   function nuvemAgendar(){
     if (!nvLigado()) return;
+    mudancas++;
     nv.pendente = true; gravarNv(); renderNuvem();
     setTimeout(nuvemEnviar, 1500);
   }
   async function nuvemEnviar(){
     if (!nvLigado() || !nv.pendente || enviando || configurando) return;
     enviando = true;
-    nv.pendente = false; gravarNv();
+    // "pendente" só sai do aparelho quando o GitHub confirma: se o iPhone fechar o app
+    // no meio do envio, ele tenta de novo ao abrir.
+    const conf = nv, envio = mudancas;
     try {
       const atual = await gh('/contents/' + ARQ_NV);
       let sha;
@@ -1722,11 +1743,13 @@ details.how .lbl{font-weight:700}
         body:JSON.stringify({ message:'Backup ' + dm(agora) + ' ' + agora.toTimeString().slice(0, 5) + ' (' + state.hist.length + ' treinos)', content:base64(JSON.stringify(state)), sha })
       });
       if (!resp.ok) throw { status:resp.status };
+      if (nv !== conf) return; // desligou ou trocou a configuração durante o envio
       nv.ultimo = Date.now(); nv.erro = '';
+      if (mudancas === envio) nv.pendente = false; // se mudou durante o envio, manda de novo
       gravarNv();
       marcarBackup();
     } catch (e) {
-      nv.pendente = true;
+      if (nv !== conf) return;
       nv.erro = e && e.status ? erroGh(e.status) : SEM_REDE;
       gravarNv();
     } finally {
@@ -1766,13 +1789,22 @@ details.how .lbl{font-weight:700}
     } finally { $('nvLigar').disabled = false; configurando = false; }
     $('nvToken').value = '';
     if (existente) {
-      const ids = new Set(state.hist.map(h => h.id));
-      for (const h of existente.hist) if (!ids.has(h.id)) { state.hist.push(h); ids.add(h.id); }
-      state.hist.sort((a, b) => a.start - b.start);
-      compact(); commit(); renderAll();
-      nv.pendente = false; nv.erro = ''; nv.ultimo = 0;
-      gravarNv(); renderNuvem();
-      return nvMsg('Backup ligado. Histórico recuperado do GitHub; o arquivo foi preservado. O próximo treino finalizado enviará o histórico reunido.');
+      juntarHist(existente.hist);
+      // Treinos deste celular que o GitHub ainda não tem (ou um envio que tinha falhado com a chave antiga):
+      // envia o histórico reunido, que continua tendo tudo o que já estava no GitHub.
+      const noGitHub = new Set(existente.hist.map(h => h.id));
+      const falta = !!antes.pendente || state.hist.some(h => !noGitHub.has(h.id));
+      nv.erro = ''; nv.ultimo = antes.repo === repo ? antes.ultimo || 0 : 0;
+      if (!falta) {
+        nv.pendente = false;
+        gravarNv(); renderNuvem();
+        return nvMsg('Backup ligado. Histórico recuperado do GitHub; o arquivo foi preservado.');
+      }
+      mudancas++;
+      nv.pendente = true;
+      gravarNv();
+      await nuvemEnviar();
+      return nvMsg(nv.erro ? nv.erro : 'Backup ligado. Histórico do GitHub juntado com o deste celular e enviado.');
     }
     nv.pendente = true; nv.erro = '';
     gravarNv();
