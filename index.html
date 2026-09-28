@@ -103,6 +103,12 @@ h1{font-size:1.75rem;font-weight:800;font-stretch:78%;margin:8px 0 2px;line-heig
 .wk.trip .rules{margin:4px 0 0}
 #saveWarning{margin:12px 0 0;padding:12px;border-radius:10px;background:var(--soft);border-left:4px solid var(--tag);font-weight:600}
 #saveWarning p{margin:0 0 10px}
+.startrow .feito{flex:1 1 100%;background:var(--surface);border:2px solid var(--tag);border-radius:14px;padding:12px 14px}
+.feito p{margin:0 0 6px}
+.feito .feito-t{display:flex;align-items:center;gap:8px;color:var(--ink);font-size:1.1rem}
+.feito .feito-t svg{flex:none;width:24px;height:24px;padding:3px;border-radius:7px;background:var(--tag);color:var(--tag-ink)}
+.feito .bkrow{margin:8px 0 6px}
+.feito .dnote{margin:0}
 .startrow .aviso-aberto{flex:1 1 100%;color:var(--ink);font-weight:600;background:var(--soft);border-left:4px solid var(--tag);border-radius:8px;padding:10px 12px}
 
 .btn{min-height:46px;padding:0 18px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-weight:700;cursor:pointer}
@@ -728,6 +734,7 @@ details.how .lbl{font-weight:700}
     if (state.hist.length > MAX_HIST) state.hist = state.hist.slice(-MAX_HIST);
   }
   function addEntry(e){
+    state.hist = state.hist.filter(h => h.id !== e.id); // treino reaberto: substitui o que foi salvo antes
     state.hist.push(e);
     state.hist.sort((a, b) => a.start - b.start);
     compact();
@@ -739,7 +746,7 @@ details.how .lbl{font-weight:700}
     if (mudou) saveLocal();
     return txt;
   }
-  function entryMeta(h){ return h.manual ? (h.fonte ? 'do app da ' + h.fonte : 'marcado à mão') : Math.max(1, Math.round((h.end - h.start) / 60000)) + ' min, ' + seriesOf(h) + ' séries'; }
+  function entryMeta(h){ const n = seriesOf(h); return h.manual ? (h.fonte ? 'do app da ' + h.fonte : 'marcado à mão') : Math.max(1, Math.round((h.end - h.start) / 60000)) + ' min, ' + n + (n === 1 ? ' série' : ' séries'); }
   const nomeTreino = h => { const w = treinoDe(h.ficha || 1, h.wid); return w ? 'Treino ' + h.wid + ' · ' + w.nome : (h.rot || 'Outro treino'); };
   function setsList(h){
     const w = treinoDe(h.ficha || 1, h.wid);
@@ -757,6 +764,7 @@ details.how .lbl{font-weight:700}
     if (wid !== 'X' && !WB[wid]) return;
     const hoje = ymd(new Date());
     if (calSel > hoje) return;
+    if (wid !== 'X' && state.hist.some(h => h.wid === wid && ymd(new Date(h.start)) === calSel)) { say('O Treino ' + wid + ' já está registrado nesse dia.'); return; }
     const start = calSel === hoje ? Date.now() : parseKey(calSel).setHours(7, 0, 0, 0);
     addEntry({ id:'m' + start.toString(36) + Math.random().toString(36).slice(2, 6), wid, ficha:fichaDoDia(calSel), start, end:start, sets:{}, manual:true });
     regOpen = false;
@@ -829,7 +837,9 @@ details.how .lbl{font-weight:700}
     if (regOpen) {
       const fichaDia = fichaDoDia(calSel);
       html += '<div class="regpick"><p>Qual treino você fez' + (calSel === hoje ? ' hoje' : ' nesse dia') + '?</p><div class="regbtns">' +
-        ORDEM.map(x => '<button type="button" class="regb' + (x === nx ? ' rec' : '') + '" data-reg="' + x + '"><i class="chip">' + x + '</i>' + esc(treinoDe(fichaDia, x).nome) + (x === nx ? '<small>próximo</small>' : '') + '</button>').join('') +
+        ORDEM.map(x => { const ja = es.some(h => h.wid === x);
+          return '<button type="button" class="regb' + (x === nx && !ja ? ' rec' : '') + '" data-reg="' + x + '"' + (ja ? ' disabled' : '') + '><i class="chip">' + x + '</i>' + esc(treinoDe(fichaDia, x).nome) +
+            (ja ? '<small>já feito</small>' : x === nx ? '<small>próximo</small>' : '') + '</button>'; }).join('') +
         '<button type="button" class="regb" data-reg="X"><i class="chip">' + CHECK + '</i>Outro treino</button></div>' +
         '<p class="dnote">Outro serve para cardio ou treino fora da ordem: conta no calendário, mas não muda o próximo treino.</p>' +
         '<button type="button" class="btn quiet" data-reg-cancel>Cancelar</button></div>';
@@ -1009,11 +1019,43 @@ details.how .lbl{font-weight:700}
     return '<p class="aviso-treino">' + t + '</p>' +
       '<p class="seguranca">Pare o exercício se aparecer dor que desce pela perna, formigamento, dormência ou perda de força, e procure avaliação. Se o joelho doer mais no dia seguinte, inchar ou travar, diminua amplitude ou carga antes de subir.</p>';
   }
+  // Treino desta letra salvo hoje (o último), quando não há treino em andamento.
+  // A aba fica concluída e os campos travam, para o mesmo treino não ser salvo duas vezes.
+  function feitoHoje(wid){
+    if (state.cur) return null;
+    const k = ymd(new Date());
+    for (let i = state.hist.length - 1; i >= 0; i--) { const h = state.hist[i]; if (h.wid === wid && ymd(new Date(h.start)) === k) return h; }
+    return null;
+  }
+  const travado = w => !!(state.cur ? state.cur.wid !== w.id : feitoHoje(w.id));
+  function concluidoHTML(h){
+    const nx = proximo();
+    let html = '<div class="feito"><p class="feito-t">' + CHECK + '<b>Treino ' + h.wid + (h.manual ? ' marcado como feito hoje' : ' concluído hoje') + '</b></p>';
+    if (!(lastSummary && lastSummary.wid === h.wid)) html += '<p>' + esc(h.manual ? 'Marcado no calendário, sem as séries.' : cap(entryMeta(h)) + '.') + '</p>';
+    html += '<div class="bkrow">' + (nx !== h.wid ? '<button type="button" class="btn primary" data-go="' + nx + '">Ir para o Treino ' + nx + '</button>' : '') +
+      (h.manual ? '<button type="button" class="btn quiet" data-desfazer="' + esc(h.id) + '">Desfazer a marcação</button>'
+        : '<button type="button" class="btn quiet" data-reabrir="' + esc(h.id) + '">Reabrir o treino</button>') + '</div>' +
+      '<p class="dnote">' + (h.manual ? 'Para fazer este treino com as séries, desfaça a marcação.'
+        : 'Os campos ficam travados para o treino não ser salvo duas vezes. Finalizou sem querer? Reabra e continue de onde parou.') + '</p></div>';
+    return html;
+  }
+  // Treino finalizado sem querer: volta a ficar em andamento, com as séries marcadas.
+  // O salvo continua no histórico até finalizar de novo (aí é substituído); descartar não apaga ele.
+  function reabrir(id){
+    const h = state.hist.find(x => x.id === id && !x.manual);
+    if (!h || state.cur) return;
+    state.cur = { wid:h.wid, ficha:h.ficha || 1, start:h.start, sets:JSON.parse(JSON.stringify(h.sets || {})), warm:{ '0':true, '1':true, '2':true } };
+    sel = h.wid;
+    abertos.clear(); fechados.clear(); seriesAbertas.clear(); lastSummary = null;
+    commit(); wake(true); renderAll();
+    say('Treino ' + h.wid + ' reaberto.');
+  }
   function renderWorkout(){
     const w = treinoTela(sel);
     const c = state.cur;
     const ativo = c && c.wid === w.id;
     const outro = c && c.wid !== w.id;
+    const feito = feitoHoje(w.id), lock = travado(w);
     const nova = w.f === ATUAL;
     let html = '<div class="whead"><div class="letter" aria-hidden="true">' + w.id + '</div><div><h2>' + esc(w.nome) + '</h2><p>Uns ' + w.min + ' min: ' + esc(w.foco) + '.</p></div></div>';
     html += '<div class="startrow">';
@@ -1030,6 +1072,8 @@ details.how .lbl{font-weight:700}
       } else if (nova) html += '<button type="button" class="minbtn" data-curta="ligar">Versão curta</button>';
     } else if (outro) {
       html += '<p>O Treino ' + c.wid + ' está em andamento. Termine ou descarte ele para começar este.</p><button type="button" class="btn" data-go="' + c.wid + '">Voltar para o Treino ' + c.wid + '</button>';
+    } else if (feito) {
+      html += concluidoHTML(feito);
     } else {
       html += '<button type="button" class="btn primary" data-act="start">Começar o Treino ' + w.id + '</button>' +
         (nova ? '<button type="button" class="btn" data-curta="ligar">Versão curta</button>' : '');
@@ -1038,8 +1082,8 @@ details.how .lbl{font-weight:700}
     if (nova) html += avisosHTML(w);
     if (lastSummary && lastSummary.wid === w.id && !c) html += lastSummary.html;
     html += '<div class="listbar"><button type="button" class="minbtn" data-todos="fechar">Minimizar todos</button><button type="button" class="minbtn" data-todos="abrir">Abrir todos</button></div>';
-    html += warmHTML(w, outro);
-    html += '<ol class="exlist">' + exibidos(w).map((e, i) => exHTML(e, i, outro)).join('') + '</ol>';
+    html += warmHTML(w, lock);
+    html += '<ol class="exlist">' + exibidos(w).map((e, i) => exHTML(e, i, lock)).join('') + '</ol>';
     if (ativo) {
       html += '<div class="finish"><button type="button" class="btn primary" data-act="finish">Finalizar treino</button><button type="button" class="btn quiet" data-act="discard">Descartar</button></div>';
     }
@@ -1290,7 +1334,7 @@ details.how .lbl{font-weight:700}
   // ---------------- cards minimizados ----------------
   // Redesenha só um card (exercício ou aquecimento), sem mexer no resto da tela.
   function redesenhar(id){
-    const w = treinoTela(sel), outro = !!(state.cur && state.cur.wid !== w.id);
+    const w = treinoTela(sel), outro = travado(w);
     const card = id === 'warm' ? document.querySelector('#workout .card.warm') : $('ex-' + id);
     if (!card || (id !== 'warm' && !w.porEx[id])) return null;
     const tmp = document.createElement('div');
@@ -1372,6 +1416,10 @@ details.how .lbl{font-weight:700}
     if (r && rest) { if (r.dataset.rest === 'skip') { rest = null; } else { rest.end += 30000; rest.total += 30; } updateDock(); return; }
   });
   $('workout').addEventListener('click', ev => {
+    const ra = ev.target.closest('[data-reabrir]');
+    if (ra) { arm(ra, 'Toque de novo para reabrir', () => reabrir(ra.dataset.reabrir)); return; }
+    const df = ev.target.closest('[data-desfazer]');
+    if (df) { arm(df, 'Toque de novo para desfazer', () => apagar(df.dataset.desfazer)); return; }
     const ab = ev.target.closest('[data-abrir]');
     if (ab) { abrir(ab.dataset.abrir); const c = redesenhar(ab.dataset.abrir); if (c) { const f = c.querySelector('.minbtn'); if (f) f.focus({ preventScroll:true }); } return; }
     const fe = ev.target.closest('[data-fechar]');
