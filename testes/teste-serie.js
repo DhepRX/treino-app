@@ -2,6 +2,7 @@ const assert = require('node:assert/strict');
 // Série marcada vira uma linha fina.
 require('fs').mkdirSync(__dirname + '/prints', { recursive: true });
 const { chromium, devices } = require('playwright');
+const { paraOntem } = require('./ajuda');
 (async () => {
   const b = await chromium.launch();
   const p = await (await b.newContext({ ...devices['iPhone 13'], serviceWorkers: 'block', colorScheme: 'dark', timezoneId: 'America/Sao_Paulo' })).newPage();
@@ -53,6 +54,7 @@ const { chromium, devices } = require('playwright');
 
   // Prancha pelo cronômetro (fica no Treino D).
   await p.click('#workout > .finish [data-act="finish"]'); await p.click('#workout > .finish [data-act="finish"]');
+  await paraOntem(p); // um treino por dia
   await p.click('[data-tab="D"]'); await p.click('[data-act="start"]');
   await p.click(row('d6', 0) + ' [data-hold]'); await p.waitForTimeout(1100); await p.click(row('d6', 0) + ' [data-hold]');
   console.log('6. prancha pelo cronômetro -> linha:', await mini('d6', 0), '|', await p.textContent(row('d6', 0) + ' .setmini span'));

@@ -49,6 +49,7 @@ A ficha tira carga direta da coluna (sem afundo com carga, abdominal com carga n
 - **Adaptação:** até fazer A, B, C e D uma vez na ficha nova, todos os exercícios aparecem com 2 séries, terminando com umas 3 repetições sobrando.
 - **Esforço depois disso:** superiores com 1 a 2 repetições sobrando; pernas com 2 a 3. Não precisa ir até a falha. As cargas antigas de perna (160 kg no leg press, 90 kg na extensora) não são meta.
 - **Subir carga:** nos superiores, bateu o topo da faixa em todas as séries, sobe no próximo treino. Nas pernas, só depois de 2 treinos seguidos no topo.
+- **Um treino por dia:** depois de salvar, o treino fica concluído e os outros travam até o dia seguinte. Finalizou sem querer? "Reabrir o treino" volta com as séries marcadas.
 - **Versão curta** (dia cansado): só os 4 primeiros exercícios, com 2 séries. No B e no D dá para incluir o exercício de tronco.
 - **Segurança:** pare se aparecer dor que desce pela perna, formigamento, dormência ou perda de força, e procure avaliação. Se o joelho doer mais no dia seguinte, inchar ou travar, diminua amplitude ou carga.
 - **Viagem:** último treino de pernas (B ou D) até 30/10; os 2 últimos antes de viajar são leves; 04/11 é descanso; volta em 11/11.
@@ -84,7 +85,7 @@ Se o aparelho não conseguir salvar, aparece um aviso com **Salvar backup agora*
 ## 6. Atualizar o app
 
 1. Troque o `index.html` no repositório (Add file > Upload files, com o mesmo nome).
-2. No `sw.js`, troque o número de `VERSAO` (por exemplo, de `v19` para `v20`) e suba ele também.
+2. No `sw.js`, troque o número de `VERSAO` (por exemplo, de `v20` para `v21`) e suba ele também.
 3. No iPhone, feche o app (arraste para cima na troca de apps) e abra de novo. Com internet, a versão nova aparece na hora.
 
 Os treinos salvos no celular continuam.

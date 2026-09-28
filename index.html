@@ -760,11 +760,13 @@ details.how .lbl{font-weight:700}
     }
     return '<p class="dnote">' + (h.manual ? (h.fonte ? 'Veio do calendário da ' + h.fonte + ', sem as séries.' : 'Marcado sem as séries.') : 'Treino antigo: só o resumo fica guardado.') + '</p>';
   }
+  const diaOcupado = k => state.hist.some(h => ymd(new Date(h.start)) === k) || !!(state.cur && ymd(new Date(state.cur.start)) === k);
   function registrar(wid){
     if (wid !== 'X' && !WB[wid]) return;
     const hoje = ymd(new Date());
     if (calSel > hoje) return;
-    if (wid !== 'X' && state.hist.some(h => h.wid === wid && ymd(new Date(h.start)) === calSel)) { say('O Treino ' + wid + ' já está registrado nesse dia.'); return; }
+    // Um treino por dia: dia que já tem treino (ou com treino em andamento) não recebe outro.
+    if (diaOcupado(calSel)) { say('Esse dia já tem treino. Vale um treino por dia.'); return; }
     const start = calSel === hoje ? Date.now() : parseKey(calSel).setHours(7, 0, 0, 0);
     addEntry({ id:'m' + start.toString(36) + Math.random().toString(36).slice(2, 6), wid, ficha:fichaDoDia(calSel), start, end:start, sets:{}, manual:true });
     regOpen = false;
@@ -831,15 +833,15 @@ details.how .lbl{font-weight:700}
     } else html += '<p class="msum">Nenhum treino em ' + esc(mes) + '.</p>';
 
     const es = byDay[calSel] || [];
+    const ocupado = diaOcupado(calSel);
+    if (ocupado) regOpen = false;
     const titulo = calSel === hoje ? 'Hoje' : cap(parseKey(calSel).toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long' }));
     html += '<section class="dayd" aria-labelledby="ddTitle"><div class="ddhead"><h3 id="ddTitle">' + esc(titulo) + '</h3>' +
-      (calSel <= hoje ? '<button type="button" class="btn ghost" data-reg-open aria-expanded="' + regOpen + '">+ Registrar treino</button>' : '') + '</div>';
+      (calSel <= hoje && !ocupado ? '<button type="button" class="btn ghost" data-reg-open aria-expanded="' + regOpen + '">+ Registrar treino</button>' : '') + '</div>';
     if (regOpen) {
       const fichaDia = fichaDoDia(calSel);
       html += '<div class="regpick"><p>Qual treino você fez' + (calSel === hoje ? ' hoje' : ' nesse dia') + '?</p><div class="regbtns">' +
-        ORDEM.map(x => { const ja = es.some(h => h.wid === x);
-          return '<button type="button" class="regb' + (x === nx && !ja ? ' rec' : '') + '" data-reg="' + x + '"' + (ja ? ' disabled' : '') + '><i class="chip">' + x + '</i>' + esc(treinoDe(fichaDia, x).nome) +
-            (ja ? '<small>já feito</small>' : x === nx ? '<small>próximo</small>' : '') + '</button>'; }).join('') +
+        ORDEM.map(x => '<button type="button" class="regb' + (x === nx ? ' rec' : '') + '" data-reg="' + x + '"><i class="chip">' + x + '</i>' + esc(treinoDe(fichaDia, x).nome) + (x === nx ? '<small>próximo</small>' : '') + '</button>').join('') +
         '<button type="button" class="regb" data-reg="X"><i class="chip">' + CHECK + '</i>Outro treino</button></div>' +
         '<p class="dnote">Outro serve para cardio ou treino fora da ordem: conta no calendário, mas não muda o próximo treino.</p>' +
         '<button type="button" class="btn quiet" data-reg-cancel>Cancelar</button></div>';
@@ -853,6 +855,8 @@ details.how .lbl{font-weight:700}
         return '<li class="entry"><details><summary><i class="chip">' + (w ? h.wid : CHECK) + '</i><span class="et"><b>' + esc(nomeTreino(h)) + '</b><small>' + esc(cap(meta)) + '</small></span></summary>' +
           setsList(h) + '<button type="button" class="btn quiet" data-del="' + esc(h.id) + '">Apagar registro</button></details></li>';
       }).join('') + '</ul>';
+      // Dias de antes da regra podem ter ficado com dois treinos.
+      if (es.length > 1) html += '<p class="dnote">Esse dia tem ' + es.length + ' treinos, mas vale um por dia: apague o que sobrou.</p>';
     } else if (!vivo) html += '<p class="dayempty">Nenhum treino registrado nesta data.</p>';
     html += '</section>';
     $('vCal').innerHTML = html;
@@ -1019,15 +1023,22 @@ details.how .lbl{font-weight:700}
     return '<p class="aviso-treino">' + t + '</p>' +
       '<p class="seguranca">Pare o exercício se aparecer dor que desce pela perna, formigamento, dormência ou perda de força, e procure avaliação. Se o joelho doer mais no dia seguinte, inchar ou travar, diminua amplitude ou carga antes de subir.</p>';
   }
-  // Treino desta letra salvo hoje (o último), quando não há treino em andamento.
-  // A aba fica concluída e os campos travam, para o mesmo treino não ser salvo duas vezes.
-  function feitoHoje(wid){
+  // Um treino por dia. treinoHoje(): o treino salvo hoje (o último), quando não há treino em andamento.
+  // A aba dele fica concluída e as outras ficam travadas até amanhã.
+  function treinoHoje(){
     if (state.cur) return null;
-    const k = ymd(new Date());
-    for (let i = state.hist.length - 1; i >= 0; i--) { const h = state.hist[i]; if (h.wid === wid && ymd(new Date(h.start)) === k) return h; }
-    return null;
+    const ini = new Date(); ini.setHours(0, 0, 0, 0);
+    const h = state.hist[state.hist.length - 1];
+    return h && h.start >= ini.getTime() ? h : null;
   }
-  const travado = w => !!(state.cur ? state.cur.wid !== w.id : feitoHoje(w.id));
+  const travado = w => !!(state.cur ? state.cur.wid !== w.id : treinoHoje());
+  function jaTreinouHTML(h){
+    return '<div class="feito"><p class="feito-t">' + CHECK + '<b>Você já treinou hoje</b></p>' +
+      '<p>' + (WB[h.wid] ? 'Hoje foi o ' + esc(nomeTreino(h)) + '.' : 'Hoje já tem um treino registrado no calendário.') + ' Vale um treino por dia: este fica para o próximo dia.</p>' +
+      '<div class="bkrow">' + (WB[h.wid] ? '<button type="button" class="btn" data-go="' + h.wid + '">Ver o Treino ' + h.wid + '</button>' : '') +
+      (h.manual ? '<button type="button" class="btn quiet" data-desfazer="' + esc(h.id) + '">Desfazer a marcação</button>' : '') + '</div>' +
+      '<p class="dnote">Dá para ver os exercícios abaixo, mas os campos ficam travados até amanhã.</p></div>';
+  }
   function concluidoHTML(h){
     const nx = proximo();
     let html = '<div class="feito"><p class="feito-t">' + CHECK + '<b>Treino ' + h.wid + (h.manual ? ' marcado como feito hoje' : ' concluído hoje') + '</b></p>';
@@ -1055,7 +1066,7 @@ details.how .lbl{font-weight:700}
     const c = state.cur;
     const ativo = c && c.wid === w.id;
     const outro = c && c.wid !== w.id;
-    const feito = feitoHoje(w.id), lock = travado(w);
+    const hoje = treinoHoje(), lock = travado(w);
     const nova = w.f === ATUAL;
     let html = '<div class="whead"><div class="letter" aria-hidden="true">' + w.id + '</div><div><h2>' + esc(w.nome) + '</h2><p>Uns ' + w.min + ' min: ' + esc(w.foco) + '.</p></div></div>';
     html += '<div class="startrow">';
@@ -1072,8 +1083,10 @@ details.how .lbl{font-weight:700}
       } else if (nova) html += '<button type="button" class="minbtn" data-curta="ligar">Versão curta</button>';
     } else if (outro) {
       html += '<p>O Treino ' + c.wid + ' está em andamento. Termine ou descarte ele para começar este.</p><button type="button" class="btn" data-go="' + c.wid + '">Voltar para o Treino ' + c.wid + '</button>';
-    } else if (feito) {
-      html += concluidoHTML(feito);
+    } else if (hoje && hoje.wid === w.id) {
+      html += concluidoHTML(hoje);
+    } else if (hoje) {
+      html += jaTreinouHTML(hoje);
     } else {
       html += '<button type="button" class="btn primary" data-act="start">Começar o Treino ' + w.id + '</button>' +
         (nova ? '<button type="button" class="btn" data-curta="ligar">Versão curta</button>' : '');
