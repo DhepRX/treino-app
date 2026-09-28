@@ -6,7 +6,7 @@ Endereço: **https://dheprx.github.io/treino-app/**
 
 - `index.html`: o app
 - `sw.js`: guarda o app no celular para abrir sem internet
-- `manifest.webmanifest` e `icon-*.png`: nome e ícone na Tela de Início
+- `manifest.webmanifest`, `icon-*.png` e `icone.svg`: nome e ícone na Tela de Início
 - `.nojekyll`: faz o GitHub Pages publicar os arquivos como estão
 
 ## 1. Colocar no ar (uma vez só)
@@ -25,6 +25,14 @@ No celular, se algum botão não aparecer, toque em **aA** na barra do Safari e 
 1. Abra o endereço no Safari.
 2. Toque em ••• > Compartilhar > Adicionar à Tela de Início > Adicionar.
 3. Use sempre pelo ícone. O Safari e o ícone guardam os dados separados.
+
+**Trocar o ícone:** o iPhone só mostra um ícone novo quando você adiciona o app de novo. E apagar o app da Tela de Início apaga os treinos guardados nele. Então:
+
+1. Finalize ou descarte o treino em andamento.
+2. Toque em **Salvar backup** e guarde o arquivo no Arquivos.
+3. Apague o ícone antigo da Tela de Início.
+4. Adicione de novo pelo Safari (passo 2 acima).
+5. Abra pelo ícone novo e toque em **Restaurar backup**, escolhendo o arquivo.
 
 ## 3. A ficha (desde 28/09/2026)
 
@@ -76,7 +84,7 @@ Se o aparelho não conseguir salvar, aparece um aviso com **Salvar backup agora*
 ## 6. Atualizar o app
 
 1. Troque o `index.html` no repositório (Add file > Upload files, com o mesmo nome).
-2. No `sw.js`, troque o número de `VERSAO` (por exemplo, de `v14` para `v15`) e suba ele também.
+2. No `sw.js`, troque o número de `VERSAO` (por exemplo, de `v15` para `v16`) e suba ele também.
 3. No iPhone, feche o app (arraste para cima na troca de apps) e abra de novo. Com internet, a versão nova aparece na hora.
 
 Os treinos salvos no celular continuam.

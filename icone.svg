@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="f1" cx=".3" cy=".25" r=".95"><stop offset="0" stop-color="#2B2B2B"/><stop offset="1" stop-color="#070707"/></radialGradient>
+    <radialGradient id="g1" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FFB300" stop-opacity=".2"/><stop offset="1" stop-color="#FFC400" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#f1)"/>
+  <circle cx="256" cy="256" r="230" fill="url(#g1)"/>
+  <g transform="rotate(-32 256 256)">
+  <defs>
+    <linearGradient id="h1a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD84A"/><stop offset="1" stop-color="#F2B200"/></linearGradient>
+    <linearGradient id="h1b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E9B000"/><stop offset="1" stop-color="#B98A00"/></linearGradient>
+  </defs>
+  <rect x="140" y="239" width="232" height="34" rx="11" fill="url(#h1b)"/>
+  <g stroke="#141414" stroke-opacity=".45" stroke-width="4" stroke-linecap="round"><line x1="211" y1="245" x2="211" y2="267"/><line x1="229" y1="245" x2="229" y2="267"/><line x1="247" y1="245" x2="247" y2="267"/><line x1="265" y1="245" x2="265" y2="267"/><line x1="283" y1="245" x2="283" y2="267"/><line x1="301" y1="245" x2="301" y2="267"/></g>
+  <rect x="70" y="224" width="30" height="64" rx="9" fill="url(#h1a)" stroke="#141414" stroke-width="7"/><rect x="412" y="224" width="30" height="64" rx="9" fill="url(#h1a)" stroke="#141414" stroke-width="7"/>
+  <rect x="94" y="176" width="42" height="160" rx="13" fill="url(#h1a)" stroke="#141414" stroke-width="7"/><rect x="376" y="176" width="42" height="160" rx="13" fill="url(#h1a)" stroke="#141414" stroke-width="7"/>
+  <rect x="130" y="146" width="52" height="220" rx="16" fill="url(#h1a)" stroke="#141414" stroke-width="7"/><rect x="330" y="146" width="52" height="220" rx="16" fill="url(#h1a)" stroke="#141414" stroke-width="7"/></g></svg>
