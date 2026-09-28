@@ -293,6 +293,10 @@ details.how .lbl{font-weight:700}
 <body>
 <header class="band"><div class="band-in"><h1>Treino<span>.</span></h1><p class="today" id="today"></p></div></header>
 <main class="wrap">
+  <section id="saveWarning" class="aviso-aberto" role="alert" hidden>
+    <p>Não foi possível salvar neste aparelho. Os dados estão nesta tela; salve um backup antes de fechar.</p>
+    <button type="button" class="btn" id="saveRescue">Salvar backup agora</button>
+  </section>
   <nav class="views" id="views" aria-label="Telas">
     <button type="button" data-view="treino" aria-pressed="true">Treino</button>
     <button type="button" data-view="semanas" aria-pressed="false">Sequência</button>
@@ -541,7 +545,7 @@ details.how .lbl{font-weight:700}
   const mmssS = s => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
   const descansoTxt = s => s >= 60 ? (s % 60 ? (s / 60).toString().replace('.', ',') + ' min' : (s / 60) + ' min') : s + ' s';
 
-  let state = { v:1, cur:null, hist:[], upd:0 };
+  let state = { v:1, cur:null, hist:[], upd:0 }, falhaLocal = false;
   // Treino aberto há mais de 5 h: você provavelmente esqueceu de finalizar.
   const ESQUECIDO = 5 * 3600000;
   const esquecido = c => !!(c && Date.now() - c.start > ESQUECIDO);
@@ -587,7 +591,7 @@ details.how .lbl{font-weight:700}
     const raw = localStorage.getItem(LS);
     if (raw) state = sanitize(JSON.parse(raw));
     else { state = sanitize(SEED); localStorage.setItem(LS, JSON.stringify(state)); }
-  } catch (e) { state = sanitize(SEED); }
+  } catch (e) { state = sanitize(SEED); falhaLocal = true; }
 
   // ---------------- histórico e sugestão ----------------
   // Séries feitas deste exercício nos últimos treinos em que ele apareceu (o mais recente primeiro).
@@ -1531,25 +1535,34 @@ details.how .lbl{font-weight:700}
 
   // ---------------- salvar: aparelho + conta ----------------
   let ref = null, writing = false, dirty = false, timer = null;
-  function saveLocal(){ try { localStorage.setItem(LS, JSON.stringify(state)); } catch (e) {} }
+  function statusSalvo(texto = 'Treinos salvos neste aparelho.'){
+    $('saveWarning').hidden = !falhaLocal;
+    $('sync').textContent = falhaLocal ? 'Não foi possível salvar neste aparelho. Salve um backup antes de fechar.' : texto;
+  }
+  function saveLocal(){
+    try { localStorage.setItem(LS, JSON.stringify(state)); falhaLocal = false; }
+    catch (e) { falhaLocal = true; }
+    statusSalvo();
+    return !falhaLocal;
+  }
   function commit(){ state.upd = Date.now(); saveLocal(); schedule(); }
   function schedule(){ if (!ref) return; clearTimeout(timer); timer = setTimeout(flush, 800); }
   async function flush(){
     if (!ref) return;
     if (writing) { dirty = true; return; }
     writing = true; dirty = false;
-    try { await ref.set(JSON.parse(fitForDb())); $('sync').textContent = 'Treinos salvos. Abrem iguais no celular e no computador.'; }
+    try { await ref.set(JSON.parse(fitForDb())); statusSalvo('Treinos salvos. Abrem iguais no celular e no computador.'); }
     catch (e) {
       const code = e && e.code;
       if (code === 'unavailable' || code === 'resource_exhausted') setTimeout(schedule, 1500 + Math.random() * 1500);
-      else { ref = null; $('sync').textContent = 'Treinos salvos neste aparelho.'; }
+      else { ref = null; statusSalvo(); }
     } finally { writing = false; if (dirty && ref) flush(); }
   }
   async function connect(){
     try {
-      if (!window.claude || typeof window.claude.use !== 'function') { $('sync').textContent = 'Treinos salvos neste aparelho.'; return; }
+      if (!window.claude || typeof window.claude.use !== 'function') { statusSalvo(); return; }
       const db = await window.claude.use('db');
-      if (!db) { $('sync').textContent = 'Treinos salvos neste aparelho.'; return; }
+      if (!db) { statusSalvo(); return; }
       const r = db.doc('treino/estado');
       const snap = await r.get();
       ref = r;
@@ -1558,7 +1571,7 @@ details.how .lbl{font-weight:700}
         if (d.upd > state.upd) { state = d; saveLocal(); if (state.cur) sel = state.cur.wid; renderAll(); }
         else if (d.upd < state.upd) schedule();
       } else if (state.upd > 0) schedule();
-      $('sync').textContent = 'Treinos salvos. Abrem iguais no celular e no computador.';
+      statusSalvo('Treinos salvos. Abrem iguais no celular e no computador.');
       r.onSnapshot(s => {
         if (!s.exists) return;
         const d = sanitize(s.data());
@@ -1568,7 +1581,7 @@ details.how .lbl{font-weight:700}
           if (!ativo) renderAll();
         }
       }, () => {});
-    } catch (e) { ref = null; $('sync').textContent = 'Treinos salvos neste aparelho.'; }
+    } catch (e) { ref = null; statusSalvo(); }
   }
 
 
@@ -1636,6 +1649,7 @@ details.how .lbl{font-weight:700}
     catch (e) { bk('Esse arquivo não é um backup do app de treino.'); }
   }
   $('bkSave').addEventListener('click', salvarBackup);
+  $('saveRescue').addEventListener('click', salvarBackup);
   $('bkOpen').addEventListener('click', () => $('bkFile').click());
   $('bkFile').addEventListener('change', () => {
     const f = $('bkFile').files && $('bkFile').files[0];
@@ -1649,7 +1663,7 @@ details.how .lbl{font-weight:700}
   // Sem internet, tenta de novo quando o app volta para a tela ou o sinal volta.
   const LS_NV = 'treino-renan-nuvem';
   const ARQ_NV = 'backup.json';
-  let nv = {}, enviando = false;
+  let nv = {}, enviando = false, configurando = false;
   try { nv = JSON.parse(localStorage.getItem(LS_NV)) || {}; } catch (e) {}
   function gravarNv(){ try { localStorage.setItem(LS_NV, JSON.stringify(nv)); } catch (e) {} }
   const nvLigado = () => !!(nv.repo && nv.token);
@@ -1693,7 +1707,7 @@ details.how .lbl{font-weight:700}
     setTimeout(nuvemEnviar, 1500);
   }
   async function nuvemEnviar(){
-    if (!nvLigado() || !nv.pendente || enviando) return;
+    if (!nvLigado() || !nv.pendente || enviando || configurando) return;
     enviando = true;
     nv.pendente = false; gravarNv();
     try {
@@ -1722,19 +1736,44 @@ details.how .lbl{font-weight:700}
     }
   }
   async function nuvemLigar(){
+    if (enviando || $('nvLigar').disabled) return;
     const repo = $('nvRepo').value.trim().replace(/^https?:\/\/github\.com\//, '').replace(/\/+$/, '');
     const token = $('nvToken').value.trim() || nv.token || '';
     if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) return nvMsg('Escreva o repositório assim: usuario/nome (ex.: DhepRX/treino-dados).');
     if (!token) return nvMsg('Cole a chave de acesso.');
     const antes = nv;
+    $('nvLigar').disabled = true; configurando = true;
     nv = Object.assign({}, nv, { repo, token });
     nvMsg('Testando…');
+    let existente = null;
     try {
       const r = await gh('');
       if (!r.ok) { nv = antes; return nvMsg(r.status === 401 ? 'Essa chave não funcionou. Confira se copiou ela inteira.' : erroGh(r.status)); }
       if (!(await r.json()).private) { nv = antes; return nvMsg('Esse repositório é público: qualquer um veria seus treinos. Use um privado.'); }
-    } catch (e) { nv = antes; return nvMsg('Sem internet agora. Tente de novo com sinal.'); }
+      // Recupera o histórico antes de habilitar envios num aparelho novo.
+      // Configurar nunca substitui um backup já existente.
+      const backup = await gh('/contents/' + ARQ_NV, { headers:{ Accept:'application/vnd.github.raw+json' } });
+      if (backup.ok) {
+        const dados = await backup.json();
+        if (!dados || dados.v !== 1 || !Array.isArray(dados.hist)) throw new Error('backup-invalido');
+        existente = sanitize(dados);
+      } else if (backup.status !== 404) {
+        nv = antes; return nvMsg(erroGh(backup.status));
+      }
+    } catch (e) {
+      nv = antes;
+      return nvMsg(e.message === 'backup-invalido' || e instanceof SyntaxError ? 'O backup do GitHub é inválido. Ele foi preservado; confira o arquivo antes de ligar.' : 'Sem internet agora. Tente de novo com sinal.');
+    } finally { $('nvLigar').disabled = false; configurando = false; }
     $('nvToken').value = '';
+    if (existente) {
+      const ids = new Set(state.hist.map(h => h.id));
+      for (const h of existente.hist) if (!ids.has(h.id)) { state.hist.push(h); ids.add(h.id); }
+      state.hist.sort((a, b) => a.start - b.start);
+      compact(); commit(); renderAll();
+      nv.pendente = false; nv.erro = ''; nv.ultimo = 0;
+      gravarNv(); renderNuvem();
+      return nvMsg('Backup ligado. Histórico recuperado do GitHub; o arquivo foi preservado. O próximo treino finalizado enviará o histórico reunido.');
+    }
     nv.pendente = true; nv.erro = '';
     gravarNv();
     await nuvemEnviar();
