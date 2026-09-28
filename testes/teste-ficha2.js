@@ -35,6 +35,10 @@ const D26 = { id: 'd26', wid: 'D', start: H(17), end: H(18), sets: {
   console.log('   séries por exercício (A):', await cards());
   console.log('   segurança:', (await p.textContent('.seguranca')).slice(0, 60) + '…');
   console.log('   aquecimento:', (await p.$$eval('.card.warm li span', s => s.map(x => x.textContent))).join(' / '));
+  // Aquecimento diz quais exercícios ganham 1 série leve, e o card de cada um avisa.
+  assert.equal((await p.$$eval('.card.warm li span', s => s.map(x => x.textContent)))[2], 'Uma série leve antes de cada movimento bem diferente: 2 (puxada frontal) e 5 (elevação lateral com halteres).');
+  assert.deepEqual(await p.$$eval('#workout .card.ex', cs => cs.filter(c => c.querySelector('.aquece')).map(c => c.id.slice(3) + ':' + c.querySelector('.aquece').textContent.slice(7, 8))), ['a1:2', 'b1:1', 'a5:1']);
+  console.log('   avisos de aquecimento nos cards: a1 (2 a 3 leves), b1 e a5 (1 leve)');
   await p.screenshot({ path: __dirname + '/prints/ficha2-A.png' });
 
   // 3. Sugestões: extensora 90 kg (C 25/09) e supino inclinado 18 kg (D 26/09).

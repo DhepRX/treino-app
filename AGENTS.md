@@ -21,7 +21,7 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
 ## Regras que não podem quebrar
 
 1. **Caminhos relativos** (`./sw.js`, `icon-192.png`). O site roda na subpasta `/treino-app/`.
-2. **Ao publicar qualquer mudança, troque `VERSAO` em `sw.js`** (hoje `treino-renan-v15`) para o celular pegar a versão nova.
+2. **Ao publicar qualquer mudança, troque `VERSAO` em `sw.js`** (hoje `treino-renan-v16`) para o celular pegar a versão nova.
 3. **Não mude o formato dos dados salvos sem migração.** Os treinos ficam só no celular (`localStorage`); perder o formato é perder o histórico.
 4. **Não renomeie os `id` dos exercícios** (`a1`…`d6`, `e1`…`e4`): eles são as chaves do histórico e da sugestão de carga. Para trocar um exercício, mude `nome`, `maq`, `como` etc. e mantenha o `id`. Movimento novo ganha id novo (próximo: `e5`).
 5. Sem bibliotecas externas além da fonte Archivo do Google Fonts. Sem framework nem dependências npm no app. Playwright é permitido somente para testes; veja `testes/README.md`.
@@ -56,6 +56,7 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
 - **Séries que valem hoje:** `S(e)`. Na **adaptação** (`adaptacao()` e `faltamAdaptacao()`: até fazer A, B, C e D uma vez na ficha 2) e na **versão curta** (`curtaAtiva()`, `exibidos()`), no máximo 2.
 - **Sugestão de carga:** `suggest()` sobe `inc` quando todas as séries feitas (pelo menos 2) bateram o topo da faixa. Com `pernas`, só depois de 2 treinos seguidos no topo, com a mesma carga (`sessoes()`, `bateuTopo()`).
 - **Avisos da ficha 2:** `avisosHTML()` (adaptação ou esforço, cargas antigas de perna, segurança).
+- **Aquecimento por exercício:** cada treino de `W2` tem `aquece` (ids que ganham 1 série leve antes, porque o movimento muda bastante). `warmHTML()` lista esses exercícios com número e nome; `aqueceHTML()` põe o aviso no card (o 1º exercício: 2 a 3 séries leves). Essas séries não contam.
 - **Séries do treino em andamento:** `curSet()` só devolve séries quando o treino em andamento é o da tela (os ids se repetem entre os treinos da ficha 2).
 - **Peso e repetições digitados uma vez:** `segue()` copia o valor para as séries seguintes; `anterior()` repete o valor da série anterior ao marcar.
 - **Séries e cards minimizados:** `setRowHTML()` desenha uma série (feita vira linha "18 kg × 8 · editar"); `trocarSerie()` redesenha só ela.
