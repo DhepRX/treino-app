@@ -55,12 +55,30 @@ const OUT = __dirname + '/prints';
   console.log('resumo:', await page.textContent('.summary h3'));
   console.log('backup após treino (hoje, sem atraso):', await bkInfo());
 
+  // Antes do sinal fraco: o pedido lento de 15 s seguraria o próximo pedido ao mesmo endereço.
+  // Site que mudou de endereço (redirecionamento): o app segue para o endereço novo, em vez de ficar na cópia guardada.
+  await fetch(BASE + '/__mudou');
+  await page.goto(URL_APP, { waitUntil: 'load' });
+  assert.equal(new URL(page.url()).pathname, '/treino-app/README.md', 'Redirecionamento tem que chegar ao navegador');
+  console.log('redirecionamento: foi para', new URL(page.url()).pathname);
+  await fetch(BASE + '/__normal');
+
   // Sinal fraco: a página demora 15 s na internet, o app tem que abrir pela cópia em ~3 s.
   await fetch(BASE + '/__lento');
   let t0 = Date.now();
   await page.goto(URL_APP, { waitUntil: 'domcontentloaded', timeout: 20000 });
   assert.ok(Date.now()-t0 < 7000, 'Cache deve evitar a espera de 15 segundos');
   console.log('sinal fraco: abriu em', ((Date.now() - t0) / 1000).toFixed(1), 's | título:', await page.title());
+  await fetch(BASE + '/__normal');
+
+  // Outra página publicada na pasta (o README) não pode virar a cópia guardada do app.
+  await page.goto(URL_APP + 'README.md', { waitUntil: 'load' });
+  await fetch(BASE + '/__lento');
+  t0 = Date.now();
+  await page.goto(URL_APP, { waitUntil: 'domcontentloaded', timeout: 20000 });
+  assert.equal(await page.title(), 'Treino', 'Abrir o README não pode trocar a cópia guardada do app');
+  assert.ok(Date.now() - t0 < 7000);
+  console.log('depois de abrir o README, com sinal fraco: abriu o app em', ((Date.now() - t0) / 1000).toFixed(1), 's');
   await fetch(BASE + '/__normal');
 
   // Sem internet.
@@ -85,11 +103,12 @@ const OUT = __dirname + '/prints';
   assert.equal(await hojeCal(), '2026-09-28');
   console.log('depois: hoje no calendário =', await hojeCal(), '| selecionado =', await p2.evaluate(() => document.querySelector('.cd.sel') && document.querySelector('.cd.sel').dataset.cd), '| header:', await p2.textContent('#today'));
 
-  // Tema escuro, para ver o destaque do backup.
+  // iPhone no modo escuro: o app continua claro.
   const p3 = await browser.newPage({ ...devices['iPhone 13'], colorScheme: 'dark', timezoneId: 'America/Sao_Paulo' });
   await p3.goto(URL_APP, { waitUntil: 'load' });
+  assert.equal(await p3.evaluate(() => getComputedStyle(document.body).backgroundColor), 'rgb(242, 242, 242)');
   await p3.locator('#backup').scrollIntoViewIfNeeded();
-  await p3.screenshot({ path: OUT + '/backup-escuro.png' });
+  await p3.screenshot({ path: OUT + '/backup-iphone-escuro.png' });
 
   assert.deepEqual(erros, [], 'Não deve haver erros de JavaScript inesperados');
   console.log('erros: nenhum');

@@ -1,12 +1,15 @@
-// Serve o app em /treino-app/, como o GitHub Pages. /__lento liga a demora de 15 s na página, /__normal desliga.
+// Serve o app em /treino-app/, como o GitHub Pages. /__lento liga a demora de 15 s na página,
+// /__mudou faz a página redirecionar (site que mudou de endereço) e /__normal desliga os dois.
 const http = require('http'), fs = require('fs'), path = require('path');
 const RAIZ = path.resolve(__dirname, '..');
 const TIPOS = { '.html':'text/html; charset=utf-8', '.js':'application/javascript', '.webmanifest':'application/manifest+json', '.png':'image/png', '.md':'text/markdown' };
-let lento = false;
+let lento = false, mudou = false;
 http.createServer((req, res) => {
   const u = new URL(req.url, 'http://x');
   if (u.pathname === '/__lento') { lento = true; return res.end('lento'); }
-  if (u.pathname === '/__normal') { lento = false; return res.end('normal'); }
+  if (u.pathname === '/__mudou') { mudou = true; return res.end('mudou'); }
+  if (u.pathname === '/__normal') { lento = false; mudou = false; return res.end('normal'); }
+  if (mudou && u.pathname === '/treino-app/') { res.statusCode = 302; res.setHeader('Cache-Control', 'no-store'); res.setHeader('Location', '/treino-app/README.md'); return res.end(); }
   if (!u.pathname.startsWith('/treino-app/')) { res.statusCode = 404; return res.end(); }
   let rel = u.pathname.slice('/treino-app/'.length) || 'index.html';
   const arq = path.join(RAIZ, rel);

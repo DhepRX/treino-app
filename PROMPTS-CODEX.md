@@ -89,7 +89,7 @@ Não sugira colocar token no código nem mandar dados para outro serviço. Use a
 Revise a acessibilidade para VoiceOver e para quem enxerga pouco:
 - rótulos (aria-label) dos botões de série, do ✓, de "editar", "Abrir", "Minimizar" e "Minimizar todos";
 - anúncios (aria-live) do descanso e das séries;
-- contraste no tema claro e no escuro;
+- contraste (o app usa sempre o tema claro);
 - para onde vai o foco depois de minimizar ou abrir um card;
 - tamanho das áreas de toque.
 Use a tabela do Prompt 0.
