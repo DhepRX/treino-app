@@ -116,6 +116,25 @@ const URL_APP = 'http://127.0.0.1:8766/treino-app/';
   assert.deepEqual(icones.vistos, icones.esperados);
   console.log('7c. ícones:', icones.vistos.join(' '));
 
+  // 7d. Remada na máquina (e1) trocada pela remada com halteres no banco inclinado (e5), no A e no C.
+  //     Treino antigo com a e1 continua no histórico, com o nome dela.
+  await p.evaluate(() => { const s = JSON.parse(localStorage.getItem('treino-renan-v1')); s.hist.push({ id:'e1velho', wid:'A', ficha:2, start:Date.UTC(2026,8,19,12), end:Date.UTC(2026,8,19,13), sets:{ e1:[{ kg:40, reps:10, done:true }] } }); s.hist.sort((a, b) => a.start - b.start); localStorage.setItem('treino-renan-v1', JSON.stringify(s)); });
+  await p.reload();
+  assert.deepEqual((await salvo()).hist.find(h => h.id === 'e1velho').sets.e1[0], { kg:40, reps:10, done:true });
+  for (const t of ['A', 'C']) {
+    await p.click(`[data-tab="${t}"]`);
+    assert.equal(await p.textContent('#ex-e5 h3'), 'Remada com halteres no banco inclinado');
+    assert.equal(await p.textContent('#ex-e5 .num'), '3');
+    assert.equal(await p.locator('#ex-e1').count(), 0);
+  }
+  await p.click('#hist [data-gocal]');
+  for (let k = 0; k < 36 && !(await p.locator('[data-cd="2026-09-19"]').count()); k++) await p.click('[data-cm="-1"]');
+  await p.click('[data-cd="2026-09-19"]');
+  await p.evaluate(() => document.querySelectorAll('#vCal .entry details').forEach(d => { d.open = true; }));
+  assert.match(await p.textContent('#vCal'), /Remada em máquina com apoio no peito: 40 kg, 10 repetições/);
+  console.log('7d. remada nova no A e no C (card 3); treino antigo com a remada na máquina continua no histórico.');
+  await p.click('[data-view="treino"]');
+
   // 8. Tema claro mesmo com o iPhone no modo escuro.
   const escuro = await (await b.newContext({ ...devices['iPhone 13'], serviceWorkers: 'block', colorScheme: 'dark' })).newPage();
   await escuro.goto(URL_APP);

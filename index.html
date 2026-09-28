@@ -449,9 +449,13 @@ details.how .lbl{font-weight:700}
     a1: muda('a1', { r:[8,12], rest:150 }),
     b1: muda('b1', { nome:'Puxada frontal, pegada confortável', maq:'puxador alto (pulley) com barra longa', yt:'puxada frontal pulley como fazer',
       como:['Pegada na largura que ficar confortável nos ombros, coxas travadas no apoio.','Puxe a barra até a parte de cima do peito, levando os cotovelos para baixo e para trás.','Suba devagar até esticar os braços.'] }),
+    // e1 saiu dos treinos (trocada pela e5, remada com halteres no banco inclinado); fica aqui para o histórico.
     e1: { id:'e1', vid:'VvT8ZFAo21Y', nome:'Remada em máquina com apoio no peito', maq:'remada articulada (máquina) com apoio para o peito', r:[8,12], rest:120, kg:null, inc:5, yt:'remada articulada apoio no peito máquina como fazer',
       como:['Ajuste o banco para o peito ficar na almofada e as mãos alcançarem as pegadas com os braços esticados.','Puxe levando os cotovelos para trás e aproximando as escápulas, sem tirar o peito do apoio.','Volte devagar até esticar os braços.'],
       erros:'tirar o peito do apoio para ajudar, dar tranco e subir os ombros.', troca:'remada baixa com triângulo, se você já faz bem e o professor conferir, ou remada articulada sentada.' },
+    e5: { id:'e5', vid:'RJOIor7FPno', nome:'Remada com halteres no banco inclinado', maq:'banco inclinado entre 30 e 45° e dois halteres', r:[8,12], rest:120, kg:null, inc:2, yt:'remada com halteres no banco inclinado peito apoiado como fazer',
+      como:['Incline o banco entre 30 e 45° e deite de barriga para baixo, com o peito apoiado e os pés firmes no chão.','Com um halter em cada mão e os braços esticados, puxe levando os cotovelos para trás, sem encolher os ombros.','Desça devagar até esticar os braços, sem tirar o peito do banco.','No app, anote o peso de um halter.'],
+      erros:'tirar o peito do banco para ajudar, dar tranco e encolher os ombros.', troca:'remada em máquina com apoio no peito, se tiver livre, ou remada baixa com triângulo, se o professor conferir.' },
     a2: muda('a2', { r:[8,12], rest:120 }),
     a5: muda('a5', { vid:'4cFpu_wwmx0', nome:'Elevação lateral com halteres, sentado', maq:'banco com encosto e halteres', r:[12,15], rest:90, yt:'elevação lateral sentado com halteres como fazer',
       como:['Sente com as costas apoiadas e os halteres ao lado do corpo.','Suba os halteres pelos lados até a altura dos ombros, com os cotovelos levemente dobrados.','Desça devagar.'],
@@ -492,11 +496,11 @@ details.how .lbl{font-weight:700}
   // eles ganham 1 série leve antes (fora das séries). O primeiro exercício já tem 2 a 3 séries leves.
   const W2 = [
     { id:'A', nome:'Superiores 1', curto:'Sup. 1', foco:'peito, costas, ombro e braço', min:65, sup:true,
-      ex:[['a1',3],['b1',3],['e1',3],['a2',2],['a5',2],['a7',2],['b5',2]], aquece:['b1','a5'] },
+      ex:[['a1',3],['b1',3],['e5',3],['a2',2],['a5',2],['a7',2],['b5',2]], aquece:['b1','a5'] },
     { id:'B', nome:'Pernas 1 + tronco', curto:'Pernas 1', foco:'coxa, glúteo e panturrilha, com ombro, bíceps e tronco', min:60,
       ex:[['c1',3],['c4',3],['c5',2],['c2',2],['c6',3],['a5',3],['b6',2],['e4',2]], aquece:['c4','c5','c6','a5','b6'] },
     { id:'C', nome:'Superiores 2', curto:'Sup. 2', foco:'peito, costas, ombro e braço', min:70, sup:true,
-      ex:[['d1',3],['d2',3],['e1',3],['a3',2],['b4',2],['d3',2],['d4',2],['e2',2]], aquece:['d2','d3'] },
+      ex:[['d1',3],['d2',3],['e5',3],['a3',2],['b4',2],['d3',2],['d4',2],['e2',2]], aquece:['d2','d3'] },
     { id:'D', nome:'Pernas 2 + tronco', curto:'Pernas 2', foco:'coxa, glúteo e panturrilha, com ombro, tríceps e tronco', min:65,
       ex:[['c4',3],['c1',2],['c2',2],['c5',2],['e3',2],['c6',2],['a5',3],['a7',2],['d6',2]], aquece:['c1','c5','c6','a5','a7'] },
   ];
@@ -516,6 +520,7 @@ details.how .lbl{font-weight:700}
   const W = FICHAS[ATUAL].treinos, WB = FICHAS[ATUAL].porId;
   const CONHECIDOS = new Set();
   Object.values(FICHAS).forEach(f => f.treinos.forEach(w => w.ex.forEach(e => CONHECIDOS.add(e.id))));
+  Object.keys(X2).forEach(id => CONHECIDOS.add(id)); // os que saíram dos treinos continuam no histórico
   const treinoDe = (f, wid) => (FICHAS[f] || FICHAS[1]).porId[wid];
   // O treino em andamento continua na ficha em que começou; os outros usam a ficha atual.
   const treinoTela = wid => treinoDe(state.cur && state.cur.wid === wid ? state.cur.ficha : ATUAL, wid);
@@ -739,7 +744,9 @@ details.how .lbl{font-weight:700}
   function setsList(h){
     const w = treinoDe(h.ficha || 1, h.wid);
     if (w && h.sets && Object.keys(h.sets).length) {
-      return '<ul>' + w.ex.filter(e => h.sets[e.id] && h.sets[e.id].some(x => x && x.done)).map(e => {
+      // Exercícios do treino e, no fim, os que saíram da ficha depois (ex.: e1).
+      const lista = w.ex.concat(Object.keys(h.sets).filter(id => !w.porEx[id] && X2[id]).map(id => X2[id]));
+      return '<ul>' + lista.filter(e => h.sets[e.id] && h.sets[e.id].some(x => x && x.done)).map(e => {
         const d = h.sets[e.id].filter(x => x && x.done);
         return '<li>' + esc(e.nome) + ': ' + esc(seriesTxt(e, d)) + '</li>';
       }).join('') + '</ul>';

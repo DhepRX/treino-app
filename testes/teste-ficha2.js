@@ -29,7 +29,7 @@ const D26 = { id: 'd26', wid: 'D', start: H(17), end: H(18), sets: {
   // 2. Adaptação: 2 séries em tudo e aviso.
   assert.match(await p.textContent('.aviso-treino'), /Semana de adaptação/);
   assert.match(await p.textContent('.aviso-treino'), /faltam A, B, C e D/);
-  assert.equal(await cards(), 'a1:2 b1:2 e1:2 a2:2 a5:2 a7:2 b5:2');
+  assert.equal(await cards(), 'a1:2 b1:2 e5:2 a2:2 a5:2 a7:2 b5:2');
   assert.ok(await p.locator('.seguranca').isVisible());
   console.log('2. aviso:', await p.textContent('.aviso-treino'));
   console.log('   séries por exercício (A):', await cards());
