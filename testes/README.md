@@ -33,7 +33,7 @@ Os prints ficam em `testes/prints/`.
 | Roteiro | O que testa |
 | --- | --- |
 | `teste-ficha2.js` | Ficha 2: próximo treino, adaptação com 2 séries, aquecimento que diz quais exercícios ganham 1 série leve, cargas sugeridas, nomes da ficha 1 no calendário, regra das pernas, versão curta, backup antigo e treino da ficha 1 aberto |
-| `teste-correcoes.js` | Correções da revisão de 28/09/2026: aquecimento no primeiro toque, séries do mesmo exercício em dois treinos, editar e trocar de aba, versão curta (progresso e número do card), "Minimizar todos" que não passa para o próximo treino, treino marcado à mão num dia da ficha 1, aviso de falha ao salvar, vídeo em todos os exercícios, ícones no tamanho certo, remada com halteres no lugar da remada na máquina (com o histórico antigo preservado), tema claro |
+| `teste-correcoes.js` | Correções da revisão de 28/09/2026: aquecimento no primeiro toque, séries do mesmo exercício em dois treinos, editar e trocar de aba, versão curta (progresso e número do card), "Minimizar todos" que não passa para o próximo treino, treino marcado à mão num dia da ficha 1, aviso de falha ao salvar, vídeo em todos os exercícios, ícones no tamanho certo, remada com halteres no lugar da remada na máquina (com o histórico antigo preservado), treino salvo que fica concluído e travado (reabrir, descartar sem perder, calendário sem repetir), tema claro |
 | `teste-serie.js` | Série marcada vira linha, editar, desmarcar, descanso que some, prancha pelo cronômetro |
 | `teste-peso.js` | Peso digitado na série 1 vai para as outras; série trocada na mão não muda |
 | `teste-mini.js` | Card minimiza na última série; abrir, minimizar, corrigindo um número, trocar de aba, finalizar |

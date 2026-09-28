@@ -135,6 +135,46 @@ const URL_APP = 'http://127.0.0.1:8766/treino-app/';
   console.log('7d. remada nova no A e no C (card 3); treino antigo com a remada na máquina continua no histórico.');
   await p.click('[data-view="treino"]');
 
+  // 9. Treino salvo fica concluído: não dá para salvar o mesmo treino duas vezes no dia.
+  const hojeA = () => p.evaluate(() => { const k = new Date().toDateString(); return JSON.parse(localStorage.getItem('treino-renan-v1')).hist.filter(h => h.wid === 'A' && new Date(h.start).toDateString() === k); });
+  await p.click('[data-tab="A"]'); await p.click('[data-act="start"]');
+  await p.click(row('a1', 0) + ' [data-done]'); await p.click('#dockBtns [data-rest="skip"]');
+  await p.click('#workout > .finish [data-act="finish"]'); await p.click('#workout > .finish [data-act="finish"]');
+  assert.equal((await hojeA()).length, 1);
+  assert.match(await p.textContent('#workout .feito'), /Treino A concluído hoje/);
+  assert.equal(await p.locator('#workout [data-act="start"]').count(), 0);
+  assert.equal(await p.locator('#workout [data-curta]').count(), 0);
+  assert.equal(await p.isDisabled(row('a1', 0) + ' [data-f="kg"]'), true);
+  assert.equal(await p.isDisabled(row('b1', 0) + ' [data-done]'), true);
+  assert.equal(await p.isDisabled('[data-warm="0"]'), true);
+  assert.equal((await salvo()).cur, null);
+  console.log('9. A salvo: aba concluída, campos travados.');
+  // Reabrir: volta com a série marcada; finalizar de novo substitui, não duplica.
+  await p.click('[data-reabrir]'); await p.click('[data-reabrir]');
+  assert.equal((await salvo()).cur.sets.a1[0].done, true);
+  await p.click(row('b1', 0) + ' [data-done]'); await p.click('#dockBtns [data-rest="skip"]');
+  await p.click('#workout > .finish [data-act="finish"]'); await p.click('#workout > .finish [data-act="finish"]');
+  let doDia = await hojeA();
+  assert.equal(doDia.length, 1);
+  assert.equal(doDia[0].sets.b1[0].done, true);
+  // Reabrir e descartar não apaga o que já estava salvo.
+  await p.click('[data-reabrir]'); await p.click('[data-reabrir]');
+  await p.click('#workout > .finish [data-act="discard"]'); await p.click('#workout > .finish [data-act="discard"]');
+  doDia = await hojeA();
+  assert.equal(doDia.length, 1); assert.equal(doDia[0].sets.b1[0].done, true);
+  console.log('   reabrir e finalizar: 1 treino A hoje, com as séries novas; reabrir e descartar: o salvo continua.');
+  // Calendário: o A de hoje não pode ser registrado de novo.
+  await p.click('#hist [data-gocal]'); await p.click('[data-reg-open]');
+  assert.equal(await p.isDisabled('[data-reg="A"]'), true);
+  assert.match(await p.textContent('[data-reg="A"]'), /já feito/);
+  // Marcação à mão (B) deixa a aba concluída, e dá para desfazer.
+  await p.click('[data-reg="B"]');
+  await p.click('[data-view="treino"]'); await p.click('[data-tab="B"]');
+  assert.match(await p.textContent('#workout .feito'), /Treino B marcado como feito hoje/);
+  await p.click('[data-desfazer]'); await p.click('[data-desfazer]');
+  assert.equal(await p.locator('#workout [data-act="start"]').count(), 1);
+  console.log('   calendário: A de hoje "já feito"; B marcado à mão fica concluído e dá para desfazer.');
+
   // 8. Tema claro mesmo com o iPhone no modo escuro.
   const escuro = await (await b.newContext({ ...devices['iPhone 13'], serviceWorkers: 'block', colorScheme: 'dark' })).newPage();
   await escuro.goto(URL_APP);

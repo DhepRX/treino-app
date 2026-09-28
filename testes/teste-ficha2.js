@@ -111,6 +111,9 @@ const D26 = { id: 'd26', wid: 'D', start: H(17), end: H(18), sets: {
   await p.screenshot({ path: __dirname + '/prints/ficha2-D.png' });
 
   // 11. Versão curta no B: 4 exercícios com 2 séries, tronco opcional.
+  // O ciclo acima foi salvo hoje, então as abas estão concluídas; passa esses treinos para ontem.
+  await p.evaluate(() => { const s = JSON.parse(localStorage.getItem('treino-renan-v1')); s.hist.forEach(h => { if (h.ficha === 2) { h.start -= 86400000; h.end -= 86400000; } }); localStorage.setItem('treino-renan-v1', JSON.stringify(s)); });
+  await p.reload();
   await p.click('[data-tab="B"]');
   await p.click('[data-curta="ligar"]');
   assert.equal(await cards(), 'c1:2 c4:2 c5:2 c2:2');
