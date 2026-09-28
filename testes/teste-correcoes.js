@@ -53,6 +53,8 @@ const URL_APP = 'http://127.0.0.1:8766/treino-app/';
   await p.click('#dockBtns [data-rest="skip"]');
   await p.click('[data-curta="ligar"]');
   assert.match(await p.textContent('#progresso'), /1 de 8 séries feitas/);
+  // Aquecimento da versão curta só cita os exercícios que aparecem.
+  assert.equal((await p.$$eval('.card.warm li span', s => s.map(x => x.textContent)))[2], 'Uma série leve antes de cada movimento bem diferente: 2 (cadeira flexora) e 3 (elevação pélvica em máquina).');
   await p.click('[data-curta="tronco"]');
   assert.equal(await p.textContent('#ex-e4 .num'), '5');
   await p.click('#ex-e4 [data-fechar="e4"]');

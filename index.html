@@ -122,6 +122,8 @@ h1{font-size:1.75rem;font-weight:800;font-stretch:78%;margin:8px 0 2px;line-heig
 .target{margin:10px 0 0;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}
 .target strong{font-size:1.15rem;font-weight:800;font-stretch:85%}
 .target span{color:var(--muted);font-size:.92rem}
+.aquece{margin:8px 0 0;display:flex;align-items:flex-start;gap:6px;padding:6px 10px;border-radius:10px;background:var(--soft);font-size:.88rem;font-weight:600;line-height:1.35}
+.aquece svg{flex:none;width:15px;height:15px;margin-top:1px;color:var(--mk)}
 .pair{margin:8px 0 0;font-size:.9rem;background:var(--soft);border-radius:8px;padding:6px 10px}
 .last{margin:6px 0 0;font-size:.92rem;color:var(--muted)}
 .up{display:inline-block;margin-top:6px;background:var(--tag);color:var(--tag-ink);font-weight:800;border-radius:6px;padding:3px 8px;font-size:.9rem}
@@ -486,15 +488,17 @@ details.how .lbl{font-weight:700}
       como:['Antebraços no chão, cotovelos embaixo dos ombros.','Corpo reto da cabeça ao calcanhar, com abdômen e glúteo contraídos.','Respire normalmente e pare antes de perder a posição.'],
       erros:'quadril caindo ou alto demais e prender a respiração.', troca:'prancha com os joelhos apoiados, se ficar pesado.' }),
   };
+  // aquece: exercícios em que o movimento muda bastante em relação ao que veio antes no treino;
+  // eles ganham 1 série leve antes (fora das séries). O primeiro exercício já tem 2 a 3 séries leves.
   const W2 = [
     { id:'A', nome:'Superiores 1', curto:'Sup. 1', foco:'peito, costas, ombro e braço', min:65, sup:true,
-      ex:[['a1',3],['b1',3],['e1',3],['a2',2],['a5',2],['a7',2],['b5',2]] },
+      ex:[['a1',3],['b1',3],['e1',3],['a2',2],['a5',2],['a7',2],['b5',2]], aquece:['b1','a5'] },
     { id:'B', nome:'Pernas 1 + tronco', curto:'Pernas 1', foco:'coxa, glúteo e panturrilha, com ombro, bíceps e tronco', min:60,
-      ex:[['c1',3],['c4',3],['c5',2],['c2',2],['c6',3],['a5',3],['b6',2],['e4',2]] },
+      ex:[['c1',3],['c4',3],['c5',2],['c2',2],['c6',3],['a5',3],['b6',2],['e4',2]], aquece:['c4','c5','c6','a5','b6'] },
     { id:'C', nome:'Superiores 2', curto:'Sup. 2', foco:'peito, costas, ombro e braço', min:70, sup:true,
-      ex:[['d1',3],['d2',3],['e1',3],['a3',2],['b4',2],['d3',2],['d4',2],['e2',2]] },
+      ex:[['d1',3],['d2',3],['e1',3],['a3',2],['b4',2],['d3',2],['d4',2],['e2',2]], aquece:['d2','d3'] },
     { id:'D', nome:'Pernas 2 + tronco', curto:'Pernas 2', foco:'coxa, glúteo e panturrilha, com ombro, tríceps e tronco', min:65,
-      ex:[['c4',3],['c1',2],['c2',2],['c5',2],['e3',2],['c6',2],['a5',3],['a7',2],['d6',2]] },
+      ex:[['c4',3],['c1',2],['c2',2],['c5',2],['e3',2],['c6',2],['a5',3],['a7',2],['d6',2]], aquece:['c1','c5','c6','a5','a7'] },
   ];
   W2.forEach(w => { w.ex = w.ex.map(([id, s]) => Object.assign({}, X2[id], { id, s })); });
 
@@ -883,6 +887,14 @@ details.how .lbl{font-weight:700}
       '<input data-f="reps" inputmode="numeric" placeholder="' + faixa(e) + '" value="' + repsVal + '" aria-label="Série ' + (i + 1) + ', repetições"' + dis + '>' + btnDone + '</div>';
   }
 
+  // Aquecimento no card: o 1º exercício tem 2 a 3 séries leves; os de "aquece", 1 série leve.
+  const nomeCurto = e => { const n = e.nome.split(',')[0]; return n.charAt(0).toLowerCase() + n.slice(1); };
+  const ehAquece = e => { const w = treinoDe(e.f, e.w); return !!(w.aquece && w.aquece.includes(e.id)); };
+  function aqueceHTML(e, idx){
+    const t = idx === 0 ? 'Antes: 2 a 3 séries leves e progressivas para aquecer (não contam).'
+      : ehAquece(e) ? 'Antes: 1 série leve para aquecer, porque o movimento muda (não conta).' : '';
+    return t ? '<p class="aquece">' + FLAME + '<span>' + esc(t) + '</span></p>' : '';
+  }
   // Séries feitas deste exercício no treino em andamento.
   const doCur = e => !!(state.cur && state.cur.wid === e.w && state.cur.ficha === e.f);
   function feitasEx(e){ return doCur(e) ? (state.cur.sets[e.id] || []).filter(x => x && x.done) : []; }
@@ -926,7 +938,7 @@ details.how .lbl{font-weight:700}
     return '<li class="card ex" id="ex-' + e.id + '">' +
       '<div class="exhead"><span class="num">' + (idx + 1) + '</span><div><h3>' + esc(e.nome) + '</h3><p class="maq">Na Smart Fit: ' + esc(e.maq) + '</p></div>' +
       '<button type="button" class="minbtn" data-fechar="' + e.id + '">Minimizar</button></div>' +
-      '<p class="target"><strong>' + esc(alvo) + '</strong><span>' + esc(desc) + '</span></p>' + par + info +
+      '<p class="target"><strong>' + esc(alvo) + '</strong><span>' + esc(desc) + '</span></p>' + aqueceHTML(e, idx) + par + info +
       '<div class="sets">' + rows + '</div>' +
       '<div class="exfoot">' +
         '<div class="videoarea">' +
@@ -957,10 +969,13 @@ details.how .lbl{font-weight:700}
 
   function warmHTML(w, lock){
     const first = w.ex[0];
+    // Número e nome de cada exercício que ganha 1 série leve antes (só os que aparecem, na versão curta).
+    const leves = exibidos(w).map((e, i) => ({ e, n:i + 1 })).filter(x => ehAquece(x.e));
     const itens = [
       '5 a 8 minutos leves de caminhada ou bike.',
-      '2 a 3 séries leves e progressivas de ' + first.nome.toLowerCase() + ', o primeiro exercício.',
-      'Uma série leve a mais ao trocar para um movimento bem diferente.',
+      '2 a 3 séries leves e progressivas de ' + nomeCurto(first) + ', o primeiro exercício.',
+      leves.length ? 'Uma série leve antes de cada movimento bem diferente: ' + joinPt(leves.map(x => x.n + ' (' + nomeCurto(x.e) + ')')) + '.'
+        : 'Uma série leve a mais ao trocar para um movimento bem diferente.',
     ];
     const warm = state.cur && state.cur.wid === w.id ? state.cur.warm : {};
     const completo = itens.every((t, i) => warm[i]);
