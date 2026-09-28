@@ -2,6 +2,7 @@ const assert = require('node:assert/strict');
 // Ficha 2 (28/09/2026): checklist do pedido, com asserções.
 require('fs').mkdirSync(__dirname + '/prints', { recursive: true });
 const { chromium, devices } = require('playwright');
+const { paraOntem } = require('./ajuda');
 const URL_APP = 'http://127.0.0.1:8766/treino-app/';
 const H = h => Date.UTC(2026, 8, 26, h + 3, 10); // 26/09 às h (Brasília)
 // Histórico do celular: SEED + D de 26/09 (ficha 1, sem o campo) com supino inclinado 18 kg.
@@ -66,12 +67,15 @@ const D26 = { id: 'd26', wid: 'D', start: H(17), end: H(18), sets: {
   console.log('   últimos treinos:', (await p.$$eval('.hist details summary', s => s.slice(0, 2).map(x => x.textContent))).join(' | '));
 
   // Faz o ciclo A, B, C e D na ficha nova (marca a 1ª série de cada exercício e finaliza).
+  // Vale um treino por dia: cada um vai para ontem, em horas seguidas, para o próximo começar hoje.
+  let hora = 6;
   const fazer = async (wid, marcar) => {
     await p.click(`[data-tab="${wid}"]`);
     await p.click('[data-act="start"]');
     await marcar();
     await p.click('#workout > .finish [data-act="finish"]'); await p.click('#workout > .finish [data-act="finish"]');
     await p.waitForTimeout(150);
+    await paraOntem(p, hora); hora += 2;
   };
   const serie1 = async () => { for (const id of await p.$$eval('#workout .card.ex:not(.mini)', cs => cs.map(c => c.id.slice(3)))) { const bt = `.setrow[data-ex="${id}"][data-i="0"] [data-done]`; if (await p.locator(bt).count()) await p.click(bt); } };
   // B com o leg press no topo (15) nas 2 séries.
@@ -111,9 +115,6 @@ const D26 = { id: 'd26', wid: 'D', start: H(17), end: H(18), sets: {
   await p.screenshot({ path: __dirname + '/prints/ficha2-D.png' });
 
   // 11. Versão curta no B: 4 exercícios com 2 séries, tronco opcional.
-  // O ciclo acima foi salvo hoje, então as abas estão concluídas; passa esses treinos para ontem.
-  await p.evaluate(() => { const s = JSON.parse(localStorage.getItem('treino-renan-v1')); s.hist.forEach(h => { if (h.ficha === 2) { h.start -= 86400000; h.end -= 86400000; } }); localStorage.setItem('treino-renan-v1', JSON.stringify(s)); });
-  await p.reload();
   await p.click('[data-tab="B"]');
   await p.click('[data-curta="ligar"]');
   assert.equal(await cards(), 'c1:2 c4:2 c5:2 c2:2');

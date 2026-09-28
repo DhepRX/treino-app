@@ -2,6 +2,7 @@ const assert = require('node:assert/strict');
 // Backup automático no GitHub, com a API do GitHub simulada.
 require('fs').mkdirSync(__dirname + '/prints', { recursive: true });
 const { chromium, devices } = require('playwright');
+const { registrarNoDia } = require('./ajuda');
 const URL_APP = 'http://127.0.0.1:8766/treino-app/';
 
 // GitHub de mentira: repositório privado DhepRX/treino-dados e público DhepRX/publico.
@@ -71,7 +72,7 @@ async function api(route) {
 
   // 6. Sem internet: registra um treino no calendário, falha, e envia quando o sinal volta.
   gh.semRede = true;
-  await p.click('[data-view="cal"]'); await p.click('[data-reg-open]'); await p.click('[data-reg="X"]');
+  await registrarNoDia(p, '2026-09-03', 'X'); // um treino por dia: hoje já tem o C
   await p.waitForTimeout(2500);
   console.log('6. sem internet:', await status(), '| commits:', gh.puts.length);
   gh.semRede = false;
@@ -106,7 +107,7 @@ async function api(route) {
   await pa.goto(URL_APP);
   gh.segurarPut = true;
   const putsMeio = gh.puts.length;
-  await pa.click('[data-view="cal"]'); await pa.click('[data-reg-open]'); await pa.click('[data-reg="X"]');
+  await registrarNoDia(pa, '2026-09-04', 'X');
   await pa.waitForTimeout(2500);
   assert.equal(await pa.evaluate(() => JSON.parse(localStorage.getItem('treino-renan-nuvem')).pendente), true, 'Pendente continua gravado durante o envio');
   await pa.close();
@@ -121,7 +122,7 @@ async function api(route) {
 
   // 8. Chave vencida depois de ligada.
   await p.evaluate(() => { const n = JSON.parse(localStorage.getItem('treino-renan-nuvem')); n.token = 'github_pat_VENCIDA'; localStorage.setItem('treino-renan-nuvem', JSON.stringify(n)); });
-  await p.reload(); await p.click('[data-view="cal"]'); await p.click('[data-reg-open]'); await p.click('[data-reg="X"]'); await p.waitForTimeout(2500);
+  await p.reload(); await registrarNoDia(p, '2026-09-05', 'X'); await p.waitForTimeout(2500);
   console.log('8. chave vencida:', await status());
   // 8b. Cola uma chave nova: o treino que falhou com a chave vencida vai junto.
   assert.equal(await p.evaluate(() => JSON.parse(localStorage.getItem('treino-renan-nuvem')).pendente), true);

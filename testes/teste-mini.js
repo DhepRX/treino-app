@@ -2,6 +2,7 @@ const assert = require('node:assert/strict');
 // Cards que minimizam quando o exercício termina.
 require('fs').mkdirSync(__dirname + '/prints', { recursive: true });
 const { chromium, devices } = require('playwright');
+const { paraOntem } = require('./ajuda');
 const URL_APP = 'http://127.0.0.1:8766/treino-app/';
 (async () => {
   const browser = await chromium.launch();
@@ -70,6 +71,7 @@ const URL_APP = 'http://127.0.0.1:8766/treino-app/';
   console.log('depois de finalizar, algum minimizado?', await p.evaluate(() => document.querySelectorAll('#workout .mini').length));
 
   // Prancha (Treino D, 2 séries) pelo cronômetro.
+  await paraOntem(p); // um treino por dia
   await p.click('[data-tab="D"]'); await p.click('[data-act="start"]');
   for (const i of [0, 1]) {
     await p.click(`.setrow[data-ex="d6"][data-i="${i}"] [data-hold]`);

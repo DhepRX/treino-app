@@ -74,15 +74,15 @@ const URL_APP = 'http://127.0.0.1:8766/treino-app/';
 
   // 6. Treino marcado à mão num dia da ficha 1 fica na ficha 1.
   await p.click('[data-view="cal"]');
-  for (let k = 0; k < 36 && !(await p.locator('[data-cd="2026-09-24"]').count()); k++) await p.click('[data-cm="-1"]');
-  await p.click('[data-cd="2026-09-24"]');
+  for (let k = 0; k < 36 && !(await p.locator('[data-cd="2026-09-18"]').count()); k++) await p.click('[data-cm="-1"]');
+  await p.click('[data-cd="2026-09-18"]');
   await p.click('[data-reg-open]');
   assert.match(await p.textContent('[data-reg="A"]'), /Empurrar/);
   await p.click('[data-reg="A"]');
-  const manual = (await salvo()).hist.find(h => h.manual && h.wid === 'A' && new Date(h.start).getDate() === 24);
+  const manual = (await salvo()).hist.find(h => h.manual && h.wid === 'A' && new Date(h.start).getDate() === 18);
   assert.equal(manual.ficha, 1);
   assert.ok((await p.$$eval('.entry .et b', s => s.map(x => x.textContent))).includes('Treino A · Empurrar'));
-  console.log('6. 24/09 marcado à mão: ficha', manual.ficha, '| nome: Treino A · Empurrar');
+  console.log('6. 18/09 marcado à mão: ficha', manual.ficha, '| nome: Treino A · Empurrar');
   // Hoje vale a ficha atual, igual a um treino feito pelo app.
   await p.click('[data-view="treino"]'); await p.click('#hist [data-gocal]'); // volta o calendário para o mês de hoje
   await p.click('.cd.today'); await p.click('[data-reg-open]');
@@ -163,17 +163,28 @@ const URL_APP = 'http://127.0.0.1:8766/treino-app/';
   doDia = await hojeA();
   assert.equal(doDia.length, 1); assert.equal(doDia[0].sets.b1[0].done, true);
   console.log('   reabrir e finalizar: 1 treino A hoje, com as séries novas; reabrir e descartar: o salvo continua.');
-  // Calendário: o A de hoje não pode ser registrado de novo.
-  await p.click('#hist [data-gocal]'); await p.click('[data-reg-open]');
-  assert.equal(await p.isDisabled('[data-reg="A"]'), true);
-  assert.match(await p.textContent('[data-reg="A"]'), /já feito/);
-  // Marcação à mão (B) deixa a aba concluída, e dá para desfazer.
-  await p.click('[data-reg="B"]');
+  // Um treino por dia: com o A salvo hoje, as outras abas travam e o calendário não registra outro.
+  await p.click('[data-tab="B"]');
+  assert.match(await p.textContent('#workout .feito'), /Você já treinou hoje/);
+  assert.equal(await p.locator('#workout [data-act="start"]').count(), 0);
+  assert.equal(await p.locator('#workout [data-curta]').count(), 0);
+  assert.equal(await p.isDisabled(row('c1', 0) + ' [data-done]'), true);
+  assert.equal(await p.isDisabled('[data-warm="0"]'), true);
+  await p.click('#hist [data-gocal]');
+  assert.equal(await p.locator('[data-reg-open]').count(), 0, 'Dia com treino não mostra "Registrar treino"');
+  console.log('   um treino por dia: B travado ("Você já treinou hoje"); calendário sem "Registrar treino" hoje.');
+  // Apagar o A de hoje libera o dia. Marcar o B à mão deixa o dia com treino, e dá para desfazer.
+  await p.click('.entry summary'); await p.click('[data-del]'); await p.click('[data-del]');
+  assert.equal((await hojeA()).length, 0);
+  await p.click('[data-reg-open]'); await p.click('[data-reg="B"]');
+  assert.equal(await p.locator('[data-reg-open]').count(), 0);
   await p.click('[data-view="treino"]'); await p.click('[data-tab="B"]');
   assert.match(await p.textContent('#workout .feito'), /Treino B marcado como feito hoje/);
+  await p.click('[data-tab="C"]');
+  assert.match(await p.textContent('#workout .feito'), /Você já treinou hoje/);
   await p.click('[data-desfazer]'); await p.click('[data-desfazer]');
   assert.equal(await p.locator('#workout [data-act="start"]').count(), 1);
-  console.log('   calendário: A de hoje "já feito"; B marcado à mão fica concluído e dá para desfazer.');
+  console.log('   B marcado à mão: aba B concluída, C travada; desfazer a marcação libera o dia.');
 
   // 8. Tema claro mesmo com o iPhone no modo escuro.
   const escuro = await (await b.newContext({ ...devices['iPhone 13'], serviceWorkers: 'block', colorScheme: 'dark' })).newPage();
