@@ -94,6 +94,16 @@ const URL_APP = 'http://127.0.0.1:8766/treino-app/';
   assert.equal(estilo, '4px rgb(255, 243, 199)');
   console.log('7. aviso de falha ao salvar:', estilo);
 
+  // 7b. Todo exercício da ficha 2 tem o botão "Ver vídeo".
+  const semVideo = [];
+  await p.click('[data-view="treino"]');
+  for (const t of ['A', 'B', 'C', 'D']) {
+    await p.click(`[data-tab="${t}"]`); await p.click('[data-todos="abrir"]');
+    for (const id of await p.$$eval('#workout .card.ex', cs => cs.map(c => c.id.slice(3)))) if (!(await p.locator(`[data-video="${id}"]`).count())) semVideo.push(t + ':' + id);
+  }
+  assert.deepEqual(semVideo, [], 'Exercícios sem vídeo: ' + semVideo.join(', '));
+  console.log('7b. todos os exercícios da ficha 2 têm vídeo.');
+
   // 8. Tema claro mesmo com o iPhone no modo escuro.
   const escuro = await (await b.newContext({ ...devices['iPhone 13'], serviceWorkers: 'block', colorScheme: 'dark' })).newPage();
   await escuro.goto(URL_APP);
