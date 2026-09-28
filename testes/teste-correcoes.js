@@ -104,6 +104,16 @@ const URL_APP = 'http://127.0.0.1:8766/treino-app/';
   assert.deepEqual(semVideo, [], 'Exercícios sem vídeo: ' + semVideo.join(', '));
   console.log('7b. todos os exercícios da ficha 2 têm vídeo.');
 
+  // 7c. Ícones: o do iPhone e os do manifest abrem no tamanho declarado.
+  const icones = await p.evaluate(async () => {
+    const man = await (await fetch(document.querySelector('link[rel="manifest"]').href)).json();
+    const urls = [document.querySelector('link[rel="apple-touch-icon"]').href].concat(man.icons.map(i => new URL(i.src, location.href).href));
+    const tamanho = u => new Promise(ok => { const im = new Image(); im.onload = () => ok(im.naturalWidth + 'x' + im.naturalHeight); im.onerror = () => ok('erro'); im.src = u; });
+    return { vistos:await Promise.all(urls.map(tamanho)), esperados:['180x180'].concat(man.icons.map(i => i.sizes)) };
+  });
+  assert.deepEqual(icones.vistos, icones.esperados);
+  console.log('7c. ícones:', icones.vistos.join(' '));
+
   // 8. Tema claro mesmo com o iPhone no modo escuro.
   const escuro = await (await b.newContext({ ...devices['iPhone 13'], serviceWorkers: 'block', colorScheme: 'dark' })).newPage();
   await escuro.goto(URL_APP);

@@ -12,7 +12,8 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
 | `index.html` | O app inteiro: HTML, CSS e JavaScript no mesmo arquivo, sem build e sem dependências |
 | `sw.js` | Service worker: guarda o app para abrir sem internet |
 | `manifest.webmanifest` | Nome, cores e ícones para instalar |
-| `icon-180.png`, `icon-192.png`, `icon-512.png` | Ícones |
+| `icon-180.png`, `icon-192.png`, `icon-512.png` | Ícones (halter amarelo no fundo preto), gerados de `icone.svg`. Ao trocar o desenho, suba o `?v=` nos links do `index.html`, do `manifest.webmanifest` e do `sw.js` |
+| `icone.svg` | Desenho do ícone, 512 × 512, sem transparência (o iPhone arredonda os cantos) |
 | `README.md` | Instruções para o dono (publicar, instalar, backup) |
 | `AGENTS.md` | Este arquivo |
 | `.nojekyll` | Faz o GitHub Pages publicar os arquivos como estão |
@@ -20,7 +21,7 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
 ## Regras que não podem quebrar
 
 1. **Caminhos relativos** (`./sw.js`, `icon-192.png`). O site roda na subpasta `/treino-app/`.
-2. **Ao publicar qualquer mudança, troque `VERSAO` em `sw.js`** (hoje `treino-renan-v14`) para o celular pegar a versão nova.
+2. **Ao publicar qualquer mudança, troque `VERSAO` em `sw.js`** (hoje `treino-renan-v15`) para o celular pegar a versão nova.
 3. **Não mude o formato dos dados salvos sem migração.** Os treinos ficam só no celular (`localStorage`); perder o formato é perder o histórico.
 4. **Não renomeie os `id` dos exercícios** (`a1`…`d6`, `e1`…`e4`): eles são as chaves do histórico e da sugestão de carga. Para trocar um exercício, mude `nome`, `maq`, `como` etc. e mantenha o `id`. Movimento novo ganha id novo (próximo: `e5`).
 5. Sem bibliotecas externas além da fonte Archivo do Google Fonts. Sem framework nem dependências npm no app. Playwright é permitido somente para testes; veja `testes/README.md`.
@@ -72,6 +73,7 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
 - Sites não vibram; o fim do descanso só apita com o app aberto e o celular fora do silencioso.
 - Site não salva arquivo sozinho: backup em arquivo sempre precisa de um toque (por isso existe o backup no GitHub).
 - O app da Tela de Início e o Safari guardam dados separados.
+- O ícone só muda quando o app é adicionado de novo à Tela de Início, e apagar o app de lá apaga os dados dele: backup antes, restaurar depois (passo a passo no `README.md`).
 
 ## Como testar
 
