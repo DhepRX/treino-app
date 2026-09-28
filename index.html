@@ -907,7 +907,10 @@ details.how .lbl{font-weight:700}
   function feitasEx(e){ return doCur(e) ? (state.cur.sets[e.id] || []).filter(x => x && x.done) : []; }
   function exHTML(e, idx, lock){
     const feitas = feitasEx(e), completo = feitas.length >= S(e);
-    const alvo = S(e) + ' × ' + faixa(e) + (e.tempo ? ' s' : '') + (e.lado ? (e.perna ? ' cada perna' : e.braco ? ' cada braço' : ' cada lado') : '') + (e.extra ? ', ' + e.extra : '');
+    const lado = (e.lado ? (e.perna ? ' cada perna' : e.braco ? ' cada braço' : ' cada lado') : '') + (e.extra ? ', ' + e.extra : '');
+    const alvo = S(e) + ' × ' + faixa(e) + (e.tempo ? ' s' : '') + lado;
+    // No card, por extenso: "2 séries de 8–12 repetições" (o "2 × 8–12" confundia séries com repetições).
+    const alvoCard = S(e) + (S(e) === 1 ? ' série de ' : ' séries de ') + faixa(e) + (e.tempo ? ' s' : ' repetições') + lado;
     if ((completo && !abertos.has(e.id)) || (!completo && fechados.has(e.id))) {
       let resumo;
       if (completo) resumo = seriesTxt(e, feitas);
@@ -945,7 +948,7 @@ details.how .lbl{font-weight:700}
     return '<li class="card ex" id="ex-' + e.id + '">' +
       '<div class="exhead"><span class="num">' + (idx + 1) + '</span><div><h3>' + esc(e.nome) + '</h3><p class="maq">Na Smart Fit: ' + esc(e.maq) + '</p></div>' +
       '<button type="button" class="minbtn" data-fechar="' + e.id + '">Minimizar</button></div>' +
-      '<p class="target"><strong>' + esc(alvo) + '</strong><span>' + esc(desc) + '</span></p>' + aqueceHTML(e, idx) + par + info +
+      '<p class="target"><strong>' + esc(alvoCard) + '</strong><span>' + esc(desc) + '</span></p>' + aqueceHTML(e, idx) + par + info +
       '<div class="sets">' + rows + '</div>' +
       '<div class="exfoot">' +
         '<div class="videoarea">' +
@@ -999,8 +1002,8 @@ details.how .lbl{font-weight:700}
   function avisosHTML(w){
     const pernas = !w.sup;
     let t = adaptacao()
-      ? '<b>Semana de adaptação:</b> 2 séries em cada exercício, terminando com umas 3 repetições sobrando. Acaba quando você fizer A, B, C e D uma vez na ficha nova (' +
-        (faltamAdaptacao().length > 1 ? 'faltam ' : 'falta ') + joinPt(faltamAdaptacao()) + '); depois, as séries da ficha.'
+      ? '<b>Primeira semana da ficha nova:</b> 2 séries em cada exercício, para o corpo se acostumar. Termine cada série com umas 3 repetições sobrando. ' +
+        'Depois que você fizer ' + (faltamAdaptacao().length === 1 ? 'o ' : '') + joinPt(faltamAdaptacao()) + ' uma vez, os exercícios principais passam para 3 séries.'
       : '<b>Esforço:</b> termine cada série com ' + (pernas ? '2 a 3' : '1 a 2') + ' repetições sobrando. Não precisa ir até a falha.';
     if (pernas) t += ' As cargas antigas de perna (160 kg no leg press, 90 kg na extensora) não são meta.';
     return '<p class="aviso-treino">' + t + '</p>' +
