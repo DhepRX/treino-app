@@ -26,7 +26,27 @@ No celular, se algum botão não aparecer, toque em **aA** na barra do Safari e 
 2. Toque em ••• > Compartilhar > Adicionar à Tela de Início > Adicionar.
 3. Use sempre pelo ícone. O Safari e o ícone guardam os dados separados.
 
-## 3. Seus treinos
+## 3. A ficha (desde 28/09/2026)
+
+Ordem A → B → C → D, sem dia fixo, 3 a 4 vezes por semana. A e C são superiores; B e D são pernas e tronco.
+A ficha tira carga direta da coluna (sem afundo com carga, abdominal com carga nem serrote) e divide as pernas em dois dias mais leves.
+
+| Treino | Exercícios |
+| --- | --- |
+| **A · Superiores 1** | supino reto com halteres, puxada frontal, remada com apoio no peito, supino inclinado articulado, elevação lateral sentado, tríceps barra V, rosca direta barra W |
+| **B · Pernas 1 + tronco** | leg press 45°, cadeira flexora, elevação pélvica, cadeira extensora, panturrilha no leg press, elevação lateral sentado, rosca martelo sentado, bird-dog |
+| **C · Superiores 2** | supino inclinado com halteres, puxada com triângulo, remada com apoio no peito, crucifixo no voador, crucifixo invertido, elevação lateral na polia, rosca Scott alternada, tríceps corda |
+| **D · Pernas 2 + tronco** | cadeira flexora, leg press 45°, cadeira extensora, elevação pélvica, cadeira abdutora, panturrilha no leg press, elevação lateral sentado, tríceps barra V, prancha |
+
+- **Adaptação:** até fazer A, B, C e D uma vez na ficha nova, todos os exercícios aparecem com 2 séries, terminando com umas 3 repetições sobrando.
+- **Esforço depois disso:** superiores com 1 a 2 repetições sobrando; pernas com 2 a 3. Não precisa ir até a falha. As cargas antigas de perna (160 kg no leg press, 90 kg na extensora) não são meta.
+- **Subir carga:** nos superiores, bateu o topo da faixa em todas as séries, sobe no próximo treino. Nas pernas, só depois de 2 treinos seguidos no topo.
+- **Versão curta** (dia cansado): só os 4 primeiros exercícios, com 2 séries. No B e no D dá para incluir o exercício de tronco.
+- **Segurança:** pare se aparecer dor que desce pela perna, formigamento, dormência ou perda de força, e procure avaliação. Se o joelho doer mais no dia seguinte, inchar ou travar, diminua amplitude ou carga.
+- **Viagem:** último treino de pernas (B ou D) até 30/10; os 2 últimos antes de viajar são leves; 04/11 é descanso; volta em 11/11.
+- Os treinos antigos (ficha 1: A Empurrar, B Puxar, C Pernas e abdômen, D Superior) continuam no calendário com os nomes da época.
+
+## 4. Seus treinos
 
 - No primeiro uso, o app já vem com os 8 treinos registrados até 26/09/2026.
 - Depois disso, os treinos ficam salvos só neste celular. Toque em **Salvar backup** de vez em quando e guarde o arquivo no Arquivos, no iCloud Drive ou no WhatsApp. O app mostra a data do último backup e destaca a seção quando passa de 7 dias com treinos novos.
@@ -38,7 +58,7 @@ No celular, se algum botão não aparecer, toque em **aA** na barra do Safari e 
 - Este app e o app de dentro do Claude são separados: o que você marca em um não aparece no outro.
 - Apagar o app da Tela de Início apaga os treinos junto. Salve um backup antes.
 
-## 4. Bom saber
+## 5. Bom saber
 
 - Digite o peso e as repetições só na série 1: as séries seguintes do exercício já vêm com eles.
 - **Minimizar todos** fecha todos os exercícios numa linha cada, com quantas séries faltam (ex.: "0 de 3 séries · 3 × 8–12 · 18 kg"). Abra só o que vai fazer; quando terminar, o próximo abre sozinho. Cada exercício também tem seu botão **Minimizar**.
@@ -51,10 +71,10 @@ No celular, se algum botão não aparecer, toque em **aA** na barra do Safari e 
 - O iPhone não deixa sites vibrarem. No fim do descanso, a barra de baixo fica amarela e o app apita, se o celular não estiver no silencioso. O apito só toca com o app aberto na tela.
 - A tela fica acesa durante o treino quando o iPhone permite.
 
-## 5. Atualizar o app
+## 6. Atualizar o app
 
 1. Troque o `index.html` no repositório (Add file > Upload files, com o mesmo nome).
-2. No `sw.js`, troque o número de `VERSAO` (por exemplo, de `v4` para `v5`) e suba ele também.
+2. No `sw.js`, troque o número de `VERSAO` (por exemplo, de `v11` para `v12`) e suba ele também.
 3. No iPhone, feche o app (arraste para cima na troca de apps) e abra de novo. Com internet, a versão nova aparece na hora.
 
 Os treinos salvos no celular continuam.

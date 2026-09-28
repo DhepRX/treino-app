@@ -106,6 +106,11 @@ h1{font-size:1.75rem;font-weight:800;font-stretch:78%;margin:8px 0 2px;line-heig
 .whead p{margin:3px 0 0;color:var(--muted)}
 .startrow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:6px 0 14px}
 .startrow p{margin:0;color:var(--muted)}
+.startrow .minbtn{margin-left:0;align-self:center}
+.startrow .curta-on{flex:1 1 100%;color:var(--ink);font-weight:700}
+.aviso-treino{margin:0 0 10px;padding:10px 12px;border-radius:10px;background:var(--soft);border-left:4px solid var(--tag);font-size:.95rem}
+.seguranca{margin:0 0 14px;padding-left:10px;border-left:3px solid var(--line);color:var(--muted);font-size:.84rem;line-height:1.45}
+.wk.trip .rules{margin:4px 0 0}
 .startrow .aviso-aberto{flex:1 1 100%;color:var(--ink);font-weight:600;background:var(--soft);border-left:4px solid var(--tag);border-radius:8px;padding:10px 12px}
 
 .btn{min-height:46px;padding:0 18px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-weight:700;cursor:pointer}
@@ -132,6 +137,7 @@ h1{font-size:1.75rem;font-weight:800;font-stretch:78%;margin:8px 0 2px;line-heig
 .sets{margin-top:10px;display:grid;gap:6px}
 .setrow{display:grid;grid-template-columns:2.2rem 1fr 1fr 48px;gap:8px;align-items:center}
 .setrow.time{grid-template-columns:2.2rem 1fr auto 48px}
+.setrow.sp{grid-template-columns:2.2rem 1fr 48px}
 .setrow.head{font-size:.8rem;color:var(--muted);font-weight:600}
 .sn{font-weight:800;text-align:center;color:var(--muted)}
 .setrow input{width:100%;min-height:44px;border:1px solid var(--line);border-radius:9px;background:var(--bg);padding:0 10px;font-size:1.05rem;font-variant-numeric:tabular-nums;text-align:center}
@@ -346,7 +352,8 @@ details.how .lbl{font-weight:700}
   document.documentElement.lang = 'pt-BR';
 
   // ---------------- treinos ----------------
-  const W = [
+  // Ficha 1 (até 27/09/2026). Fica guardada para o histórico antigo mostrar os nomes certos.
+  const W1 = [
     { id:'A', dia:'Segunda', dow:1, nome:'Empurrar', foco:'peito, ombro e tríceps', min:60, ex:[
       { id:'a1', vid:'IOvaYfds_ok', nome:'Supino reto com halteres', maq:'banco reto e halteres', s:3, r:[8,10], rest:120, kg:26, inc:2, yt:'supino reto com halteres como fazer',
         como:['Deite no banco com os pés firmes no chão e as escápulas juntas e para baixo.','Comece com os halteres na linha do peito e os cotovelos a uns 45° do corpo.','Empurre para cima sem bater um halter no outro e desça controlando até a lateral do peito.'],
@@ -434,9 +441,82 @@ details.how .lbl{font-weight:700}
         erros:'quadril caindo ou alto demais e prender a respiração.', troca:'prancha com os joelhos apoiados, se ficar pesado.' },
     ]},
   ];
-  const EX = {};
-  W.forEach(w => w.ex.forEach(e => { e.w = w.id; EX[e.id] = e; }));
-  const WB = Object.fromEntries(W.map(w => [w.id, w]));
+
+  // Ficha 2 (desde 28/09/2026). Sem carga direta na coluna; pernas em dois dias mais leves.
+  // O mesmo exercício pode estar em mais de um treino, com séries diferentes: a carga e o
+  // histórico continuam pelo id. Os que não mudaram partem da ficha 1 com poucos ajustes.
+  const def1 = id => { for (const w of W1) for (const e of w.ex) if (e.id === id) return Object.assign({}, e); };
+  const muda = (id, extra) => Object.assign(def1(id), extra);
+  const X2 = {
+    a1: muda('a1', { r:[8,12], rest:150 }),
+    b1: muda('b1', { nome:'Puxada frontal, pegada confortável', maq:'puxador alto (pulley) com barra longa', yt:'puxada frontal pulley como fazer',
+      como:['Pegada na largura que ficar confortável nos ombros, coxas travadas no apoio.','Puxe a barra até a parte de cima do peito, levando os cotovelos para baixo e para trás.','Suba devagar até esticar os braços.'] }),
+    e1: { id:'e1', nome:'Remada em máquina com apoio no peito', maq:'remada articulada (máquina) com apoio para o peito', r:[8,12], rest:120, kg:null, inc:5, yt:'remada articulada apoio no peito máquina como fazer',
+      como:['Ajuste o banco para o peito ficar na almofada e as mãos alcançarem as pegadas com os braços esticados.','Puxe levando os cotovelos para trás e aproximando as escápulas, sem tirar o peito do apoio.','Volte devagar até esticar os braços.'],
+      erros:'tirar o peito do apoio para ajudar, dar tranco e subir os ombros.', troca:'remada baixa com triângulo, se você já faz bem e o professor conferir, ou remada articulada sentada.' },
+    a2: muda('a2', { r:[8,12], rest:120 }),
+    a5: muda('a5', { nome:'Elevação lateral com halteres, sentado', maq:'banco com encosto e halteres', r:[12,15], rest:90, yt:'elevação lateral sentado com halteres como fazer',
+      como:['Sente com as costas apoiadas e os halteres ao lado do corpo.','Suba os halteres pelos lados até a altura dos ombros, com os cotovelos levemente dobrados.','Desça devagar.'],
+      erros:'balançar o tronco, passar da altura dos ombros e encolher os ombros.' }),
+    a7: muda('a7', { r:[10,15], rest:90 }),
+    b5: muda('b5', { r:[10,15], rest:90 }),
+    c1: muda('c1', { r:[10,15], rest:150, kg:null, inc:5, pernas:true,
+      como:['Costas e quadril bem apoiados, pés na plataforma na largura do quadril.','Desça devagar só até onde o quadril e a lombar continuam apoiados no banco.','Suba empurrando com o pé inteiro, sem travar os joelhos.'],
+      erros:'descer demais e tirar o quadril do banco, travar os joelhos e empurrar com a ponta dos pés.', troca:'leg press horizontal, se tiver. Evite agachamento com barra nas costas.' }),
+    c4: muda('c4', { r:[10,15], rest:120, pernas:true, troca:'mesa flexora, deitado.' }),
+    c5: muda('c5', { nome:'Elevação pélvica em máquina', r:[10,15], rest:120, pernas:true,
+      como:['Costas apoiadas, apoio sobre o quadril e pés firmes na largura do quadril.','Suba pelo quadril até alinhar o tronco com as coxas, sem jogar o tronco para trás no final, e aperte o glúteo por 1 segundo.','Desça controlando.'] }),
+    c2: muda('c2', { r:[12,15], rest:120, pernas:true,
+      como:['Alinhe o eixo da máquina com o joelho e o rolo logo acima do tornozelo.','Suba e desça devagar, sem soltar o peso na descida.','Se o joelho incomodar, diminua a amplitude.'] }),
+    c6: muda('c6', { r:[12,20], rest:90, pernas:true }),
+    b6: muda('b6', { nome:'Rosca martelo com halteres, sentado', maq:'banco com encosto e halteres', r:[10,15], rest:90, yt:'rosca martelo sentado com halteres como fazer',
+      como:['Sente com as costas apoiadas, halteres ao lado do corpo e palmas viradas uma para a outra.','Suba dobrando só os cotovelos, sem girar o punho.','Desça devagar.'] }),
+    e4: { id:'e4', nome:'Bird-dog, sem peso', maq:'colchonete', r:[5,5], lado:true, semPeso:true, extra:'segure 5 s em cada', rest:60, kg:null, inc:0, tronco:true, yt:'bird dog exercício como fazer',
+      como:['Em quatro apoios, mãos embaixo dos ombros e joelhos embaixo do quadril.','Estique um braço e a perna do lado oposto até ficarem na linha do tronco, segure 5 segundos e volte.','Alterne os lados: conte 5 repetições de cada lado.'],
+      erros:'girar o quadril, arquear a lombar e fazer rápido.', troca:'mexer só um braço ou só uma perna por vez.' },
+    d1: muda('d1', { rest:150 }),
+    d2: muda('d2', { rest:120 }),
+    a3: muda('a3', { rest:90 }),
+    b4: muda('b4', { rest:90 }),
+    d3: muda('d3', { rest:90 }),
+    d4: Object.assign(muda('d4', { r:[10,15], rest:90 }), { par:undefined, parCurto:undefined }),
+    e2: { id:'e2', nome:'Tríceps na polia com corda', maq:'polia alta com corda', r:[10,15], rest:90, kg:null, inc:2.5, yt:'tríceps na polia com corda como fazer',
+      como:['Em pé, de frente para a polia, cotovelos colados ao corpo.','Estique os braços para baixo, abrindo a corda no fim.','Volte devagar até uns 90°.'],
+      erros:'levar os cotovelos para a frente e para trás e inclinar o tronco para ajudar.', troca:'tríceps na polia com barra V.' },
+    e3: { id:'e3', nome:'Cadeira abdutora', maq:'cadeira abdutora', r:[12,20], rest:90, kg:null, inc:5, pernas:true, yt:'cadeira abdutora como fazer',
+      como:['Sente com as costas apoiadas.','Abra as pernas até onde for confortável e segure 1 segundo.','Volte devagar, sem deixar as placas baterem.'],
+      erros:'jogar o tronco para a frente e soltar o peso na volta.', troca:'abdução em pé na polia baixa, com caneleira.' },
+    d6: muda('d6', { nome:'Prancha frontal', r:[20,40], rest:60, inc:5, tronco:true,
+      como:['Antebraços no chão, cotovelos embaixo dos ombros.','Corpo reto da cabeça ao calcanhar, com abdômen e glúteo contraídos.','Respire normalmente e pare antes de perder a posição.'],
+      erros:'quadril caindo ou alto demais e prender a respiração.', troca:'prancha com os joelhos apoiados, se ficar pesado.' }),
+  };
+  const W2 = [
+    { id:'A', nome:'Superiores 1', curto:'Sup. 1', foco:'peito, costas, ombro e braço', min:65, sup:true,
+      ex:[['a1',3],['b1',3],['e1',3],['a2',2],['a5',2],['a7',2],['b5',2]] },
+    { id:'B', nome:'Pernas 1 + tronco', curto:'Pernas 1', foco:'coxa, glúteo e panturrilha, com ombro, bíceps e tronco', min:60,
+      ex:[['c1',3],['c4',3],['c5',2],['c2',2],['c6',3],['a5',3],['b6',2],['e4',2]] },
+    { id:'C', nome:'Superiores 2', curto:'Sup. 2', foco:'peito, costas, ombro e braço', min:70, sup:true,
+      ex:[['d1',3],['d2',3],['e1',3],['a3',2],['b4',2],['d3',2],['d4',2],['e2',2]] },
+    { id:'D', nome:'Pernas 2 + tronco', curto:'Pernas 2', foco:'coxa, glúteo e panturrilha, com ombro, tríceps e tronco', min:65,
+      ex:[['c4',3],['c1',2],['c2',2],['c5',2],['e3',2],['c6',2],['a5',3],['a7',2],['d6',2]] },
+  ];
+  W2.forEach(w => { w.ex = w.ex.map(([id, s]) => Object.assign({}, X2[id], { id, s })); });
+
+  // Cada exercício sabe o treino (w) e a ficha (f) de onde veio.
+  function montar(f, treinos){
+    treinos.forEach(w => { w.f = f; w.porEx = {}; w.ex.forEach(e => { e.w = w.id; e.f = f; w.porEx[e.id] = e; }); });
+    return { treinos, porId:Object.fromEntries(treinos.map(w => [w.id, w])) };
+  }
+  const FICHAS = { 1:montar(1, W1), 2:montar(2, W2) };
+  const ATUAL = 2;
+  const W = FICHAS[ATUAL].treinos, WB = FICHAS[ATUAL].porId;
+  const CONHECIDOS = new Set();
+  Object.values(FICHAS).forEach(f => f.treinos.forEach(w => w.ex.forEach(e => CONHECIDOS.add(e.id))));
+  const treinoDe = (f, wid) => (FICHAS[f] || FICHAS[1]).porId[wid];
+  // O treino em andamento continua na ficha em que começou; os outros usam a ficha atual.
+  const treinoTela = wid => treinoDe(state.cur && state.cur.wid === wid ? state.cur.ficha : ATUAL, wid);
+  const exTela = id => treinoTela(sel).porEx[id];
+  const parDe = e => e.par ? treinoDe(e.f, e.w).porEx[e.par] : null;
   const LS = 'treino-renan-v1';
   const MAX_HIST = 1200, KEEP_DETAIL = 60;
   const pad2 = n => String(n).padStart(2, '0');
@@ -476,13 +556,14 @@ details.how .lbl{font-weight:700}
     const cleanSets = sets => {
       const o = {};
       if (sets && typeof sets === 'object') for (const [k, arr] of Object.entries(sets)) {
-        if (!EX[k] || !Array.isArray(arr)) continue;
+        if (!CONHECIDOS.has(k) || !Array.isArray(arr)) continue;
         o[k] = arr.slice(0, 8).map(x => x && typeof x === 'object' ? { kg:num(x.kg), reps:num(x.reps), done:!!x.done } : null);
       }
       return o;
     };
     if (d && d.cur && WB[d.cur.wid] && typeof d.cur.start === 'number') {
-      out.cur = { wid:d.cur.wid, start:d.cur.start, sets:cleanSets(d.cur.sets), warm:{} };
+      // Sem o campo ficha: começou antes da ficha 2.
+      out.cur = { wid:d.cur.wid, ficha:FICHAS[d.cur.ficha] ? Number(d.cur.ficha) : 1, start:d.cur.start, sets:cleanSets(d.cur.sets), warm:{} };
       if (d.cur.warm && typeof d.cur.warm === 'object') for (const k of ['0','1','2']) if (d.cur.warm[k]) out.cur.warm[k] = true;
     }
     if (d && Array.isArray(d.hist)) {
@@ -490,6 +571,7 @@ details.how .lbl{font-weight:700}
         .map(h => {
           const e = { id:String(h.id || h.start), wid:h.wid, start:h.start, end:Number(h.end) || h.start, sets:cleanSets(h.sets) };
           if (h.manual) e.manual = true;
+          if (FICHAS[h.ficha]) e.ficha = Number(h.ficha); // sem o campo: ficha 1
           if (typeof h.n === 'number' && isFinite(h.n)) e.n = Math.max(0, Math.round(h.n));
           if (typeof h.rot === 'string' && h.rot.trim()) e.rot = h.rot.trim().slice(0, 40);
           if (typeof h.fonte === 'string' && h.fonte.trim()) e.fonte = h.fonte.trim().slice(0, 30);
@@ -508,22 +590,45 @@ details.how .lbl{font-weight:700}
   } catch (e) { state = sanitize(SEED); }
 
   // ---------------- histórico e sugestão ----------------
-  function lastSets(exId){
-    for (let i = state.hist.length - 1; i >= 0; i--) {
+  // Séries feitas deste exercício nos últimos treinos em que ele apareceu (o mais recente primeiro).
+  function sessoes(exId, n){
+    const out = [];
+    for (let i = state.hist.length - 1; i >= 0 && out.length < n; i--) {
       const arr = state.hist[i].sets[exId];
-      if (arr && arr.some(s => s && s.done)) return arr.filter(s => s && s.done);
+      if (arr && arr.some(s => s && s.done)) out.push(arr.filter(s => s && s.done));
     }
-    return null;
+    return out;
   }
+  const maxKgDe = sets => Math.max(0, ...sets.map(s => s.kg || 0));
+  // Bateu o topo da faixa em todas as séries feitas (pelo menos 2).
+  const bateuTopo = (e, sets) => sets.length >= Math.min(2, e.s) && sets.every(s => (s.reps || 0) >= e.r[1]);
   function suggest(e){
-    const last = lastSets(e.id);
+    const [last, antes] = sessoes(e.id, 2);
     if (!last) return { kg:e.kg, secs:null, up:false, last:null };
-    const bateu = last.length >= e.s && last.every(s => (s.reps || 0) >= e.r[1]);
-    if (e.tempo) return { kg:null, secs:bateu ? e.r[1] + 10 : null, up:bateu, last };
-    const maxKg = Math.max(0, ...last.map(s => s.kg || 0));
+    let bateu = bateuTopo(e, last);
+    // Pernas: só sobe depois de 2 treinos seguidos no topo, com a mesma carga.
+    if (bateu && e.pernas) bateu = !!antes && bateuTopo(e, antes) && maxKgDe(antes) >= maxKgDe(last);
+    if (e.tempo) return { kg:null, secs:bateu ? e.r[1] + (e.inc || 10) : null, up:bateu, last };
+    const maxKg = maxKgDe(last);
     if (!maxKg) return { kg:e.kg, up:false, last };
     return { kg:bateu ? Math.round((maxKg + e.inc) * 100) / 100 : maxKg, up:bateu, last };
   }
+  // Primeiro ciclo da ficha nova, até fazer A, B, C e D uma vez nela: 2 séries em tudo.
+  function adaptacao(){
+    const feitos = new Set(state.hist.filter(h => h.ficha === ATUAL).map(h => h.wid));
+    return !ORDEM.every(l => feitos.has(l));
+  }
+  // Versão curta (dia cansado): só os 4 primeiros exercícios, com 2 séries; no B e no D, o de tronco se quiser.
+  // Fica fora dos dados do treino: { start do treino em andamento, tronco }.
+  const LS_CURTA = 'treino-renan-curta';
+  let curta = null;
+  try { curta = JSON.parse(localStorage.getItem(LS_CURTA)); } catch (e) {}
+  function gravarCurta(v){ curta = v; try { v ? localStorage.setItem(LS_CURTA, JSON.stringify(v)) : localStorage.removeItem(LS_CURTA); } catch (e) {} }
+  const curtaAtiva = wid => !!(curta && state.cur && state.cur.wid === wid && curta.start === state.cur.start);
+  const temTronco = w => w.ex.some(e => e.tronco);
+  const exibidos = w => curtaAtiva(w.id) ? w.ex.filter((e, i) => i < 4 || (curta.tronco && e.tronco)) : w.ex;
+  // Séries que valem hoje.
+  const S = e => e.f === ATUAL && (adaptacao() || curtaAtiva(e.w)) ? Math.min(2, e.s) : e.s;
   function seriesTxt(e, sets){
     if (e.tempo) return joinPt(sets.map(s => (s.reps || 0) + ' s'));
     const kgs = sets.map(s => s.kg || 0);
@@ -584,10 +689,10 @@ details.how .lbl{font-weight:700}
       } else st = '<span class="st">Ainda não feito</span>';
       return '<li><button type="button" class="day seqrow' + (id === nx ? ' is-today' : '') + '" data-open="' + id + '"><span class="dw"><b>' + id + '</b>' + esc(w.nome) + '</span><span class="foco">' + esc(w.foco) + '</span>' + st + '</button></li>';
     }).join('') + '</ul>';
-    html += '<section class="wk"><h3>Regras</h3><ul class="rules"><li>4 treinos a cada 7 dias, nos dias que der.</li><li>No máximo 2 dias seguidos; depois, 1 de descanso.</li><li>Perdeu um dia? Não pula treino: faça o próximo da ordem.</li></ul></section>';
-    html += '<section class="wk"><h3>Frequência</h3><p class="wkcount">Últimos 7 dias: <b>' + recentes(7) + '</b> de 4 treinos.</p><p class="wkcount">Treinos registrados aqui: <b>' + state.hist.length + '</b>.</p><button type="button" class="btn" data-gocal>Ver calendário</button></section>';
+    html += '<section class="wk"><h3>Regras</h3><ul class="rules"><li>A e C são superiores; B e D são pernas e tronco.</li><li>3 a 4 treinos por semana, nos dias que der.</li><li>Se fizer só 3 numa semana, continue a ordem na seguinte, sem recomeçar pelo A. Não compense falta dobrando treino.</li><li>No máximo 2 dias seguidos.</li></ul></section>';
+    html += '<section class="wk"><h3>Frequência</h3><p class="wkcount">Últimos 7 dias: <b>' + recentes(7) + '</b> treinos (meta: 3 a 4).</p><p class="wkcount">Treinos registrados aqui: <b>' + state.hist.length + '</b>.</p><button type="button" class="btn" data-gocal>Ver calendário</button></section>';
     const faltam = diasEntre(now, VIAGEM);
-    if (faltam > 0) html += '<section class="wk trip"><h3>Salvador em ' + faltam + (faltam > 1 ? ' dias' : ' dia') + '</h3><p>O último treino de perna (C) até uns 5 dias antes da viagem. Os 2 últimos treinos antes de viajar ficam leves: 2 séries por exercício, com a mesma carga.</p></section>';
+    if (faltam > 0) html += '<section class="wk trip"><h3>Salvador em ' + faltam + (faltam > 1 ? ' dias' : ' dia') + '</h3><ul class="rules"><li>Último treino de pernas (B ou D) até 30/10.</li><li>Os 2 últimos treinos antes da viagem são leves: 2 séries por exercício, mesma carga, parando 2 a 3 repetições antes do limite.</li><li>04/11 é descanso. De 05 a 10/11 não tem treino; você volta em 11/11.</li></ul></section>';
     $('vSemanas').innerHTML = html;
   }
 
@@ -619,8 +724,9 @@ details.how .lbl{font-weight:700}
     return txt;
   }
   function entryMeta(h){ return h.manual ? (h.fonte ? 'do app da ' + h.fonte : 'marcado à mão') : Math.max(1, Math.round((h.end - h.start) / 60000)) + ' min, ' + seriesOf(h) + ' séries'; }
+  const nomeTreino = h => { const w = treinoDe(h.ficha || 1, h.wid); return w ? 'Treino ' + h.wid + ' · ' + w.nome : (h.rot || 'Outro treino'); };
   function setsList(h){
-    const w = WB[h.wid];
+    const w = treinoDe(h.ficha || 1, h.wid);
     if (w && h.sets && Object.keys(h.sets).length) {
       return '<ul>' + w.ex.filter(e => h.sets[e.id] && h.sets[e.id].some(x => x && x.done)).map(e => {
         const d = h.sets[e.id].filter(x => x && x.done);
@@ -634,7 +740,7 @@ details.how .lbl{font-weight:700}
     const hoje = ymd(new Date());
     if (calSel > hoje) return;
     const start = calSel === hoje ? Date.now() : parseKey(calSel).setHours(7, 0, 0, 0);
-    addEntry({ id:'m' + start.toString(36) + Math.random().toString(36).slice(2, 6), wid, start, end:start, sets:{}, manual:true });
+    addEntry({ id:'m' + start.toString(36) + Math.random().toString(36).slice(2, 6), wid, ficha:ATUAL, start, end:start, sets:{}, manual:true });
     regOpen = false;
     commit();
     renderAll();
@@ -679,7 +785,7 @@ details.how .lbl{font-weight:700}
       const dt = new Date(calY, calM, 1 - off + i), k = ymd(dt), es = byDay[k] || [];
       const cls = 'cd' + (dt.getMonth() !== calM ? ' out' : '') + (k === hoje ? ' today' : '') + (k === calSel ? ' sel' : '');
       const mk = es.slice(0, 2).map((h, j) => (j === 1 && es.length > 2) ? '<i class="chip">+' + (es.length - 1) + '</i>' : '<i class="chip">' + (WB[h.wid] ? h.wid : CHECK) + '</i>').join('');
-      const rot = dt.toLocaleDateString('pt-BR', { day:'numeric', month:'long' }) + (k === hoje ? ', hoje' : '') + (es.length ? ': ' + es.map(h => WB[h.wid] ? 'Treino ' + h.wid : (h.rot || 'outro treino')).join(' e ') : '');
+      const rot = dt.toLocaleDateString('pt-BR', { day:'numeric', month:'long' }) + (k === hoje ? ', hoje' : '') + (es.length ? ': ' + es.map(nomeTreino).join(' e ') : '');
       g += '<button type="button" class="' + cls + '" data-cd="' + k + '" aria-pressed="' + (k === calSel) + '" aria-label="' + esc(rot) + '"' + (k === hoje ? ' aria-current="date"' : '') + (k > hoje ? ' disabled' : '') + '>' +
         '<span class="n">' + (k === hoje ? 'Hoje' : dt.getDate()) + '</span><span class="mk">' + mk + '</span></button>';
     }
@@ -713,9 +819,9 @@ details.how .lbl{font-weight:700}
     if (vivo) html += '<div class="livebox"><span>Treino ' + state.cur.wid + ' em andamento</span><button type="button" class="btn primary" data-go="' + state.cur.wid + '">Continuar</button></div>';
     if (es.length) {
       html += '<ul class="entries">' + es.slice().reverse().map(h => {
-        const w = WB[h.wid];
+        const w = treinoDe(h.ficha || 1, h.wid);
         const meta = (h.manual ? '' : new Date(h.start).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }) + ' · ') + entryMeta(h);
-        return '<li class="entry"><details><summary><i class="chip">' + (w ? h.wid : CHECK) + '</i><span class="et"><b>' + esc(w ? 'Treino ' + h.wid + ' · ' + w.nome : (h.rot || 'Outro treino')) + '</b><small>' + esc(cap(meta)) + '</small></span></summary>' +
+        return '<li class="entry"><details><summary><i class="chip">' + (w ? h.wid : CHECK) + '</i><span class="et"><b>' + esc(nomeTreino(h)) + '</b><small>' + esc(cap(meta)) + '</small></span></summary>' +
           setsList(h) + '<button type="button" class="btn quiet" data-del="' + esc(h.id) + '">Apagar registro</button></details></li>';
       }).join('') + '</ul>';
     } else if (!vivo) html += '<p class="dayempty">Nenhum treino registrado nesta data.</p>';
@@ -725,7 +831,7 @@ details.how .lbl{font-weight:700}
 
   function renderTabs(){
     $('tabs').innerHTML = W.map(w => '<button type="button" data-tab="' + w.id + '" aria-pressed="' + (w.id === sel) + '"' +
-      (state.cur && state.cur.wid === w.id ? ' class="live"' : '') + '><b>' + w.id + '</b><small>' + esc(w.nome.split(' ')[0]) + '</small></button>').join('');
+      (state.cur && state.cur.wid === w.id ? ' class="live"' : '') + '><b>' + w.id + '</b><small>' + esc(treinoTela(w.id).curto || treinoTela(w.id).nome.split(' ')[0]) + '</small></button>').join('');
   }
 
   function curSet(exId, i){
@@ -736,7 +842,7 @@ details.how .lbl{font-weight:700}
 
   function restRowHTML(e, i, dis, feita){
     const f = feita ? ' feita' : '';
-    if (e.par) return '<p class="restnote' + f + '" data-rn="' + e.id + ':' + i + '">Sem descanso: vai pro ' + esc(e.parCurto || EX[e.par].nome.toLowerCase()) + '</p>';
+    if (e.par) return '<p class="restnote' + f + '" data-rn="' + e.id + ':' + i + '">Sem descanso: vai pro ' + esc(e.parCurto || parDe(e).nome.toLowerCase()) + '</p>';
     return '<button type="button" class="restbtn' + f + '" data-rs="' + e.id + ':' + i + '"' + dis + '><span class="bar"></span>' + CLOCK + '<span class="rt">Descanso ' + mmssS(e.rest) + '</span></button>';
   }
 
@@ -758,49 +864,55 @@ details.how .lbl{font-weight:700}
     }
     const kgVal = cs && cs.kg !== null && cs.kg !== undefined ? fmt(cs.kg) : (sg.kg ? fmt(sg.kg) : '');
     const repsVal = cs && cs.reps !== null && cs.reps !== undefined ? fmt(cs.reps) : '';
+    if (e.semPeso) {
+      return '<div class="setrow sp' + (done ? ' ok' : '') + attrs +
+        '<input data-f="reps" inputmode="numeric" placeholder="' + faixa(e) + '" value="' + repsVal + '" aria-label="Série ' + (i + 1) + ', repetições"' + dis + '>' + btnDone + '</div>';
+    }
     return '<div class="setrow' + (done ? ' ok' : '') + attrs +
       '<input data-f="kg" inputmode="decimal" placeholder="kg" value="' + kgVal + '" aria-label="Série ' + (i + 1) + ', carga em kg"' + dis + '>' +
       '<input data-f="reps" inputmode="numeric" placeholder="' + faixa(e) + '" value="' + repsVal + '" aria-label="Série ' + (i + 1) + ', repetições"' + dis + '>' + btnDone + '</div>';
   }
 
   // Séries feitas deste exercício no treino em andamento.
-  function feitasEx(e){ return state.cur && state.cur.wid === e.w ? (state.cur.sets[e.id] || []).filter(x => x && x.done) : []; }
+  const doCur = e => !!(state.cur && state.cur.wid === e.w && state.cur.ficha === e.f);
+  function feitasEx(e){ return doCur(e) ? (state.cur.sets[e.id] || []).filter(x => x && x.done) : []; }
   function exHTML(e, idx, lock){
-    const feitas = feitasEx(e), completo = feitas.length >= e.s;
-    const alvo = e.s + ' × ' + faixa(e) + (e.tempo ? ' s' : '') + (e.lado ? (e.perna ? ' cada perna' : e.braco ? ' cada braço' : ' cada lado') : '');
+    const feitas = feitasEx(e), completo = feitas.length >= S(e);
+    const alvo = S(e) + ' × ' + faixa(e) + (e.tempo ? ' s' : '') + (e.lado ? (e.perna ? ' cada perna' : e.braco ? ' cada braço' : ' cada lado') : '') + (e.extra ? ', ' + e.extra : '');
     if ((completo && !abertos.has(e.id)) || (!completo && fechados.has(e.id))) {
       let resumo;
       if (completo) resumo = seriesTxt(e, feitas);
       else {
         // Minimizado antes de terminar: quantas séries faltam, a meta e o peso da próxima.
-        const prox = (state.cur && state.cur.wid === e.w && (state.cur.sets[e.id] || []).find(x => x && !x.done && x.kg)) || null;
+        const prox = (doCur(e) && (state.cur.sets[e.id] || []).find(x => x && !x.done && x.kg)) || null;
         const kg = prox ? prox.kg : suggest(e).kg;
-        resumo = feitas.length + ' de ' + e.s + ' séries · ' + alvo + (kg && !e.tempo ? ' · ' + fmt(kg) + ' kg' : '');
+        resumo = feitas.length + ' de ' + S(e) + ' séries · ' + alvo + (kg && !e.tempo && !e.semPeso ? ' · ' + fmt(kg) + ' kg' : '');
       }
       return '<li class="card ex mini" id="ex-' + e.id + '"><button type="button" class="minirow" data-abrir="' + e.id + '" aria-expanded="false">' +
         '<span class="num' + (completo ? '' : ' pend') + '">' + (completo ? CHECK : idx + 1) + '</span><span class="mt"><b>' + esc(e.nome) + '</b><small>' + esc(resumo) + '</small></span>' +
         '<span class="abrir">Abrir</span></button></li>';
     }
     const sg = suggest(e);
-    const w = WB[e.w];
     let info = '';
     if (sg.last) info += '<p class="last">' + esc(lastTxt(e, sg.last)) + '</p>';
     else if (e.kg) info += '<p class="last">Primeira vez aqui: comece com ' + fmt(e.kg) + ' kg (a carga do seu app).</p>';
-    else if (!e.tempo) info += '<p class="last">Primeira vez: escolha uma carga em que a última repetição saia com esforço, sobrando 1 ou 2.</p>';
+    else if (!e.tempo && !e.semPeso) info += '<p class="last">Primeira vez: escolha uma carga em que a última repetição saia com esforço, sobrando ' + (e.pernas ? '2 ou 3' : '1 ou 2') + '.</p>';
     if (sg.up) info += '<span class="up">' + (e.tempo ? 'Hora de subir: tente ' + sg.secs + ' s' : 'Hora de subir: ' + fmt(sg.kg) + ' kg') + '</span>';
     const desc = e.par ? 'sem descanso: vai direto pro próximo' : 'descanso ' + descansoTxt(e.rest);
     let rows = '';
     if (e.tempo) {
       rows += '<div class="setrow time head"><span>Série</span><span>Segundos</span><span>Cronômetro</span><span></span></div>';
+    } else if (e.semPeso) {
+      rows += '<div class="setrow sp head"><span>Série</span><span>Repetições' + (e.lado ? ' (cada lado)' : '') + '</span><span></span></div>';
     } else {
       rows += '<div class="setrow head"><span>Série</span><span>Carga (kg)</span><span>Repetições</span><span></span></div>';
     }
     const dis = lock ? ' disabled' : '';
-    for (let i = 0; i < e.s; i++) {
+    for (let i = 0; i < S(e); i++) {
       const cs = curSet(e.id, i);
       rows += setRowHTML(e, i, sg, dis) + restRowHTML(e, i, dis, !!(cs && cs.done));
     }
-    const par = e.par ? '<p class="pair">Faça junto com o <b>' + esc(EX[e.par].nome.toLowerCase()) + '</b>: uma série de cada, sem pausa, e descanse depois do tríceps.</p>' : '';
+    const par = e.par ? '<p class="pair">Faça junto com o <b>' + esc(parDe(e).nome.toLowerCase()) + '</b>: uma série de cada, sem pausa, e descanse depois do tríceps.</p>' : '';
     return '<li class="card ex" id="ex-' + e.id + '">' +
       '<div class="exhead"><span class="num">' + (idx + 1) + '</span><div><h3>' + esc(e.nome) + '</h3><p class="maq">Na Smart Fit: ' + esc(e.maq) + '</p></div>' +
       '<button type="button" class="minbtn" data-fechar="' + e.id + '">Minimizar</button></div>' +
@@ -817,7 +929,7 @@ details.how .lbl{font-weight:700}
   }
 
   function toggleVideo(btn){
-    const id = btn.dataset.video, e = EX[id];
+    const id = btn.dataset.video, e = exTela(id);
     const box = document.querySelector('[data-video-box="' + id + '"]');
     if (!e || !e.vid || !box) return;
     if (box.hidden) {
@@ -835,13 +947,10 @@ details.how .lbl{font-weight:700}
 
   function warmHTML(w, lock){
     const first = w.ex[0];
-    const sg = suggest(first);
-    const r2 = v => first.inc >= 5 ? Math.round(v / 5) * 5 : Math.round(v / 2) * 2;
-    const kg = sg.kg;
     const itens = [
-      '7 minutos de bike ou esteira, leve. De manhã o corpo demora mais para esquentar.',
-      kg ? '1ª série leve de ' + first.nome.toLowerCase() + ': ' + fmt(r2(kg * 0.5)) + ' kg × 10.' : '1ª série leve de ' + first.nome.toLowerCase() + ': metade da carga × 10.',
-      kg ? '2ª série leve: ' + fmt(r2(kg * 0.75)) + ' kg × 5.' : '2ª série leve: três quartos da carga × 5.',
+      '5 a 8 minutos leves de caminhada ou bike.',
+      '2 a 3 séries leves e progressivas de ' + first.nome.toLowerCase() + ', o primeiro exercício.',
+      'Uma série leve a mais ao trocar para um movimento bem diferente.',
     ];
     const warm = state.cur && state.cur.wid === w.id ? state.cur.warm : {};
     const completo = itens.every((t, i) => warm[i]);
@@ -854,11 +963,22 @@ details.how .lbl{font-weight:700}
       '<li><button type="button" class="done chk" data-warm="' + i + '" aria-pressed="' + !!warm[i] + '" aria-label="' + esc(t) + '"' + (lock ? ' disabled' : '') + '>' + CHECK + '</button><span>' + esc(t) + '</span></li>').join('') + '</ul></article>';
   }
 
+  // Avisos da ficha nova: adaptação ou esforço, e segurança.
+  function avisosHTML(w){
+    const pernas = !w.sup;
+    let t = adaptacao()
+      ? '<b>Semana de adaptação:</b> 2 séries, terminando com umas 3 repetições sobrando.'
+      : '<b>Esforço:</b> termine cada série com ' + (pernas ? '2 a 3' : '1 a 2') + ' repetições sobrando. Não precisa ir até a falha.';
+    if (pernas) t += ' As cargas antigas de perna (160 kg no leg press, 90 kg na extensora) não são meta.';
+    return '<p class="aviso-treino">' + t + '</p>' +
+      '<p class="seguranca">Pare o exercício se aparecer dor que desce pela perna, formigamento, dormência ou perda de força, e procure avaliação. Se o joelho doer mais no dia seguinte, inchar ou travar, diminua amplitude ou carga antes de subir.</p>';
+  }
   function renderWorkout(){
-    const w = WB[sel];
+    const w = treinoTela(sel);
     const c = state.cur;
     const ativo = c && c.wid === w.id;
     const outro = c && c.wid !== w.id;
+    const nova = w.f === ATUAL;
     let html = '<div class="whead"><div class="letter" aria-hidden="true">' + w.id + '</div><div><h2>' + esc(w.nome) + '</h2><p>Uns ' + w.min + ' min: ' + esc(w.foco) + '.</p></div></div>';
     html += '<div class="startrow">';
     if (ativo && esquecido(c)) {
@@ -867,20 +987,27 @@ details.how .lbl{font-weight:700}
         '<button type="button" class="btn primary" data-act="finish">Finalizar treino</button><button type="button" class="btn quiet" data-act="discard">Descartar</button>';
     } else if (ativo) {
       html += '<p id="progresso"></p>';
+      if (nova && curtaAtiva(w.id)) {
+        html += '<p class="curta-on">Versão curta: ' + exibidos(w).length + ' exercícios, 2 séries.</p>' +
+          (temTronco(w) ? '<button type="button" class="minbtn" data-curta="tronco">' + (curta.tronco ? 'Tirar o tronco' : 'Incluir o tronco') + '</button>' : '') +
+          '<button type="button" class="minbtn" data-curta="sair">Voltar ao treino completo</button>';
+      } else if (nova) html += '<button type="button" class="minbtn" data-curta="ligar">Versão curta</button>';
     } else if (outro) {
       html += '<p>O Treino ' + c.wid + ' está em andamento. Termine ou descarte ele para começar este.</p><button type="button" class="btn" data-go="' + c.wid + '">Voltar para o Treino ' + c.wid + '</button>';
     } else {
-      html += '<button type="button" class="btn primary" data-act="start">Começar o Treino ' + w.id + '</button>';
+      html += '<button type="button" class="btn primary" data-act="start">Começar o Treino ' + w.id + '</button>' +
+        (nova ? '<button type="button" class="btn" data-curta="ligar">Versão curta</button>' : '');
     }
     html += '</div>';
+    if (nova) html += avisosHTML(w);
     if (lastSummary && lastSummary.wid === w.id && !c) html += lastSummary.html;
     html += '<div class="listbar"><button type="button" class="minbtn" data-todos="fechar">Minimizar todos</button><button type="button" class="minbtn" data-todos="abrir">Abrir todos</button></div>';
     html += warmHTML(w, outro);
-    html += '<ol class="exlist">' + w.ex.map((e, i) => exHTML(e, i, outro)).join('') + '</ol>';
+    html += '<ol class="exlist">' + exibidos(w).map((e, i) => exHTML(e, i, outro)).join('') + '</ol>';
     if (ativo) {
       html += '<div class="finish"><button type="button" class="btn primary" data-act="finish">Finalizar treino</button><button type="button" class="btn quiet" data-act="discard">Descartar</button></div>';
     }
-    html += '<p class="note">Perdeu um dia? Não pula treino: faça o próximo da ordem. No máximo 2 dias seguidos, depois 1 de descanso.</p>';
+    html += '<p class="note">Perdeu um dia? Não pula treino: faça o próximo da ordem. No máximo 2 dias seguidos. Não compense falta dobrando treino.</p>';
     $('workout').innerHTML = html;
     progressText();
   }
@@ -893,7 +1020,7 @@ details.how .lbl{font-weight:700}
     } else {
       html += h.map(s => {
         const dia = new Date(s.start).toLocaleDateString('pt-BR', { weekday:'short', day:'2-digit', month:'2-digit' });
-        return '<details><summary>' + esc(dia + ', ' + (WB[s.wid] ? 'Treino ' + s.wid : (s.rot || 'Outro treino')) + ', ' + entryMeta(s)) + '</summary>' + setsList(s) + '</details>';
+        return '<details><summary>' + esc(dia + ', ' + nomeTreino(s) + ', ' + entryMeta(s)) + '</summary>' + setsList(s) + '</details>';
       }).join('');
     }
     html += '<p class="histcal"><button type="button" class="btn" data-gocal>Ver no calendário</button></p>';
@@ -917,15 +1044,15 @@ details.how .lbl{font-weight:700}
 
   function progressText(){
     const p = $('progresso');
-    if (p && state.cur) p.textContent = 'Em andamento desde ' + new Date(state.cur.start).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }) + '. ' + countDone(state.cur) + ' de ' + totalSets(WB[state.cur.wid]) + ' séries feitas.';
+    if (p && state.cur) p.textContent = 'Em andamento desde ' + new Date(state.cur.start).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }) + '. ' + countDone(state.cur) + ' de ' + totalSets(treinoTela(state.cur.wid)) + ' séries feitas.';
   }
-  const totalSets = w => w.ex.reduce((a, e) => a + e.s, 0);
+  const totalSets = w => exibidos(w).reduce((a, e) => a + S(e), 0);
   const countDone = c => Object.values(c.sets).reduce((a, arr) => a + arr.filter(x => x && x.done).length, 0);
 
   // ---------------- sessão ----------------
   function startSession(wid){
     if (state.cur) return state.cur.wid === wid;
-    state.cur = { wid, start:Date.now(), sets:{}, warm:{} };
+    state.cur = { wid, ficha:ATUAL, start:Date.now(), sets:{}, warm:{} };
     abertos.clear();
     seriesAbertas.clear();
     lastSummary = null;
@@ -935,8 +1062,8 @@ details.how .lbl{font-weight:700}
     return true;
   }
   function setVal(exId, i, patch){
-    const e = EX[exId];
     const c = state.cur;
+    const e = treinoDe(c.ficha, c.wid).porEx[exId];
     if (!c.sets[exId]) c.sets[exId] = Array.from({ length:e.s }, () => null);
     const prev = c.sets[exId][i] || { kg:null, reps:null, done:false };
     c.sets[exId][i] = Object.assign({}, prev, patch);
@@ -944,21 +1071,22 @@ details.how .lbl{font-weight:700}
   function finishSession(){
     const c = state.cur;
     if (!c) return;
-    const w = WB[c.wid];
+    const w = treinoDe(c.ficha, c.wid), total = totalSets(w);
     const sets = {};
     for (const [k, arr] of Object.entries(c.sets)) if (arr.some(x => x && x.done)) sets[k] = arr;
     const feitas = countDone(c);
     // Esqueceu aberto: salva com a duração normal do treino em vez de horas.
     const fim = esquecido(c) ? c.start + w.min * 60000 : Date.now();
     const min = Math.max(1, Math.round((fim - c.start) / 60000));
-    if (feitas) addEntry({ id:String(c.start), wid:c.wid, start:c.start, end:fim, sets });
+    if (feitas) addEntry({ id:String(c.start), wid:c.wid, ficha:c.ficha, start:c.start, end:fim, sets });
+    gravarCurta(null);
     state.cur = null;
     commit();
     wake(false);
     rest = null;
     hold = null;
     const subir = w.ex.map(e => ({ e, sg:suggest(e) })).filter(x => x.sg.up);
-    let html = '<div class="summary"><h3>Treino ' + w.id + ' salvo</h3><p>' + min + ' min e ' + feitas + ' de ' + totalSets(w) + ' séries.</p>';
+    let html = '<div class="summary"><h3>Treino ' + w.id + ' salvo</h3><p>' + min + ' min e ' + feitas + ' de ' + total + ' séries.</p>';
     html += subir.length ? '<p>Na próxima, sobe a carga em:</p><ul>' + subir.map(x => '<li>' + esc(x.e.nome) + ': ' + (x.e.tempo ? x.sg.secs + ' s' : fmt(x.sg.kg) + ' kg') + '</li>').join('') + '</ul>'
       : '<p>Na próxima, repita as cargas e tente mais repetições.</p>';
     html += '<button type="button" class="btn" data-gocal>Ver no calendário</button></div>';
@@ -969,6 +1097,7 @@ details.how .lbl{font-weight:700}
   }
   function discardSession(){
     state.cur = null;
+    gravarCurta(null);
     rest = null;
     hold = null;
     lastSummary = null;
@@ -1020,7 +1149,8 @@ details.how .lbl{font-weight:700}
         b.querySelector('.bar').style.width = Math.min(100, 100 * (1 - (rest.end - now) / (rest.total * 1000))) + '%';
       } else if (b.classList.contains('on')) {
         b.classList.remove('on');
-        b.querySelector('.rt').textContent = 'Descanso ' + mmssS(EX[b.dataset.rs.split(':')[0]].rest);
+        const eb = exTela(b.dataset.rs.split(':')[0]);
+        b.querySelector('.rt').textContent = 'Descanso ' + mmssS(eb ? eb.rest : 0);
         b.querySelector('.bar').style.width = '0';
       }
     });
@@ -1121,18 +1251,18 @@ details.how .lbl{font-weight:700}
   // ---------------- cards minimizados ----------------
   // Redesenha só um card (exercício ou aquecimento), sem mexer no resto da tela.
   function redesenhar(id){
-    const w = WB[sel], outro = !!(state.cur && state.cur.wid !== w.id);
+    const w = treinoTela(sel), outro = !!(state.cur && state.cur.wid !== w.id);
     const card = id === 'warm' ? document.querySelector('#workout .card.warm') : $('ex-' + id);
-    if (!card) return null;
+    if (!card || (id !== 'warm' && !w.porEx[id])) return null;
     const tmp = document.createElement('div');
-    tmp.innerHTML = id === 'warm' ? warmHTML(w, outro) : exHTML(EX[id], w.ex.indexOf(EX[id]), outro);
+    tmp.innerHTML = id === 'warm' ? warmHTML(w, outro) : exHTML(w.porEx[id], w.ex.indexOf(w.porEx[id]), outro);
     const novo = tmp.firstElementChild;
     card.replaceWith(novo);
     return novo;
   }
   // Redesenha uma série (e esconde o descanso dela quando já foi feita).
   function trocarSerie(exId, i){
-    const e = EX[exId], row = document.querySelector('.setrow[data-ex="' + exId + '"][data-i="' + i + '"]');
+    const e = exTela(exId), row = document.querySelector('.setrow[data-ex="' + exId + '"][data-i="' + i + '"]');
     if (!row) return null;
     const tmp = document.createElement('div');
     tmp.innerHTML = setRowHTML(e, i, suggest(e), '');
@@ -1144,7 +1274,8 @@ details.how .lbl{font-weight:700}
   }
   function estaCompleto(id){
     if (id === 'warm') return !!(state.cur && ['0', '1', '2'].every(x => state.cur.warm[x]));
-    return feitasEx(EX[id]).length >= EX[id].s;
+    const e = exTela(id);
+    return !!e && feitasEx(e).length >= S(e);
   }
   function abrir(id){ fechados.delete(id); abertos.add(id); }
   function minimizar(id){ abertos.delete(id); fechados.add(id); }
@@ -1162,7 +1293,7 @@ details.how .lbl{font-weight:700}
       const novo = redesenhar(id);
       if (novo && novo.classList.contains('mini')) {
         // Se o próximo exercício por fazer estava minimizado, abre ele.
-        const ids = WB[sel].ex.map(x => x.id), k = id === 'warm' ? -1 : ids.indexOf(id);
+        const ids = exibidos(treinoTela(sel)).map(x => x.id), k = id === 'warm' ? -1 : ids.indexOf(id);
         const prox = ids.slice(k + 1).find(x => !estaCompleto(x));
         if (prox && fechados.has(prox)) { fechados.delete(prox); redesenhar(prox); }
         const suave = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -1206,9 +1337,18 @@ details.how .lbl{font-weight:700}
     if (ab) { abrir(ab.dataset.abrir); const c = redesenhar(ab.dataset.abrir); if (c) { const f = c.querySelector('.minbtn'); if (f) f.focus({ preventScroll:true }); } return; }
     const fe = ev.target.closest('[data-fechar]');
     if (fe) { minimizar(fe.dataset.fechar); const c = redesenhar(fe.dataset.fechar); if (c) c.querySelector('.minirow').focus({ preventScroll:true }); return; }
+    const vc = ev.target.closest('[data-curta]');
+    if (vc) {
+      const acao = vc.dataset.curta;
+      if (acao === 'ligar') { if (!startSession(sel)) return; gravarCurta({ start:state.cur.start, tronco:false }); }
+      else if (acao === 'tronco' && curta) gravarCurta({ start:curta.start, tronco:!curta.tronco });
+      else if (acao === 'sair') gravarCurta(null);
+      renderWorkout();
+      return;
+    }
     const td = ev.target.closest('[data-todos]');
     if (td) {
-      const ids = ['warm'].concat(WB[sel].ex.map(x => x.id));
+      const ids = ['warm'].concat(exibidos(treinoTela(sel)).map(x => x.id));
       ids.forEach(td.dataset.todos === 'fechar' ? minimizar : abrir);
       renderWorkout();
       const barra = document.querySelector('#workout .listbar');
@@ -1259,7 +1399,7 @@ details.how .lbl{font-weight:700}
     const rb = ev.target.closest('[data-rs]');
     if (rb) {
       const [exId, iStr] = rb.dataset.rs.split(':');
-      const i = Number(iStr), e = EX[exId];
+      const i = Number(iStr), e = exTela(exId);
       if (!state.cur && !startSession(sel)) return;
       if (!state.cur || state.cur.wid !== e.w) return;
       if (rest && rest.exId === exId && rest.i === i && rest.end > Date.now()) rest = null;
@@ -1270,7 +1410,7 @@ details.how .lbl{font-weight:700}
     const hb = ev.target.closest('[data-hold]');
     if (hb) {
       const row = hb.closest('.setrow');
-      const exId = row.dataset.ex, i = Number(row.dataset.i), e = EX[exId];
+      const exId = row.dataset.ex, i = Number(row.dataset.i), e = exTela(exId);
       if (!state.cur && !startSession(sel)) return;
       if (!state.cur || state.cur.wid !== e.w) return;
       const q = '.setrow[data-ex="' + exId + '"][data-i="' + i + '"]';
@@ -1287,7 +1427,7 @@ details.how .lbl{font-weight:700}
         progressText();
         seriesAbertas.delete(exId + ':' + i);
         trocarSerie(exId, i);
-        if (feitasEx(e).length >= e.s) fecharDepois(exId);
+        if (feitasEx(e).length >= S(e)) fecharDepois(exId);
       } else {
         if (hold) {
           const old = document.querySelector('.setrow[data-ex="' + hold.exId + '"][data-i="' + hold.i + '"] [data-hold]');
@@ -1304,7 +1444,7 @@ details.how .lbl{font-weight:700}
     if (db) {
       const row = db.closest('.setrow');
       const exId = row.dataset.ex, i = Number(row.dataset.i);
-      const e = EX[exId];
+      const e = exTela(exId);
       const novo = !(curSet(exId, i) && curSet(exId, i).done);
       if (!state.cur) { startSession(sel); }
       if (!state.cur || state.cur.wid !== e.w) return;
@@ -1337,8 +1477,8 @@ details.how .lbl{font-weight:700}
       if (novo) {
         const quantos = (state.cur.sets[exId] || []).filter(x => x && x.done).length;
         if (!e.par) startRest(e.rest, e.nome, exId, i);
-        else if (EX[e.par]) say('Agora ' + EX[e.par].nome.toLowerCase() + ', sem pausa.');
-        if (quantos >= e.s) { say(e.nome + ' concluído.'); fecharDepois(exId); }
+        else if (parDe(e)) say('Agora ' + parDe(e).nome.toLowerCase() + ', sem pausa.');
+        if (quantos >= S(e)) { say(e.nome + ' concluído.'); fecharDepois(exId); }
       }
       commit();
       progressText();
@@ -1354,7 +1494,7 @@ details.how .lbl{font-weight:700}
   }
   function segue(inp, exId, i){
     const f = inp.dataset.f, antes = inp.dataset.seguindo || '';
-    for (let j = i + 1; j < EX[exId].s; j++) {
+    for (let j = i + 1; j < S(exTela(exId)); j++) {
       const cs = curSet(exId, j);
       if (cs && cs.done) continue;
       const outro = document.querySelector('.setrow[data-ex="' + exId + '"][data-i="' + j + '"] [data-f="' + f + '"]');
@@ -1383,7 +1523,7 @@ details.how .lbl{font-weight:700}
       commit();
       return;
     }
-    if (state.cur.wid !== EX[exId].w) return;
+    if (state.cur.wid !== exTela(exId).w) return;
     setVal(exId, i, { [f]: num(inp.value) });
     segue(inp, exId, i);
     commit();
