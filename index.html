@@ -460,8 +460,15 @@ details.how .lbl{font-weight:700}
       como:['Ajuste o banco para o peito ficar na almofada e as mãos alcançarem as pegadas com os braços esticados.','Puxe levando os cotovelos para trás e aproximando as escápulas, sem tirar o peito do apoio.','Volte devagar até esticar os braços.'],
       erros:'tirar o peito do apoio para ajudar, dar tranco e subir os ombros.', troca:'remada baixa com triângulo, se você já faz bem e o professor conferir, ou remada articulada sentada.' },
     e5: { id:'e5', vid:'RJOIor7FPno', nome:'Remada com halteres no banco inclinado', maq:'banco inclinado entre 30 e 45° e dois halteres', r:[8,12], rest:120, kg:null, inc:2, yt:'remada com halteres no banco inclinado peito apoiado como fazer',
-      como:['Incline o banco entre 30 e 45° e deite de barriga para baixo, com o peito apoiado e os pés firmes no chão.','Com um halter em cada mão e os braços esticados, puxe levando os cotovelos para trás, sem encolher os ombros.','Desça devagar até esticar os braços, sem tirar o peito do banco.','No app, anote o peso de um halter.'],
-      erros:'tirar o peito do banco para ajudar, dar tranco e encolher os ombros.', troca:'remada em máquina com apoio no peito, se tiver livre, ou remada baixa com triângulo, se o professor conferir.' },
+      como:['Incline o banco entre 30 e 45° e deite de barriga para baixo, com o peito apoiado e os pés firmes no chão.','Pegada neutra: palmas viradas uma para a outra. Com um halter em cada mão e os braços esticados, puxe levando os cotovelos para trás, sem encolher os ombros.','Desça devagar até esticar os braços, sem tirar o peito do banco.','No app, anote o peso de um halter.'],
+      erros:'tirar o peito do banco para ajudar, dar tranco e encolher os ombros.', troca:'remada cavalinho com apoio no peito, se tiver livre, ou remada baixa com triângulo, se o professor conferir.' },
+    // a3 e b4 (voador) saíram do C: a Smart Fit do dono não tem a máquina. Ficam aqui para o histórico.
+    e6: { id:'e6', vid:'j9dk50rAd1w', nome:'Crucifixo na polia (crossover)', maq:'crossover com as polias na altura dos ombros ou acima', r:[12,15], rest:90, kg:null, inc:2.5, yt:'crucifixo no crossover polia peito como fazer',
+      como:['Regule as duas polias na altura dos ombros ou um pouco acima, segure uma alça em cada mão e dê um passo à frente, com um pé na frente do outro.','Com os cotovelos levemente dobrados, feche os braços à frente do peito, como num abraço, e aperte o peito por 1 segundo.','Volte devagar até sentir o peito alongar, sem deixar as placas baterem.'],
+      erros:'dobrar e esticar o cotovelo no meio do movimento, puxar com as costas e abrir mais do que o ombro aguenta.', troca:'crucifixo com halteres no banco reto.' },
+    e7: { id:'e7', vid:'W8M2MtVbZ_s', nome:'Crucifixo invertido na polia', maq:'crossover com as polias altas, cabos cruzados', r:[12,15], rest:90, kg:null, inc:2.5, yt:'crucifixo invertido na polia cross over como fazer',
+      como:['Regule as duas polias na altura dos ombros, pegue com a mão direita a alça da polia da esquerda e com a esquerda a da direita, e fique em pé com os braços à frente.','Com os cotovelos levemente dobrados, abra os braços para trás até a altura dos ombros, apertando a parte de trás do ombro.','Volte devagar, sem deixar as placas baterem.'],
+      erros:'carga alta demais (o trapézio assume), encolher os ombros e dobrar muito os cotovelos.', troca:'crucifixo invertido com halteres, com o peito apoiado no banco inclinado.' },
     a2: muda('a2', { r:[8,12], rest:120 }),
     a5: muda('a5', { vid:'4cFpu_wwmx0', nome:'Elevação lateral com halteres, sentado', maq:'banco com encosto e halteres', r:[12,15], rest:90, yt:'elevação lateral sentado com halteres como fazer',
       como:['Sente com as costas apoiadas e os halteres ao lado do corpo.','Suba os halteres pelos lados até a altura dos ombros, com os cotovelos levemente dobrados.','Desça devagar.'],
@@ -498,17 +505,15 @@ details.how .lbl{font-weight:700}
       como:['Antebraços no chão, cotovelos embaixo dos ombros.','Corpo reto da cabeça ao calcanhar, com abdômen e glúteo contraídos.','Respire normalmente e pare antes de perder a posição.'],
       erros:'quadril caindo ou alto demais e prender a respiração.', troca:'prancha com os joelhos apoiados, se ficar pesado.' }),
   };
-  // aquece: exercícios em que o movimento muda bastante em relação ao que veio antes no treino;
-  // eles ganham 1 série leve antes (fora das séries). O primeiro exercício já tem 2 a 3 séries leves.
   const W2 = [
     { id:'A', nome:'Superiores 1', curto:'Sup. 1', foco:'peito, costas, ombro e braço', min:65, sup:true,
-      ex:[['a1',3],['b1',3],['e5',3],['a2',2],['a5',2],['a7',2],['b5',2]], aquece:['b1','a5'] },
+      ex:[['a1',3],['b1',3],['e5',3],['a2',2],['a5',2],['a7',2],['b5',2]] },
     { id:'B', nome:'Pernas 1 + tronco', curto:'Pernas 1', foco:'coxa, glúteo e panturrilha, com ombro, bíceps e tronco', min:60,
-      ex:[['c1',3],['c4',3],['c5',2],['c2',2],['c6',3],['a5',3],['b6',2],['e4',2]], aquece:['c4','c5','c6','a5','b6'] },
+      ex:[['c1',3],['c4',3],['c5',2],['c2',2],['c6',3],['a5',3],['b6',2],['e4',2]] },
     { id:'C', nome:'Superiores 2', curto:'Sup. 2', foco:'peito, costas, ombro e braço', min:70, sup:true,
-      ex:[['d1',3],['d2',3],['e5',3],['a3',2],['b4',2],['d3',2],['d4',2],['e2',2]], aquece:['d2','d3'] },
+      ex:[['d1',3],['d2',3],['e5',3],['e6',2],['e7',2],['d3',2],['d4',2],['e2',2]] },
     { id:'D', nome:'Pernas 2 + tronco', curto:'Pernas 2', foco:'coxa, glúteo e panturrilha, com ombro, tríceps e tronco', min:65,
-      ex:[['c4',3],['c1',2],['c2',2],['c5',2],['e3',2],['c6',2],['a5',3],['a7',2],['d6',2]], aquece:['c1','c5','c6','a5','a7'] },
+      ex:[['c4',3],['c1',2],['c2',2],['c5',2],['e3',2],['c6',2],['a5',3],['a7',2],['d6',2]] },
   ];
   W2.forEach(w => { w.ex = w.ex.map(([id, s]) => Object.assign({}, X2[id], { id, s })); });
 
@@ -908,12 +913,10 @@ details.how .lbl{font-weight:700}
       '<input data-f="reps" inputmode="numeric" placeholder="' + faixa(e) + '" value="' + repsVal + '" aria-label="Série ' + (i + 1) + ', repetições"' + dis + '>' + btnDone + '</div>';
   }
 
-  // Aquecimento no card: o 1º exercício tem 2 a 3 séries leves; os de "aquece", 1 série leve.
+  // Aquecimento no card: só o 1º exercício tem séries leves antes; nos outros, a 1ª série é feita mais leve.
   const nomeCurto = e => { const n = e.nome.split(',')[0]; return n.charAt(0).toLowerCase() + n.slice(1); };
-  const ehAquece = e => { const w = treinoDe(e.f, e.w); return !!(w.aquece && w.aquece.includes(e.id)); };
   function aqueceHTML(e, idx){
-    const t = idx === 0 ? 'Antes: 2 a 3 séries leves e progressivas para aquecer (não contam).'
-      : ehAquece(e) ? 'Antes: 1 série leve para aquecer, porque o movimento muda (não conta).' : '';
+    const t = idx === 0 ? 'Antes: 2 a 3 séries leves e progressivas para aquecer (não contam).' : '';
     return t ? '<p class="aquece">' + FLAME + '<span>' + esc(t) + '</span></p>' : '';
   }
   // Séries feitas deste exercício no treino em andamento.
@@ -993,13 +996,10 @@ details.how .lbl{font-weight:700}
 
   function warmHTML(w, lock){
     const first = w.ex[0];
-    // Número e nome de cada exercício que ganha 1 série leve antes (só os que aparecem, na versão curta).
-    const leves = exibidos(w).map((e, i) => ({ e, n:i + 1 })).filter(x => ehAquece(x.e));
     const itens = [
       '5 a 8 minutos leves de caminhada ou bike.',
       '2 a 3 séries leves e progressivas de ' + nomeCurto(first) + ', o primeiro exercício.',
-      leves.length ? 'Uma série leve antes de cada movimento bem diferente: ' + joinPt(leves.map(x => x.n + ' (' + nomeCurto(x.e) + ')')) + '.'
-        : 'Uma série leve a mais ao trocar para um movimento bem diferente.',
+      'Nos outros exercícios não precisa aquecer à parte: faça a 1ª série mais leve, sem pegar a máquina antes.',
     ];
     const warm = state.cur && state.cur.wid === w.id ? state.cur.warm : {};
     const completo = itens.every((t, i) => warm[i]);

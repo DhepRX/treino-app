@@ -21,9 +21,9 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
 ## Regras que não podem quebrar
 
 1. **Caminhos relativos** (`./sw.js`, `icon-192.png`). O site roda na subpasta `/treino-app/`.
-2. **Ao publicar qualquer mudança, troque `VERSAO` em `sw.js`** (hoje `treino-renan-v20`) para o celular pegar a versão nova.
+2. **Ao publicar qualquer mudança, troque `VERSAO` em `sw.js`** (hoje `treino-renan-v22`) para o celular pegar a versão nova.
 3. **Não mude o formato dos dados salvos sem migração.** Os treinos ficam só no celular (`localStorage`); perder o formato é perder o histórico.
-4. **Não renomeie os `id` dos exercícios** (`a1`…`d6`, `e1`…`e5`): eles são as chaves do histórico e da sugestão de carga. Para trocar um exercício, mude `nome`, `maq`, `como` etc. e mantenha o `id`. Movimento novo ou com carga que não dá para comparar (máquina → halteres) ganha id novo (próximo: `e6`). O que sai dos treinos continua em `X2` (ou em `W1`), porque `CONHECIDOS` e o histórico dependem dele: `e1` (remada na máquina) saiu em 28/09/2026 e foi trocada pela `e5`.
+4. **Não renomeie os `id` dos exercícios** (`a1`…`d6`, `e1`…`e7`): eles são as chaves do histórico e da sugestão de carga. Para trocar um exercício, mude `nome`, `maq`, `como` etc. e mantenha o `id`. Movimento novo ou com carga que não dá para comparar (máquina → halteres ou polia) ganha id novo (próximo: `e8`). O que sai dos treinos continua em `X2` (ou em `W1`), porque `CONHECIDOS` e o histórico dependem dele: `e1` (remada na máquina) saiu em 28/09/2026 e foi trocada pela `e5`; `a3` e `b4` (voador) saíram do C e foram trocados pelas `e6` e `e7` (polia), porque a Smart Fit do dono não tem o voador.
 5. Sem bibliotecas externas além da fonte Archivo do Google Fonts. Sem framework nem dependências npm no app. Playwright é permitido somente para testes; veja `testes/README.md`.
 6. Tudo precisa funcionar offline, menos os vídeos e o backup no GitHub.
 7. **Não apague a ficha 1** (`W1`): o histórico antigo usa os nomes dela. Treino salvo sem o campo `ficha` é da ficha 1.
@@ -52,11 +52,11 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
 - **Campos de exercício:** `id, vid (YouTube), nome, maq, s (séries), r:[mín,máx], rest (s), kg (carga inicial), inc (quanto subir), yt (busca no YouTube), como[], erros, troca`
   e, quando precisar: `lado`, `perna`, `braco` (meta "cada lado/perna/braço"), `tempo` (segundos, com cronômetro), `semPeso` (só repetições), `extra` (texto na meta),
   `pernas` (regra de subir carga das pernas), `tronco` (entra na versão curta se ele quiser), `par` e `parCurto` (emendado sem descanso; só na ficha 1).
-- **Vídeos (`vid`):** todo exercício tem um. Os de `a5`, `b6` e `e1`…`e5` foram escolhidos pelo título na busca do YouTube, sem conferir pelo oEmbed (o ambiente de teste bloqueia o YouTube). Se um não abrir no app, troque o `vid`.
+- **Vídeos (`vid`):** todo exercício tem um. Os de `a5`, `b6` e `e1`…`e7` foram escolhidos pelo título na busca do YouTube, sem conferir pelo oEmbed (o ambiente de teste bloqueia o YouTube). Se um não abrir no app, troque o `vid`.
 - **Séries que valem hoje:** `S(e)`. Na **adaptação** (`adaptacao()` e `faltamAdaptacao()`: até fazer A, B, C e D uma vez na ficha 2) e na **versão curta** (`curtaAtiva()`, `exibidos()`), no máximo 2.
 - **Sugestão de carga:** `suggest()` sobe `inc` quando todas as séries feitas (pelo menos 2) bateram o topo da faixa. Com `pernas`, só depois de 2 treinos seguidos no topo, com a mesma carga (`sessoes()`, `bateuTopo()`).
 - **Avisos da ficha 2:** `avisosHTML()` (adaptação ou esforço, cargas antigas de perna, segurança).
-- **Aquecimento por exercício:** cada treino de `W2` tem `aquece` (ids que ganham 1 série leve antes, porque o movimento muda bastante). `warmHTML()` lista esses exercícios com número e nome; `aqueceHTML()` põe o aviso no card (o 1º exercício: 2 a 3 séries leves). Essas séries não contam.
+- **Aquecimento:** `warmHTML()` tem 3 itens: cardio leve, 2 a 3 séries leves do 1º exercício (`aqueceHTML()` repete o aviso no card dele) e, nos demais, a 1ª série mais leve. Não peça aquecimento em outras máquinas: o dono pediu que não, por causa da fila e porque perde o sentido.
 - **Séries do treino em andamento:** `curSet()` só devolve séries quando o treino em andamento é o da tela (os ids se repetem entre os treinos da ficha 2).
 - **Peso e repetições digitados uma vez:** `segue()` copia o valor para as séries seguintes; `anterior()` repete o valor da série anterior ao marcar.
 - **Séries e cards minimizados:** `setRowHTML()` desenha uma série (feita vira linha "18 kg × 8 · editar"); `trocarSerie()` redesenha só ela.

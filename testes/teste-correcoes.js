@@ -53,8 +53,8 @@ const URL_APP = 'http://127.0.0.1:8766/treino-app/';
   await p.click('#dockBtns [data-rest="skip"]');
   await p.click('[data-curta="ligar"]');
   assert.match(await p.textContent('#progresso'), /1 de 8 séries feitas/);
-  // Aquecimento da versão curta só cita os exercícios que aparecem.
-  assert.equal((await p.$$eval('.card.warm li span', s => s.map(x => x.textContent)))[2], 'Uma série leve antes de cada movimento bem diferente: 2 (cadeira flexora) e 3 (elevação pélvica em máquina).');
+  // Aquecimento não pede série leve em outras máquinas.
+  assert.equal((await p.$$eval('.card.warm li span', s => s.map(x => x.textContent)))[2], 'Nos outros exercícios não precisa aquecer à parte: faça a 1ª série mais leve, sem pegar a máquina antes.');
   await p.click('[data-curta="tronco"]');
   assert.equal(await p.textContent('#ex-e4 .num'), '5');
   await p.click('#ex-e4 [data-fechar="e4"]');
@@ -132,7 +132,18 @@ const URL_APP = 'http://127.0.0.1:8766/treino-app/';
   await p.click('[data-cd="2026-09-19"]');
   await p.evaluate(() => document.querySelectorAll('#vCal .entry details').forEach(d => { d.open = true; }));
   assert.match(await p.textContent('#vCal'), /Remada em máquina com apoio no peito: 40 kg, 10 repetições/);
+  // Voador (a3 e b4) saiu do C: entram o crucifixo na polia e o invertido na polia, nas mesmas posições.
+  await p.click('[data-view="treino"]'); await p.click('[data-tab="C"]');
+  assert.equal(await p.textContent('#ex-e6 h3'), 'Crucifixo na polia (crossover)');
+  assert.equal(await p.textContent('#ex-e6 .num'), '4');
+  assert.equal(await p.textContent('#ex-e7 h3'), 'Crucifixo invertido na polia');
+  assert.equal(await p.textContent('#ex-e7 .num'), '5');
+  assert.equal(await p.locator('#ex-a3, #ex-b4').count(), 0);
+  await p.evaluate(() => { const s = JSON.parse(localStorage.getItem('treino-renan-v1')); s.hist.push({ id:'a3velho', wid:'C', ficha:2, start:Date.UTC(2026,8,18,12), end:Date.UTC(2026,8,18,13), sets:{ a3:[{ kg:30, reps:12, done:true }] } }); s.hist.sort((a, b) => a.start - b.start); localStorage.setItem('treino-renan-v1', JSON.stringify(s)); });
+  await p.reload();
+  assert.deepEqual((await salvo()).hist.find(h => h.id === 'a3velho').sets.a3[0], { kg:30, reps:12, done:true });
   console.log('7d. remada nova no A e no C (card 3); treino antigo com a remada na máquina continua no histórico.');
+  console.log('    C: crucifixo na polia (4) e invertido na polia (5); treino antigo com o voador continua salvo.');
   await p.click('[data-view="treino"]');
 
   // 9. Treino salvo fica concluído: não dá para salvar o mesmo treino duas vezes no dia.

@@ -26,7 +26,7 @@ Regras:
 - Responda em português do Brasil.
 - NÃO altere nenhum arquivo nesta etapa. Só analise e liste.
 - Não proponha trocar de framework, adicionar build ou bibliotecas no app. Dependências de teste são permitidas somente fora do app.
-- Não proponha mudar o formato dos dados salvos (localStorage "treino-renan-v1") nem os ids dos exercícios (a1…d6, e1…e5). A ficha 1 (W1) fica guardada para o histórico.
+- Não proponha mudar o formato dos dados salvos (localStorage "treino-renan-v1") nem os ids dos exercícios (a1…d6, e1…e7). A ficha 1 (W1) fica guardada para o histórico.
 
 Diferencie problemas reproduzidos, suspeitas e limitações do ambiente. Use IDs únicos por análise: BUG-01, UX-01, OFF-01, DADOS-01, A11Y-01 e TESTE-01.
 Para cada problema encontrado, use esta tabela:

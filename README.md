@@ -43,7 +43,7 @@ A ficha tira carga direta da coluna (sem afundo com carga, abdominal com carga n
 | --- | --- |
 | **A · Superiores 1** | supino reto com halteres, puxada frontal, remada com halteres no banco inclinado, supino inclinado articulado, elevação lateral sentado, tríceps barra V, rosca direta barra W |
 | **B · Pernas 1 + tronco** | leg press 45°, cadeira flexora, elevação pélvica, cadeira extensora, panturrilha no leg press, elevação lateral sentado, rosca martelo sentado, bird-dog |
-| **C · Superiores 2** | supino inclinado com halteres, puxada com triângulo, remada com halteres no banco inclinado, crucifixo no voador, crucifixo invertido, elevação lateral na polia, rosca Scott alternada, tríceps corda |
+| **C · Superiores 2** | supino inclinado com halteres, puxada com triângulo, remada com halteres no banco inclinado, crucifixo na polia, crucifixo invertido na polia, elevação lateral na polia, rosca Scott alternada, tríceps corda |
 | **D · Pernas 2 + tronco** | cadeira flexora, leg press 45°, cadeira extensora, elevação pélvica, cadeira abdutora, panturrilha no leg press, elevação lateral sentado, tríceps barra V, prancha |
 
 - **Adaptação:** até fazer A, B, C e D uma vez na ficha nova, todos os exercícios aparecem com 2 séries, terminando com umas 3 repetições sobrando.
@@ -85,7 +85,7 @@ Se o aparelho não conseguir salvar, aparece um aviso com **Salvar backup agora*
 ## 6. Atualizar o app
 
 1. Troque o `index.html` no repositório (Add file > Upload files, com o mesmo nome).
-2. No `sw.js`, troque o número de `VERSAO` (por exemplo, de `v20` para `v21`) e suba ele também.
+2. No `sw.js`, troque o número de `VERSAO` (por exemplo, de `v22` para `v23`) e suba ele também.
 3. No iPhone, feche o app (arraste para cima na troca de apps) e abra de novo. Com internet, a versão nova aparece na hora.
 
 Os treinos salvos no celular continuam.
