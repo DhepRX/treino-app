@@ -24,7 +24,7 @@ const D26 = { id: 'd26', wid: 'D', start: H(17), end: H(18), sets: {
   const sugestao = async id => { const v = await p.inputValue(`.setrow[data-ex="${id}"][data-i="0"] [data-f="kg"]`).catch(() => '—'); return v; };
 
   // 1. Próximo treino depois do D de 26/09.
-  assert.match(await p.textContent('#today'), /Próximo: A \(Superiores 1\)/);
+  assert.match(await p.textContent('#today'), /Próximo( treino)?: A \(Superiores 1\)/);
   console.log('1. cabeçalho:', await p.textContent('#today'), '| aba aberta:', await p.textContent('#tabs [aria-pressed="true"]'));
   console.log('   título:', await p.textContent('.whead h2'), '| foco:', await p.textContent('.whead p'));
   // 2. Adaptação: 2 séries em tudo e aviso.
@@ -39,9 +39,9 @@ const D26 = { id: 'd26', wid: 'D', start: H(17), end: H(18), sets: {
   console.log('   segurança:', (await p.textContent('.seguranca')).slice(0, 60) + '…');
   console.log('   aquecimento:', (await p.$$eval('.card.warm li span', s => s.map(x => x.textContent))).join(' / '));
   // Aquecimento diz quais exercícios ganham 1 série leve, e o card de cada um avisa.
-  assert.equal((await p.$$eval('.card.warm li span', s => s.map(x => x.textContent)))[2], 'Uma série leve antes de cada movimento bem diferente: 2 (puxada frontal) e 5 (elevação lateral com halteres).');
-  assert.deepEqual(await p.$$eval('#workout .card.ex', cs => cs.filter(c => c.querySelector('.aquece')).map(c => c.id.slice(3) + ':' + c.querySelector('.aquece').textContent.slice(7, 8))), ['a1:2', 'b1:1', 'a5:1']);
-  console.log('   avisos de aquecimento nos cards: a1 (2 a 3 leves), b1 e a5 (1 leve)');
+  assert.equal((await p.$$eval('.card.warm li span', s => s.map(x => x.textContent)))[2], 'Nos outros exercícios não precisa aquecer à parte: faça a 1ª série mais leve, sem pegar a máquina antes.');
+  assert.deepEqual(await p.$$eval('#workout .card.ex', cs => cs.filter(c => c.querySelector('.aquece')).map(c => c.id.slice(3) + ':' + c.querySelector('.aquece').textContent.slice(7, 8))), ['a1:2']);
+  console.log('   aviso de aquecimento só no card do 1º exercício (a1)');
   await p.screenshot({ path: __dirname + '/prints/ficha2-A.png' });
 
   // 3. Sugestões: extensora 90 kg (C 25/09) e supino inclinado 18 kg (D 26/09).
@@ -58,6 +58,8 @@ const D26 = { id: 'd26', wid: 'D', start: H(17), end: H(18), sets: {
   // 5. Calendário: 25/09 "Pernas e abdômen" e 26/09 "Superior", com cargas.
   await p.click('[data-view="cal"]');
   for (const dia of ['2026-09-25', '2026-09-26']) {
+    // O calendário abre no mês de hoje: volta até o mês do dia.
+    for (let k = 0; k < 36 && !(await p.locator(`[data-cd="${dia}"]`).count()); k++) await p.click('[data-cm="-1"]');
     await p.click(`[data-cd="${dia}"]`);
     await p.click('.entry summary');
     assert.equal(await p.textContent('.entry .et b'), dia.endsWith('25') ? 'Treino C · Pernas e abdômen' : 'Treino D · Superior');
