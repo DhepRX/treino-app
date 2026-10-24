@@ -38,8 +38,8 @@ const D26 = { id: 'd26', wid: 'D', start: H(17), end: H(18), sets: {
   console.log('   séries por exercício (A):', await cards());
   console.log('   segurança:', (await p.textContent('.seguranca')).slice(0, 60) + '…');
   console.log('   aquecimento:', (await p.$$eval('.card.warm li span', s => s.map(x => x.textContent))).join(' / '));
-  // Aquecimento diz quais exercícios ganham 1 série leve, e o card de cada um avisa.
-  assert.equal((await p.$$eval('.card.warm li span', s => s.map(x => x.textContent)))[2], 'Nos outros exercícios não precisa aquecer à parte: faça a 1ª série mais leve, sem pegar a máquina antes.');
+  // A preparação acontece na própria máquina, antes das séries previstas; só o 1º card repete o lembrete.
+  assert.equal((await p.$$eval('.card.warm li span', s => s.map(x => x.textContent)))[2], 'Nos exercícios seguintes, faça uma série leve de preparação na própria máquina antes das séries do treino, conforme necessário. Essa preparação não conta nas séries previstas.');
   assert.deepEqual(await p.$$eval('#workout .card.ex', cs => cs.filter(c => c.querySelector('.aquece')).map(c => c.id.slice(3) + ':' + c.querySelector('.aquece').textContent.slice(7, 8))), ['a1:2']);
   console.log('   aviso de aquecimento só no card do 1º exercício (a1)');
   await p.screenshot({ path: __dirname + '/prints/ficha2-A.png' });
@@ -148,6 +148,49 @@ const D26 = { id: 'd26', wid: 'D', start: H(17), end: H(18), sets: {
   const s3 = await st();
   assert.equal(s3.hist.slice(-1)[0].ficha, 1);
   console.log('   salvo como ficha:', s3.hist.slice(-1)[0].ficha, '| exercício:', Object.keys(s3.hist.slice(-1)[0].sets).join(','));
+
+  // Restaurar um arquivo recupera o treino aberto sem substituir outro ou reabrir um já concluído.
+  const pi = await (await b.newContext({ ...devices['iPhone 13'], serviceWorkers:'block', timezoneId:'America/Sao_Paulo' })).newPage();
+  pi.on('pageerror', e => erros.push('importação: ' + e.message));
+  await pi.addInitScript(() => {
+    window.pedidosTelaAcesa = 0;
+    Object.defineProperty(navigator, 'wakeLock', { configurable:true, value:{ request:async () => {
+      window.pedidosTelaAcesa++;
+      return { release:async () => {} };
+    } } });
+  });
+  await pi.goto(URL_APP);
+  const importado = () => pi.evaluate(() => JSON.parse(localStorage.getItem('treino-renan-v1')));
+  async function importar(dados){
+    await pi.evaluate(() => { document.querySelector('#bkMsg').textContent = ''; });
+    await pi.setInputFiles('#bkFile', { name:'backup.json', mimeType:'application/json', buffer:Buffer.from(JSON.stringify(dados)) });
+    await pi.waitForFunction(() => document.querySelector('#bkMsg').textContent.length > 0);
+  }
+  const antesInvalido = await importado();
+  await importar({});
+  assert.match(await pi.textContent('#bkMsg'), /não é um backup/);
+  assert.deepEqual(await importado(), antesInvalido, 'Arquivo sem formato de backup não altera os dados');
+  const aberto = { wid:'D', ficha:2, start:Date.UTC(2026,9,22,12), sets:{ c4:[{ kg:35, reps:10, done:true }] }, warm:{ '0':true, '1':true } };
+  const arquivoAberto = { v:1, cur:aberto, hist:[D26], upd:aberto.start };
+  await importar(arquivoAberto);
+  assert.deepEqual((await importado()).cur, aberto, 'Restaura início, ficha, séries e aquecimento');
+  assert.equal(await pi.evaluate(() => window.pedidosTelaAcesa), 1, 'Treino restaurado também pede para manter a tela acesa');
+  assert.ok((await importado()).hist.some(h => h.id === D26.id), 'Também junta o histórico');
+  assert.equal(await pi.getAttribute('#tabs [aria-pressed="true"]', 'data-tab'), 'D');
+  await importar({ ...arquivoAberto, cur:{ ...aberto, wid:'A', start:aberto.start + 1 } });
+  assert.deepEqual((await importado()).cur, aberto, 'Importar preserva o treino local em andamento');
+  await pi.click('#workout > .finish [data-act="finish"]'); await pi.click('#workout > .finish [data-act="finish"]');
+  assert.equal((await importado()).cur, null);
+  const concluidos = (await importado()).hist;
+  assert.ok(concluidos.some(h => h.id === String(aberto.start)), 'Treino restaurado pode ser finalizado');
+  await importar(arquivoAberto);
+  assert.equal((await importado()).cur, null, 'Backup antigo não reabre treino já finalizado');
+  assert.deepEqual((await importado()).hist, concluidos, 'Reimportar não duplica o histórico');
+  const mesmoInicio = { ...aberto, start:aberto.start - 86400000 };
+  await importar({ v:1, cur:mesmoInicio, hist:[{ id:'concluido-antigo', wid:'D', ficha:2, start:mesmoInicio.start, end:mesmoInicio.start + 3600000, sets:mesmoInicio.sets }], upd:aberto.start });
+  assert.equal((await importado()).cur, null, 'Conclusão com o mesmo início no próprio arquivo também impede reabertura');
+  console.log('9. importação: recupera treino aberto, preserva o local, não reabre concluídos e recusa arquivo inválido.');
+  await pi.context().close();
 
   console.log('largura:', await p.evaluate(() => document.documentElement.scrollWidth + ' x ' + innerWidth));
   assert.equal(await p.evaluate(() => document.documentElement.scrollWidth), 390);

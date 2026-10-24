@@ -311,7 +311,7 @@ details.how .lbl{font-weight:700}
   <section id="vCal" hidden aria-label="Calendário de treinos"></section>
   <section class="backup" id="backup" aria-labelledby="bkTitle">
     <h2 id="bkTitle">Backup dos treinos</h2>
-    <p>Fora do Claude, os treinos ficam salvos só neste celular. Salve um backup de vez em quando e guarde no Arquivos, no iCloud Drive ou no WhatsApp.</p>
+    <p>Seus treinos ficam salvos neste celular. Ative o backup automático abaixo para guardar também uma cópia no GitHub. Você pode salvar um arquivo de backup quando quiser.</p>
     <p class="bklast" id="bkLast"></p>
     <div class="bkrow">
       <button type="button" class="btn" id="bkSave">Salvar backup</button>
@@ -324,9 +324,9 @@ details.how .lbl{font-weight:700}
       <p class="nvstatus" id="nvStatus"></p>
       <div class="bkrow"><button type="button" class="btn" id="nvRestaurar" hidden>Restaurar do GitHub</button></div>
       <details class="how" id="nvConfig">
-        <summary>Configurar</summary>
+        <summary>Configurar backup automático</summary>
         <ol>
-          <li>Crie um repositório <b>privado</b> chamado <b>treino-dados</b>, marcando <b>Add a README file</b>: <a class="lnk" href="https://github.com/new" target="_blank" rel="noopener">github.com/new</a></li>
+          <li>Use seu repositório <b>privado</b> de backup, como <b>DhepRX/treino-dados</b>. Se ainda não tiver um, <a class="lnk" href="https://github.com/new" target="_blank" rel="noopener">crie um repositório privado</a> chamado <b>treino-dados</b>, marcando <b>Add a README file</b>.</li>
           <li>Crie uma chave em <a class="lnk" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Fine-grained token</a>. Em <b>Repository access</b>, escolha <b>Only select repositories</b> e o <b>treino-dados</b>. Em <b>Permissions</b>, ponha <b>Contents</b> em <b>Read and write</b>. Toque em <b>Generate token</b> e copie.</li>
           <li>Cole a chave aqui embaixo e toque em <b>Ligar e testar</b>.</li>
         </ol>
@@ -913,10 +913,10 @@ details.how .lbl{font-weight:700}
       '<input data-f="reps" inputmode="numeric" placeholder="' + faixa(e) + '" value="' + repsVal + '" aria-label="Série ' + (i + 1) + ', repetições"' + dis + '>' + btnDone + '</div>';
   }
 
-  // Aquecimento no card: só o 1º exercício tem séries leves antes; nos outros, a 1ª série é feita mais leve.
+  // O card do 1º exercício lembra as séries de aquecimento; nos demais, prepare na própria máquina se necessário. Aquecimento não conta nas séries do treino.
   const nomeCurto = e => { const n = e.nome.split(',')[0]; return n.charAt(0).toLowerCase() + n.slice(1); };
   function aqueceHTML(e, idx){
-    const t = idx === 0 ? 'Antes: 2 a 3 séries leves e progressivas para aquecer (não contam).' : '';
+    const t = idx === 0 ? 'Antes: 2 a 3 séries leves e progressivas para aquecer. Elas não contam nas séries do treino.' : '';
     return t ? '<p class="aquece">' + FLAME + '<span>' + esc(t) + '</span></p>' : '';
   }
   // Séries feitas deste exercício no treino em andamento.
@@ -998,8 +998,8 @@ details.how .lbl{font-weight:700}
     const first = w.ex[0];
     const itens = [
       '5 a 8 minutos leves de caminhada ou bike.',
-      '2 a 3 séries leves e progressivas de ' + nomeCurto(first) + ', o primeiro exercício.',
-      'Nos outros exercícios não precisa aquecer à parte: faça a 1ª série mais leve, sem pegar a máquina antes.',
+      'No primeiro exercício, ' + nomeCurto(first) + ', faça 2 a 3 séries leves e progressivas de aquecimento antes das séries do treino. Elas não contam nas séries previstas.',
+      'Nos exercícios seguintes, faça uma série leve de preparação na própria máquina antes das séries do treino, conforme necessário. Essa preparação não conta nas séries previstas.',
     ];
     const warm = state.cur && state.cur.wid === w.id ? state.cur.warm : {};
     const completo = itens.every((t, i) => warm[i]);
@@ -1203,7 +1203,7 @@ details.how .lbl{font-weight:700}
   }
 
   // ---------------- descanso e relógio ----------------
-  let rest = null, audio = null, hold = null;
+  let rest = null, audio = null, hold = null, dockTimer = null;
   // O iPhone só libera o som durante um toque, e trava de novo quando o app vai para o fundo.
   // Chamado a cada toque que começa um descanso ou o cronômetro, para o apito do fim tocar.
   function somOn(){
@@ -1238,10 +1238,13 @@ details.how .lbl{font-weight:700}
   function paintRestRows(){
     const now = Date.now();
     const key = rest && rest.exId && rest.end > now && state.cur && state.cur.wid === sel ? rest.exId + ':' + rest.i : null;
-    document.querySelectorAll('.restbtn').forEach(b => {
+    // Só o descanso atual e os que precisam perder o destaque podem mudar neste tick.
+    document.querySelectorAll('.restbtn.on' + (key ? ', .restbtn[data-rs="' + key + '"]' : '')).forEach(b => {
       if (b.dataset.rs === key) {
         b.classList.add('on');
-        b.querySelector('.rt').textContent = 'Descansando ' + mmss(rest.end - now) + '. Toque para pular';
+        const texto = 'Descansando ' + mmss(rest.end - now) + '. Toque para pular';
+        const rt = b.querySelector('.rt');
+        if (rt.textContent !== texto) rt.textContent = texto;
         b.querySelector('.bar').style.width = Math.min(100, 100 * (1 - (rest.end - now) / (rest.total * 1000))) + '%';
       } else if (b.classList.contains('on')) {
         b.classList.remove('on');
@@ -1255,7 +1258,11 @@ details.how .lbl{font-weight:700}
     if (!hold) return;
     const b = state.cur && state.cur.wid === sel && document.querySelector('.setrow[data-ex="' + hold.exId + '"][data-i="' + hold.i + '"] [data-hold]');
     const s = Math.floor((Date.now() - hold.start) / 1000);
-    if (b) { b.classList.add('on'); b.textContent = 'Parar ' + mmssS(s); }
+    if (b) {
+      b.classList.add('on');
+      const texto = 'Parar ' + mmssS(s);
+      if (b.textContent !== texto) b.textContent = texto;
+    }
     if (!hold.avisou && s >= hold.alvo) {
       hold.avisou = true;
       try { navigator.vibrate && navigator.vibrate([200, 100, 200]); } catch (e) {}
@@ -1267,6 +1274,9 @@ details.how .lbl{font-weight:700}
   // Tempo de treino: passa a mostrar as horas depois de 60 min (1:15:10).
   const relogio = ms => { const s = Math.max(0, Math.floor(ms / 1000)), h = Math.floor(s / 3600); return h ? h + ':' + pad2(Math.floor(s / 60) % 60) + ':' + pad2(s % 60) : mmss(ms); };
   function updateDock(){
+    clearTimeout(dockTimer);
+    dockTimer = null;
+    if (document.visibilityState !== 'visible') return;
     paintRestRows();
     paintHold();
     const dock = $('dock');
@@ -1275,10 +1285,11 @@ details.how .lbl{font-weight:700}
     dock.hidden = false;
     document.body.classList.add('running');
     const now = Date.now();
+    let label, clock;
     if (rest && rest.end > now) {
       dock.classList.add('resting');
-      $('dockLabel').textContent = 'Descanso';
-      $('dockClock').textContent = mmss(rest.end - now);
+      label = 'Descanso';
+      clock = mmss(rest.end - now);
       if ($('dockBtns').dataset.mode !== 'rest') {
         $('dockBtns').innerHTML = '<button type="button" data-rest="30">+30 s</button><button type="button" data-rest="skip">Pular</button>';
         $('dockBtns').dataset.mode = 'rest';
@@ -1293,16 +1304,19 @@ details.how .lbl{font-weight:700}
       }
       const fresh = rest && rest.fim && now - rest.fim < 4000;
       dock.classList.toggle('resting', !!fresh);
-      $('dockLabel').textContent = fresh ? 'Bora, próxima série' : 'Treino ' + c.wid + (esquecido(c) ? ' ficou aberto' : ' em andamento');
-      $('dockClock').textContent = relogio(now - c.start);
+      label = fresh ? 'Bora, próxima série' : 'Treino ' + c.wid + (esquecido(c) ? ' ficou aberto' : ' em andamento');
+      clock = relogio(now - c.start);
       if ($('dockBtns').dataset.mode !== 'run') {
         $('dockBtns').innerHTML = '<button type="button" data-go="' + c.wid + '">Ver treino</button>';
         $('dockBtns').dataset.mode = 'run';
       }
       if (rest && !fresh) rest = null;
     }
+    if ($('dockLabel').textContent !== label) $('dockLabel').textContent = label;
+    if ($('dockClock').textContent !== clock) $('dockClock').textContent = clock;
+    // Sem treino ou com o app em segundo plano, não há atualização periódica do DOM.
+    dockTimer = setTimeout(updateDock, 250);
   }
-  setInterval(updateDock, 250);
 
   let lock = null;
   async function wake(on){
@@ -1311,7 +1325,11 @@ details.how .lbl{font-weight:700}
       if (!on && lock) { await lock.release(); lock = null; }
     } catch (e) { lock = null; }
   }
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && state.cur) { lock = null; wake(true); } });
+  document.addEventListener('visibilitychange', () => {
+    updateDock(); // Date.now recupera o tempo real ao voltar, inclusive um descanso já encerrado.
+    if (document.visibilityState === 'visible' && state.cur) { lock = null; wake(true); }
+  });
+  window.addEventListener('pageshow', updateDock);
 
   function say(t){ $('live').textContent = t; }
 
@@ -1732,23 +1750,34 @@ details.how .lbl{font-weight:700}
     r.onerror = () => erro(r.error);
     r.readAsText(file);
   });
-  // Junta treinos de um backup (já passados pelo sanitize) com os do celular, sem apagar nada.
-  // Devolve quantos eram novos.
-  function juntarHist(hist){
+  // Junta dados já passados pelo sanitize, sem apagar histórico nem substituir um treino aberto.
+  function juntarHist(hist, cur = null){
     const ids = new Set(state.hist.map(h => h.id));
     const novos = hist.filter(h => !ids.has(h.id) && ids.add(h.id));
     novos.forEach(h => state.hist.push(h));
     state.hist.sort((a, b) => a.start - b.start);
+    // Um backup antigo não pode reabrir um treino que já foi finalizado, inclusive no histórico importado.
+    const retomado = !!(cur && Number.isFinite(cur.start) && !state.cur && !state.hist.some(h => h.id === String(cur.start) || h.start === cur.start));
+    if (retomado) {
+      state.cur = cur;
+      sel = cur.wid;
+      abertos.clear(); fechados.clear(); seriesAbertas.clear(); lastSummary = null;
+      wake(true);
+    }
     compact();
     commit();
     renderAll();
-    return novos.length;
+    return { novos:novos.length, retomado };
   }
   function juntarBackup(txt, avisar){
     try {
-      const n = juntarHist(sanitize(JSON.parse(txt)).hist);
-      if (n) nuvemAgendar();
-      avisar(n ? n + (n > 1 ? ' treinos restaurados.' : ' treino restaurado.') : 'Esse backup não tinha treinos novos.');
+      const dados = JSON.parse(txt);
+      if (!dados || dados.v !== 1 || !Array.isArray(dados.hist)) throw new Error('backup-invalido');
+      const limpo = sanitize(dados);
+      const { novos:n, retomado } = juntarHist(limpo.hist, limpo.cur);
+      if (n || retomado) nuvemAgendar();
+      const mensagem = n ? n + (n > 1 ? ' treinos restaurados.' : ' treino restaurado.') : '';
+      avisar((mensagem + (retomado ? ' Treino em andamento restaurado.' : '')).trim() || 'Esse backup não tinha treinos novos.');
     } catch (e) { avisar('Esse arquivo não é um backup do app de treino.'); }
   }
   async function restaurarBackup(file){
@@ -1878,7 +1907,7 @@ details.how .lbl{font-weight:700}
     } finally { $('nvLigar').disabled = false; configurando = false; }
     $('nvToken').value = '';
     if (existente) {
-      juntarHist(existente.hist);
+      juntarHist(existente.hist, existente.cur);
       // Treinos deste celular que o GitHub ainda não tem (ou um envio que tinha falhado com a chave antiga):
       // envia o histórico reunido, que continua tendo tudo o que já estava no GitHub.
       const noGitHub = new Set(existente.hist.map(h => h.id));

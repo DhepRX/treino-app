@@ -8,7 +8,7 @@ const OUT = __dirname + '/prints';
 
 (async () => {
   const browser = await chromium.launch();
-  const ctx = await browser.newContext({ ...devices['iPhone 13'], serviceWorkers: 'allow', acceptDownloads: true, timezoneId: 'America/Sao_Paulo', locale: 'pt-BR', ignoreHTTPSErrors: true });
+  const ctx = await browser.newContext({ ...devices['iPhone 13'], serviceWorkers: 'allow', acceptDownloads: true, timezoneId: 'America/Sao_Paulo', locale: 'pt-BR' });
   const page = await ctx.newPage();
   const erros = [];
   page.on('pageerror', e => erros.push('pageerror: ' + e.message));
