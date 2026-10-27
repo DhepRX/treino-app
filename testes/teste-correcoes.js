@@ -53,8 +53,9 @@ const URL_APP = 'http://127.0.0.1:8766/treino-app/';
   await p.click('#dockBtns [data-rest="skip"]');
   await p.click('[data-curta="ligar"]');
   assert.match(await p.textContent('#progresso'), /1 de 8 séries feitas/);
-  // A preparação vem antes das séries previstas, quando chegar à própria máquina.
-  assert.equal((await p.$$eval('.card.warm li span', s => s.map(x => x.textContent)))[2], 'Nos exercícios seguintes, faça uma série leve de preparação na própria máquina antes das séries do treino, conforme necessário. Essa preparação não conta nas séries previstas.');
+  // A preparação dos próximos exercícios fica nos cards, sem prender o checklist inicial.
+  assert.equal(await p.locator('.card.warm [data-warm]').count(), 2);
+  assert.match(await p.textContent('#ex-c4 .aquece'), /neste exercício.*não conta nas séries previstas/);
   await p.click('[data-curta="tronco"]');
   assert.equal(await p.textContent('#ex-e4 .num'), '5');
   await p.click('#ex-e4 [data-fechar="e4"]');

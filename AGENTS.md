@@ -21,7 +21,7 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
 ## Regras que não podem quebrar
 
 1. **Caminhos relativos** (`./sw.js`, `icon-192.png`). O site roda na subpasta `/treino-app/`.
-2. **Ao publicar qualquer mudança, troque `VERSAO` em `sw.js`** (hoje `treino-renan-v23`) para o celular pegar a versão nova.
+2. **Ao publicar qualquer mudança, troque `VERSAO` em `sw.js`** (hoje `treino-renan-v24`) para o celular pegar a versão nova.
 3. **Não mude o formato dos dados salvos sem migração.** Os treinos ficam só no celular (`localStorage`); perder o formato é perder o histórico.
 4. **Não renomeie os `id` dos exercícios** (`a1`…`d6`, `e1`…`e7`): eles são as chaves do histórico e da sugestão de carga. Para trocar um exercício, mude `nome`, `maq`, `como` etc. e mantenha o `id`. Movimento novo ou com carga que não dá para comparar (máquina → halteres ou polia) ganha id novo (próximo: `e8`). O que sai dos treinos continua em `X2` (ou em `W1`), porque `CONHECIDOS` e o histórico dependem dele: `e1` (remada na máquina) saiu em 28/09/2026 e foi trocada pela `e5`; `a3` e `b4` (voador) saíram do C e foram trocados pelas `e6` e `e7` (polia), porque a Smart Fit do dono não tem o voador.
 5. Sem bibliotecas externas além da fonte Archivo do Google Fonts. Sem framework nem dependências npm no app. Playwright é permitido somente para testes; veja `testes/README.md`.
@@ -36,12 +36,15 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
   - `cur` também tem `ficha` (1 ou 2); sem o campo, é da ficha 1 e continua sendo mostrado com a ficha 1 até finalizar.
   - `hist`: treinos feitos `[{ id, wid, ficha?, start, end, sets, manual?, n?, rot?, fonte? }]`; `wid` é `A`–`D` ou `X` (outro treino); `ficha` ausente = ficha 1
   - Treino marcado à mão no calendário ganha a ficha atual se for hoje, ou a que valia na data (`fichaDoDia()`; a ficha 2 começa em 28/09/2026).
+  - Campos opcionais novos em `cur`/`hist`: `feedback:{[exId]:{rir?,tecnica?,dor?}}`, `plano:{[exId]:nSeries}` e `modo` (`completo`, `curto`, `adaptacao`). `rir` é inteiro 0–5 (5 = cinco ou mais repetições sobrando na última série); `tecnica` é `boa`/`ajustar`; `dor` é `nao`/`sim`. Omitido significa não informado. `sanitize()` valida cada campo, conserva formato v1 e não inventa respostas nos backups antigos. O plano/modo salvo registra a prescrição usada, sem transformar um treino reduzido em completo ao reabrir.
+  - Histórico com `interrompido:true` guarda relatos quando a sessão termina sem séries concluídas. Não avança sequência, adaptação, frequência nem bloqueia outro treino no dia; continua visível no calendário/histórico e na análise dos relatos.
   - Tudo que entra passa por `sanitize()`. Ao ler, o app chama `sanitize(JSON.parse(...))`.
   - Na primeira abertura, carrega `SEED` (treinos até 26/09/2026).
 - `treino-renan-backup`: data (ms) do último backup, manual ou automático.
 - `treino-renan-curta`: versão curta do treino em andamento `{ start, tronco }` (fica fora dos dados do treino).
 - `treino-renan-nuvem`: backup automático `{ repo, token, pendente, ultimo, erro }`. Grava `backup.json` num repositório **privado** via GitHub Contents API (`PUT /repos/{repo}/contents/backup.json`), com uma chave fine-grained. O token fica só no aparelho; nunca coloque token no código.
   `pendente` só vira `false` quando o GitHub confirma o envio. Ao configurar num celular com `backup.json` já no GitHub, o app junta o histórico e recupera `cur` se não houver treino local aberto nem registro concluído com o mesmo `start` ou `id === String(cur.start)`. Só envia se este celular tiver treinos que o GitHub não tem ou um envio pendente anterior; recuperar `cur` na configuração não gera um envio.
+  `gravarNv()` informa se conseguiu persistir a configuração. `confirmarConfigNv()` preserva a configuração anterior em falha; ligar/trocar chave não inicia um envio nem afirma sucesso sem salvar chave e pendência. Desligar também mantém a configuração anterior e avisa se a gravação falhar.
 
 ## Onde mexer no `index.html`
 
@@ -51,12 +54,13 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
   Cada exercício tem `e.w` (letra) e `e.f` (ficha). Não existe mais `EX` global.
 - **Campos de exercício:** `id, vid (YouTube), nome, maq, s (séries), r:[mín,máx], rest (s), kg (carga inicial), inc (quanto subir), yt (busca no YouTube), como[], erros, troca`
   e, quando precisar: `lado`, `perna`, `braco` (meta "cada lado/perna/braço"), `tempo` (segundos, com cronômetro), `semPeso` (só repetições), `extra` (texto na meta),
-  `pernas` (regra de subir carga das pernas), `tronco` (entra na versão curta se ele quiser), `par` e `parCurto` (emendado sem descanso; só na ficha 1).
+  `pernas` (orientação de esforço das pernas), `tronco` (entra na versão curta se ele quiser), `par` e `parCurto` (emendado sem descanso; só na ficha 1).
 - **Vídeos (`vid`):** todo exercício tem um. Os de `a5`, `b6` e `e1`…`e7` foram escolhidos pelo título na busca do YouTube, sem conferir pelo oEmbed (o ambiente de teste bloqueia o YouTube). Se um não abrir no app, troque o `vid`.
 - **Séries que valem hoje:** `S(e)`. Na **adaptação** (`adaptacao()` e `faltamAdaptacao()`: até fazer A, B, C e D uma vez na ficha 2) e na **versão curta** (`curtaAtiva()`, `exibidos()`), no máximo 2.
-- **Sugestão de carga:** `suggest()` sobe `inc` quando todas as séries feitas (pelo menos 2) bateram o topo da faixa. Com `pernas`, só depois de 2 treinos seguidos no topo, com a mesma carga (`sessoes()`, `bateuTopo()`).
+- **Sugestão de carga:** `suggest()` mantém a carga preenchida. `analisarExercicio()` usa duas sessões do mesmo exercício na mesma ficha, completas conforme plano/tabela de origem, no topo da faixa e com a mesma carga em todas as séries. O aviso exige feedback explícito adequado nas duas sessões (execução controlada, sem desconforto, reserva de pelo menos 1 repetição em superiores e 2 nas pernas). Sessões curtas/de adaptação não geram progressão; no legado sem modo/plano, a comparação usa a tabela de origem. A análise informa falta de dados e separa mudança de carga de melhora comprovada. Nunca aumenta números automaticamente nem interpreta ausência de resposta como ausência de sintomas.
+- **Acompanhamento:** `renderProgresso()` mostra frequência real e comparação dos registros disponíveis, atualizada ao salvar/restaurar. É uma análise local por regras, sem serviço de IA, diagnóstico ou acesso à conversa. Registros manuais contam na frequência, não como séries detalhadas. `feedbackHTML()` recebe as respostas opcionais nos cards; ficam no estado e backup privados, nunca no código público.
 - **Avisos da ficha 2:** `avisosHTML()` (adaptação ou esforço, cargas antigas de perna, segurança).
-- **Aquecimento:** `warmHTML()` tem 3 itens: cardio leve, 2 a 3 séries leves do 1º exercício (`aqueceHTML()` repete o aviso só no card dele) e, nos seguintes, uma série leve de preparação na própria máquina, quando chegar ao exercício e conforme necessário. As séries leves vêm antes das séries previstas no treino e não contam como uma delas. Não peça para passar pelas outras máquinas antes de começar o treino.
+- **Aquecimento:** `warmHTML()` tem apenas 2 itens iniciais: cardio leve e 2 a 3 séries leves do 1º exercício. `WARM_KEYS` define as marcações que concluem esse checklist. A preparação dos demais aparece em `aqueceHTML()` no próprio card, conforme necessário, e não bloqueia a conclusão do aquecimento inicial. Ela vem antes das séries previstas e não conta como uma delas. A chave antiga `warm['2']` é preservada ao importar, mas não entra no checklist atual.
 - **Séries do treino em andamento:** `curSet()` só devolve séries quando o treino em andamento é o da tela (os ids se repetem entre os treinos da ficha 2).
 - **Peso e repetições digitados uma vez:** `segue()` copia o valor para as séries seguintes; `anterior()` repete o valor da série anterior ao marcar.
 - **Séries e cards minimizados:** `setRowHTML()` desenha uma série (feita vira linha "18 kg × 8 · editar"); `trocarSerie()` redesenha só ela.
@@ -79,7 +83,7 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
 
 ## Como testar
 
-Rode `node testes/rodar.js` após preparar o Playwright conforme `testes/README.md`. O comando inicia e encerra o servidor e executa os onze roteiros sequencialmente, também no PowerShell. Os testes devem falhar com saída diferente de zero quando uma asserção falhar. Chromium com tela de iPhone não substitui validação no Safari e na PWA instalada.
+Rode `node testes/rodar.js` após preparar o Playwright conforme `testes/README.md`. O comando inicia e encerra o servidor e executa os treze roteiros sequencialmente, também no PowerShell. Os testes devem falhar com saída diferente de zero quando uma asserção falhar. Chromium com tela de iPhone não substitui validação no Safari e na PWA instalada.
 
 Alternativa manual para Bash:
 

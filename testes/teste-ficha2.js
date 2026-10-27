@@ -28,26 +28,31 @@ const D26 = { id: 'd26', wid: 'D', start: H(17), end: H(18), sets: {
   console.log('1. cabeçalho:', await p.textContent('#today'), '| aba aberta:', await p.textContent('#tabs [aria-pressed="true"]'));
   console.log('   título:', await p.textContent('.whead h2'), '| foco:', await p.textContent('.whead p'));
   // 2. Adaptação: 2 séries em tudo e aviso.
-  assert.match(await p.textContent('.aviso-treino'), /Primeira semana da ficha nova/);
+  assert.match(await p.textContent('.aviso-treino'), /Adaptação à ficha nova/);
   assert.match(await p.textContent('.aviso-treino'), /fizer A, B, C e D uma vez, os exercícios principais passam para 3 séries/);
   assert.equal(await p.textContent('#ex-a1 .target strong'), '2 séries de 8–12 repetições');
   assert.equal(await p.textContent('#ex-a5 .target strong'), '2 séries de 12–15 repetições');
+  assert.match(await p.textContent('#ex-e5 .last'), /sobrando 3\./, 'A dica de carga dos superiores respeita a adaptação');
   assert.equal(await cards(), 'a1:2 b1:2 e5:2 a2:2 a5:2 a7:2 b5:2');
   assert.ok(await p.locator('.seguranca').isVisible());
   console.log('2. aviso:', await p.textContent('.aviso-treino'));
   console.log('   séries por exercício (A):', await cards());
   console.log('   segurança:', (await p.textContent('.seguranca')).slice(0, 60) + '…');
   console.log('   aquecimento:', (await p.$$eval('.card.warm li span', s => s.map(x => x.textContent))).join(' / '));
-  // A preparação acontece na própria máquina, antes das séries previstas; só o 1º card repete o lembrete.
-  assert.equal((await p.$$eval('.card.warm li span', s => s.map(x => x.textContent)))[2], 'Nos exercícios seguintes, faça uma série leve de preparação na própria máquina antes das séries do treino, conforme necessário. Essa preparação não conta nas séries previstas.');
-  assert.deepEqual(await p.$$eval('#workout .card.ex', cs => cs.filter(c => c.querySelector('.aquece')).map(c => c.id.slice(3) + ':' + c.querySelector('.aquece').textContent.slice(7, 8))), ['a1:2']);
-  console.log('   aviso de aquecimento só no card do 1º exercício (a1)');
+  // Só cardio e primeiro exercício ficam no checklist inicial; os demais se preparam no próprio card.
+  assert.equal(await p.locator('.card.warm [data-warm]').count(), 2);
+  assert.equal(await p.locator('[data-warm="2"]').count(), 0);
+  assert.match(await p.textContent('#ex-a1 .aquece'), /2 a 3 séries leves/);
+  assert.match(await p.textContent('#ex-b1 .aquece'), /neste exercício.*não conta nas séries previstas/);
+  assert.equal(await p.locator('#workout .card.ex .aquece').count(), await p.locator('#workout .card.ex').count());
+  console.log('   aquecimento inicial com 2 itens; preparação junto de cada exercício');
   await p.screenshot({ path: __dirname + '/prints/ficha2-A.png' });
 
   // 3. Sugestões: extensora 90 kg (C 25/09) e supino inclinado 18 kg (D 26/09).
   await p.click('[data-tab="B"]');
   assert.equal(await sugestao('c2'), '90');
   assert.equal(await sugestao('c1'), '');
+  assert.match(await p.textContent('#ex-c1 .last'), /sobrando 3\./, 'A dica de carga das pernas respeita a adaptação');
   console.log('3. B:', await p.textContent('.whead h2'), '| extensora sugere:', await sugestao('c2'), '| leg press:', await sugestao('c1'), '| aviso pernas:', (await p.textContent('.aviso-treino')).includes('160 kg'));
   console.log('   bird-dog:', (await p.textContent('#ex-e4 .target strong')), '| campos:', await p.$$eval('.setrow[data-ex="e4"][data-i="0"] input', i => i.map(x => x.dataset.f).join(',')));
   await p.click('[data-tab="C"]');
@@ -104,11 +109,52 @@ const D26 = { id: 'd26', wid: 'D', start: H(17), end: H(18), sets: {
   assert.equal(await cards(), 'c1:3 c4:3 c5:2 c2:2 c6:3 a5:3 b6:2 e4:2');
   console.log('4. depois do ciclo, B:', await cards());
   console.log('   aviso:', await p.textContent('.aviso-treino'));
-  assert.doesNotMatch(await p.textContent('.aviso-treino'), /Primeira semana/);
+  assert.doesNotMatch(await p.textContent('.aviso-treino'), /Adaptação à ficha nova/);
   assert.equal(await p.textContent('#ex-c1 .target strong'), '3 séries de 10–15 repetições');
   assert.equal(await p.textContent('#ex-e4 .target strong'), '2 séries de 5 repetições cada lado, segure 5 s em cada');
-  assert.equal(await sugestao('c1'), '105');
-  console.log('6. leg press depois de 2 treinos no topo:', await sugestao('c1'), '| "Hora de subir"?', await p.locator('#ex-c1 .up').textContent().catch(() => 'não'));
+  assert.equal(await sugestao('c1'), '100');
+  assert.equal(await p.locator('#ex-c1 .up').count(), 0, 'Duas séries de adaptação no B não equivalem à tabela completa de três séries');
+  console.log('6. após adaptação: mantém a carga; a progressão espera duas sessões com a tabela completa.');
+
+  // Progressão exige duas sessões completas na mesma carga, usando a tabela de cada treino.
+  const pp = await (await b.newContext({ ...devices['iPhone 13'], serviceWorkers:'block', timezoneId:'America/Sao_Paulo' })).newPage();
+  pp.on('pageerror', e => erros.push('progressão: ' + e.message));
+  await pp.goto(URL_APP);
+  const baseProgressao = Date.now() - 20 * 86400000;
+  async function conferirProgressao(wid, exId, sessoes, kg, aumenta){
+    const hist = ['A','B','C','D'].map((w, i) => ({ id:'ciclo-' + w, wid:w, ficha:2, manual:true, start:baseProgressao + i * 86400000, end:baseProgressao + i * 86400000, sets:{} }));
+    sessoes.forEach((s, i) => {
+      const inicio = baseProgressao + (5 + i) * 86400000;
+      hist.push({ id:'progressao-' + i, wid:s.wid, ficha:2, start:inicio, end:inicio + 3600000,
+        feedback:{ [exId]:{ rir:3, tecnica:'boa', dor:'nao' } },
+        sets:{ [exId]:Array.from({ length:s.n }, (_, j) => ({ kg:Array.isArray(s.kg) ? s.kg[j] : s.kg, reps:s.reps, done:true })) } });
+    });
+    await pp.evaluate(d => localStorage.setItem('treino-renan-v1', JSON.stringify(d)), { v:1, cur:null, hist, upd:baseProgressao });
+    await pp.reload(); await pp.click(`[data-tab="${wid}"]`);
+    assert.equal(await pp.inputValue(`.setrow[data-ex="${exId}"][data-i="0"] [data-f="kg"]`), String(kg), 'A carga preenchida continua sendo a última usada');
+    assert.equal(await pp.locator(`#ex-${exId} .up`).count(), Number(aumenta));
+    assert.doesNotMatch(await pp.textContent('.aviso-treino'), /Adaptação à ficha nova/, 'A adaptação não reinicia a cada semana');
+    if (aumenta) assert.match(await pp.textContent(`#ex-${exId} .up`), /Se a técnica e a reserva foram adequadas, teste o menor aumento de carga disponível/);
+  }
+  const a20 = { wid:'A', kg:20, n:3, reps:12 };
+  await conferirProgressao('A', 'a1', [a20], 20, false);
+  await conferirProgressao('A', 'a1', [a20, { ...a20, n:2 }], 20, false);
+  await conferirProgressao('A', 'a1', [a20, a20], 20, true);
+  assert.match(await pp.textContent('#ex-e5 .last'), /sobrando 1 ou 2\./, 'Superiores voltam à reserva prevista após a adaptação');
+  await conferirProgressao('A', 'a1', [a20, { ...a20, kg:[20,18,20] }], 20, false);
+  const b100 = { wid:'B', kg:100, n:3, reps:15 }, d100 = { wid:'D', kg:100, n:2, reps:15 };
+  await conferirProgressao('B', 'c1', [{ ...b100, kg:120 }, d100], 100, false);
+  await conferirProgressao('B', 'c1', [{ ...b100, kg:120 }, d100, b100], 100, true);
+  await conferirProgressao('D', 'c1', [b100, d100], 100, true);
+  assert.match(await pp.textContent('#ex-e3 .last'), /sobrando 2 ou 3\./, 'Pernas mantêm a reserva prevista após a adaptação');
+  await conferirProgressao('D', 'c1', [{ ...b100, n:2 }, d100], 100, false);
+  await conferirProgressao('D', 'c1', [b100, { ...d100, n:1 }], 100, false);
+  await pp.evaluate(() => localStorage.setItem('treino-renan-v1', JSON.stringify({ v:1, hist:[], upd:0,
+    cur:{ wid:'D', ficha:1, start:Date.now() - 60000, sets:{}, warm:{} } })));
+  await pp.reload();
+  assert.match(await pp.textContent('#ex-d3 .last'), /sobrando 1 ou 2\./, 'A adaptação da ficha nova não muda a dica de um treino legado');
+  console.log('6b. progressão: duas sessões completas, mesma carga em todas as séries, B/D com contagens próprias e aviso condicional.');
+  await pp.context().close();
   await p.click('[data-tab="A"]');
   console.log('   A:', await cards(), '| aviso:', (await p.textContent('.aviso-treino')).slice(0, 70));
   await p.click('[data-tab="D"]');

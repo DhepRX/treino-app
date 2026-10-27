@@ -46,7 +46,7 @@ h1{font-size:1.75rem;font-weight:800;font-stretch:78%;margin:8px 0 2px;line-heig
 .band h1{margin:0;color:var(--band-ink);font-size:2rem}
 .band h1 span{color:var(--tag)}
 .band .today{color:#D2D2D2;margin:4px 0 0}
-.views{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:14px 0 2px}
+.views{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:14px 0 2px}
 .views button{min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-weight:800;font-stretch:85%;font-size:1.02rem;cursor:pointer}
 .views button[aria-pressed="true"]{background:var(--sel);color:var(--sel-ink);border-color:var(--sel)}
 .vt{font-size:1.35rem;font-weight:800;font-stretch:80%;margin:18px 0 2px}
@@ -133,6 +133,12 @@ h1{font-size:1.75rem;font-weight:800;font-stretch:78%;margin:8px 0 2px;line-heig
 .pair{margin:8px 0 0;font-size:.9rem;background:var(--soft);border-radius:8px;padding:6px 10px}
 .last{margin:6px 0 0;font-size:.92rem;color:var(--muted)}
 .up{display:inline-block;margin-top:6px;background:var(--tag);color:var(--tag-ink);font-weight:800;border-radius:6px;padding:3px 8px;font-size:.9rem}
+.feedback{margin-top:12px;border-top:1px solid var(--line);padding-top:4px}
+.feedback summary{min-height:44px;cursor:pointer;font-weight:700;padding:10px 0}
+.feedback p{margin:4px 0 10px;color:var(--muted);font-size:.88rem}
+.feedback label{display:grid;gap:4px;margin:10px 0;font-size:.9rem;font-weight:650}
+.feedback select{width:100%;min-height:44px;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px}
+.feedback select:disabled{opacity:.55}
 
 .sets{margin-top:10px;display:grid;gap:6px}
 .setrow{display:grid;grid-template-columns:2.2rem 1fr 1fr 48px;gap:8px;align-items:center}
@@ -213,6 +219,17 @@ details.how .lbl{font-weight:700}
 .summary h3{margin:0 0 6px}
 .summary p{margin:4px 0}
 .summary ul{margin:6px 0 0;padding-left:1.2rem}
+
+.evolucao h3{margin:0 0 4px;font-size:1.05rem}
+.evolucao p{margin:8px 0;font-size:.94rem}
+.evolucao .estado{display:inline-block;padding:3px 8px;border-radius:6px;background:var(--soft);font-weight:750;font-size:.87rem}
+.evolucao[data-status="revisar"],.evolucao[data-status="reserva"]{border-left:4px solid var(--mk)}
+.evolucao table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.87rem;text-align:left;table-layout:fixed}
+.evolucao th,.evolucao td{padding:8px 5px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}
+.evolucao th:first-child{width:29%}
+.evolucao caption{text-align:left;font-weight:700;padding-top:8px}
+.evolucao .tendencia{color:var(--muted)}
+.mais-progresso>summary{min-height:44px;cursor:pointer;font-weight:700;padding:10px 0}
 
 .hist h2{font-size:1.2rem;font-weight:800;font-stretch:85%;margin:28px 0 8px}
 .hist details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 8px}
@@ -301,6 +318,7 @@ details.how .lbl{font-weight:700}
     <button type="button" data-view="treino" aria-pressed="true">Treino</button>
     <button type="button" data-view="semanas" aria-pressed="false">Sequência</button>
     <button type="button" data-view="cal" aria-pressed="false">Calendário</button>
+    <button type="button" data-view="progresso" aria-pressed="false">Progresso</button>
   </nav>
   <div id="vTreino">
     <nav class="tabs" id="tabs" aria-label="Treinos da semana"></nav>
@@ -309,6 +327,7 @@ details.how .lbl{font-weight:700}
   </div>
   <section id="vSemanas" hidden></section>
   <section id="vCal" hidden aria-label="Calendário de treinos"></section>
+  <section id="vProgresso" hidden aria-labelledby="progressoTitle"></section>
   <section class="backup" id="backup" aria-labelledby="bkTitle">
     <h2 id="bkTitle">Backup dos treinos</h2>
     <p>Seus treinos ficam salvos neste celular. Ative o backup automático abaixo para guardar também uma cópia no GitHub. Você pode salvar um arquivo de backup quando quiser.</p>
@@ -539,6 +558,7 @@ details.how .lbl{font-weight:700}
   const parDe = e => e.par ? treinoDe(e.f, e.w).porEx[e.par] : null;
   const LS = 'treino-renan-v1';
   const MAX_HIST = 1200, KEEP_DETAIL = 60;
+  const WARM_KEYS = ['0', '1']; // cardio e preparação do primeiro exercício
   const pad2 = n => String(n).padStart(2, '0');
   const ymd = d => d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
   const dm = d => pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1);
@@ -571,6 +591,31 @@ details.how .lbl{font-weight:700}
   const seriesAbertas = new Set(); // séries feitas abertas para editar ('exId:i')
   let lastSummary = null;
 
+  // Campos opcionais: backups antigos continuam válidos; ausência nunca significa "sem dor".
+  function cleanFeedback(value){
+    const out = {};
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return out;
+    for (const [id, f] of Object.entries(value)) {
+      if (!CONHECIDOS.has(id) || !f || typeof f !== 'object' || Array.isArray(f)) continue;
+      const item = {};
+      if (Number.isInteger(f.rir) && f.rir >= 0 && f.rir <= 5) item.rir = f.rir;
+      if (['boa', 'ajustar'].includes(f.tecnica)) item.tecnica = f.tecnica;
+      if (['nao', 'sim'].includes(f.dor)) item.dor = f.dor;
+      if (Object.keys(item).length) out[id] = item;
+    }
+    return out;
+  }
+  function sessionExtras(source, target){
+    const feedback = cleanFeedback(source.feedback);
+    if (Object.keys(feedback).length) target.feedback = feedback;
+    const plano = {};
+    if (source.plano && typeof source.plano === 'object' && !Array.isArray(source.plano)) {
+      for (const [id, n] of Object.entries(source.plano)) if (CONHECIDOS.has(id) && Number.isInteger(n) && n >= 1 && n <= 8) plano[id] = n;
+    }
+    if (Object.keys(plano).length) target.plano = plano;
+    if (['completo', 'curto', 'adaptacao'].includes(source.modo)) target.modo = source.modo;
+    return target;
+  }
   function sanitize(d){
     const out = { v:1, cur:null, hist:[], upd:Number(d && d.upd) || 0 };
     const cleanSets = sets => {
@@ -584,6 +629,7 @@ details.how .lbl{font-weight:700}
     if (d && d.cur && WB[d.cur.wid] && typeof d.cur.start === 'number') {
       // Sem o campo ficha: começou antes da ficha 2.
       out.cur = { wid:d.cur.wid, ficha:FICHAS[d.cur.ficha] ? Number(d.cur.ficha) : 1, start:d.cur.start, sets:cleanSets(d.cur.sets), warm:{} };
+      sessionExtras(d.cur, out.cur);
       if (d.cur.warm && typeof d.cur.warm === 'object') for (const k of ['0','1','2']) if (d.cur.warm[k]) out.cur.warm[k] = true;
     }
     if (d && Array.isArray(d.hist)) {
@@ -595,6 +641,8 @@ details.how .lbl{font-weight:700}
           if (typeof h.n === 'number' && isFinite(h.n)) e.n = Math.max(0, Math.round(h.n));
           if (typeof h.rot === 'string' && h.rot.trim()) e.rot = h.rot.trim().slice(0, 40);
           if (typeof h.fonte === 'string' && h.fonte.trim()) e.fonte = h.fonte.trim().slice(0, 30);
+          sessionExtras(h, e);
+          if (h.interrompido === true && !e.manual && seriesOf(e) === 0 && Object.keys(e.feedback || {}).length) e.interrompido = true;
           return e;
         })
         .sort((a, b) => a.start - b.start)
@@ -610,28 +658,82 @@ details.how .lbl{font-weight:700}
   } catch (e) { state = sanitize(SEED); falhaLocal = true; }
 
   // ---------------- histórico e sugestão ----------------
-  // Séries feitas deste exercício nos últimos treinos em que ele apareceu (o mais recente primeiro).
-  function sessoes(exId, n){
+  // Sem ficha explícita, preserva a última carga como referência na migração da ficha antiga.
+  // A interpretação usa somente a mesma ficha e também vê exercícios interrompidos com relato.
+  function sessoes(exId, n, ficha = null, relatos = false){
     const out = [];
     for (let i = state.hist.length - 1; i >= 0 && out.length < n; i--) {
-      const arr = state.hist[i].sets[exId];
-      if (arr && arr.some(s => s && s.done)) out.push(arr.filter(s => s && s.done));
+      const h = state.hist[i];
+      if ((ficha !== null && (h.ficha || 1) !== ficha) || h.start > Date.now()) continue;
+      const sets = (h.sets[exId] || []).filter(s => s && s.done);
+      const feedback = h.feedback && h.feedback[exId] || {};
+      if (sets.length || (relatos && Object.keys(feedback).length)) {
+        const w = treinoDe(h.ficha || 1, h.wid);
+        const ex = w && w.porEx[exId];
+        if (ficha !== null && !ex) continue;
+        out.push({ sets, ex, h, feedback });
+      }
     }
     return out;
   }
-  const maxKgDe = sets => Math.max(0, ...sets.map(s => s.kg || 0));
-  // Bateu o topo da faixa em todas as séries feitas (pelo menos 2).
-  const bateuTopo = (e, sets) => sets.length >= Math.min(2, e.s) && sets.every(s => (s.reps || 0) >= e.r[1]);
+  const cargaUnica = sessao => {
+    const sets = sessao && sessao.sets;
+    if (!sets || !sets.length || !sets.every(s => s.kg !== null && s.kg > 0 && s.kg === sets[0].kg)) return null;
+    return sets[0].kg;
+  };
+  const completa = sessao => !!(sessao && sessao.ex && !sessao.h.interrompido && sessao.h.modo !== 'curto' && sessao.h.modo !== 'adaptacao' &&
+    sessao.sets.length >= ((sessao.h.plano && sessao.h.plano[sessao.ex.id]) || sessao.ex.s));
+  const bateuTopo = (e, sessao) => !!(completa(sessao) && sessao.ex.f === e.f &&
+    sessao.sets.every(s => s.reps !== null && s.reps >= e.r[1]));
+  function tendenciaExercicio(e, atual, antes){
+    if (!atual || !antes || !atual.sets.length || !antes.sets.length) return 'Ainda falta outra sessão com séries anotadas para comparar.';
+    if (atual.sets.length !== antes.sets.length) return 'Quantidades de séries diferentes: estes totais não medem melhora ou piora.';
+    if ((atual.h.modo || 'completo') !== (antes.h.modo || 'completo')) return 'Modos de treino diferentes: compare as séries sem tratar a redução como perda de progresso.';
+    if (!e.tempo && !e.semPeso && (cargaUnica(atual) === null || cargaUnica(atual) !== cargaUnica(antes)))
+      return 'As cargas variaram entre as séries ou sessões. Os números, sozinhos, não confirmam ganho ou perda de força.';
+    if (!atual.sets.concat(antes.sets).every(s => s.reps !== null)) return 'Faltam repetições ou tempo anotados para comparar.';
+    const total = s => s.sets.reduce((n, x) => n + x.reps, 0);
+    const delta = total(atual) - total(antes), unidade = e.tempo ? 'segundos' : 'repetições';
+    return delta > 0 ? 'Você registrou ' + fmt(delta) + ' ' + unidade + ' a mais, com a mesma quantidade de séries' + (!e.tempo && !e.semPeso ? ' e carga' : '') + '.'
+      : delta < 0 ? 'Você registrou ' + fmt(-delta) + ' ' + unidade + ' a menos. Uma sessão isolada não define regressão.'
+      : 'Mesma quantidade de séries e ' + unidade + (!e.tempo && !e.semPeso ? ', com a mesma carga.' : '.');
+  }
+  // Regras locais e transparentes; ausência de relato não significa ausência de sintomas.
+  function analisarExercicio(e){
+    const registros = sessoes(e.id, 2, e.f, true), [atual, antes] = registros;
+    const tendencia = tendenciaExercicio(e, atual, antes);
+    const resposta = (status, titulo, texto, pronto = false) => ({ sessoes:registros, status, titulo, texto, tendencia, pronto });
+    const relatos = registros.map(s => s.feedback);
+    const corrente = state.cur && state.cur.ficha === e.f && state.cur.feedback && state.cur.feedback[e.id];
+    if (corrente) relatos.unshift(corrente);
+    if (relatos.some(f => f.dor === 'sim')) return resposta('revisar', 'Rever antes de progredir', 'Há relato recente de dor ou desconforto. Não aumente a carga com base nestes números; confira a execução e a tolerância com seu professor ou fisioterapeuta.');
+    if (relatos.some(f => f.tecnica === 'ajustar')) return resposta('revisar', 'Conferir a execução', 'Você marcou dificuldade para manter a técnica. Revise a execução antes de considerar aumento de carga.');
+    const reserva = e.pernas ? 2 : 1;
+    if (!e.tempo && relatos.some(f => Number.isInteger(f.rir) && f.rir < reserva)) return resposta('reserva', 'Preservar a reserva', 'O relato indica menos de ' + reserva + (reserva === 1 ? ' repetição possível' : ' repetições possíveis') + ' ao terminar. Evite aumentar agora; ajuste o esforço para manter a reserva prevista.');
+    if (!atual || !atual.sets.length) return resposta('dados', 'Começar o acompanhamento', 'Registre carga, repetições e como foi o exercício. Um treino marcado só no calendário conta para a frequência, mas não permite avaliar desempenho.');
+    if (!antes || !antes.sets.length) return resposta('dados', 'Primeira referência registrada', 'Ainda falta outra sessão deste exercício na mesma ficha. Use a última carga apenas como referência, conforme a tolerância do dia.');
+    if (e.tempo || e.semPeso) return resposta('manter', 'Acompanhar o controle', 'Compare as séries e preserve a execução. O app não aumenta automaticamente o tempo ou a dificuldade deste exercício.');
+    if (!completa(atual) || !completa(antes)) return resposta('manter', 'Manter a referência', 'Há uma sessão curta, de adaptação ou com menos séries que as previstas. Ela conta como treino; aguarde duas sessões completas para avaliar aumento de carga.');
+    const topo = bateuTopo(e, atual) && bateuTopo(e, antes);
+    if (!topo) return resposta('manter', 'Construir repetições', 'O topo da faixa ainda não apareceu em todas as séries de duas sessões. Mantenha a carga se estiver confortável e avance nas repetições dentro da faixa, preservando técnica e reserva.');
+    if (cargaUnica(atual) === null || cargaUnica(atual) !== cargaUnica(antes)) return resposta('manter', 'Confirmar a mesma carga', 'Você chegou ao topo da faixa, mas as cargas diferem. Avalie duas sessões completas com a mesma carga antes de considerar um aumento.');
+    const c = state.cur;
+    const reduzido = e.f === ATUAL && (adaptacao() || curtaAtiva(e.w) || !!(c && c.ficha === e.f && c.wid === e.w && ['curto','adaptacao'].includes(c.modo)));
+    if (reduzido) return resposta('manter', 'Focar na sessão reduzida', 'Durante a adaptação ou versão curta, mantenha a referência conforme a tolerância do dia. Deixe a avaliação de aumento para uma sessão completa.');
+    const confirmado = registros.every(s => s.feedback.dor === 'nao' && s.feedback.tecnica === 'boa' && Number.isInteger(s.feedback.rir) && s.feedback.rir >= reserva);
+    if (!confirmado) return resposta('relato', 'Completar o relato', 'Os números atingiram o critério de duas sessões no topo. Ainda faltam relatos de técnica, reserva ou desconforto; não dá para concluir que aumentar é adequado. Preencha esses dados nos próximos treinos.');
+    return resposta('avaliar', 'Avaliar um pequeno aumento', 'Duas sessões completas no topo, mesma carga e relatos de técnica controlada, sem desconforto e com reserva. Se continuar confortável, avalie o menor incremento disponível. A carga preenchida continua igual.', true);
+  }
   function suggest(e){
-    const [last, antes] = sessoes(e.id, 2);
-    if (!last) return { kg:e.kg, secs:null, up:false, last:null };
-    let bateu = bateuTopo(e, last);
-    // Pernas: só sobe depois de 2 treinos seguidos no topo, com a mesma carga.
-    if (bateu && e.pernas) bateu = !!antes && bateuTopo(e, antes) && maxKgDe(antes) >= maxKgDe(last);
-    if (e.tempo) return { kg:null, secs:bateu ? e.r[1] + (e.inc || 10) : null, up:bateu, last };
-    const maxKg = maxKgDe(last);
-    if (!maxKg) return { kg:e.kg, up:false, last };
-    return { kg:bateu ? Math.round((maxKg + e.inc) * 100) / 100 : maxKg, up:bateu, last };
+    const [atual] = sessoes(e.id, 1);
+    if (!atual) return { kg:e.kg, secs:null, up:false, last:null };
+    const last = atual.sets;
+    const reduzido = e.f === ATUAL && (adaptacao() || curtaAtiva(e.w));
+    const up = !reduzido && analisarExercicio(e).pronto;
+    if (e.tempo || e.semPeso) return { kg:null, secs:null, up:false, last };
+    // A interpretação nunca altera o valor preenchido nem presume segurança a partir da carga.
+    const ultimaCarga = last.slice().reverse().find(s => s.kg !== null && s.kg > 0);
+    return { kg:ultimaCarga ? ultimaCarga.kg : e.kg, up, last };
   }
   // Primeiro ciclo da ficha nova, até fazer A, B, C e D uma vez nela: 2 séries em tudo.
   // faltamAdaptacao(): letras que ainda faltam fazer uma vez na ficha nova.
@@ -640,7 +742,7 @@ details.how .lbl{font-weight:700}
   function faltamAdaptacao(){
     const h = state.hist;
     if (adaptMemo && adaptMemo.h === h && adaptMemo.n === h.length) return adaptMemo.v;
-    const feitos = new Set(h.filter(x => x.ficha === ATUAL).map(x => x.wid));
+    const feitos = new Set(h.filter(x => !x.interrompido && x.ficha === ATUAL).map(x => x.wid));
     adaptMemo = { h, n:h.length, v:ORDEM.filter(l => !feitos.has(l)) };
     return adaptMemo.v;
   }
@@ -651,11 +753,29 @@ details.how .lbl{font-weight:700}
   let curta = null;
   try { curta = JSON.parse(localStorage.getItem(LS_CURTA)); } catch (e) {}
   function gravarCurta(v){ curta = v; try { v ? localStorage.setItem(LS_CURTA, JSON.stringify(v)) : localStorage.removeItem(LS_CURTA); } catch (e) {} }
+  function restaurarModo(c){
+    if (!c || !c.modo) return;
+    if (c.modo === 'curto') {
+      const w = treinoDe(c.ficha, c.wid);
+      const tronco = !!(w && w.ex.some(e => e.tronco && c.plano && c.plano[e.id]));
+      if (!curta || curta.start !== c.start || curta.tronco !== tronco) gravarCurta({ start:c.start, tronco });
+    } else if (curta && curta.start === c.start) gravarCurta(null);
+  }
+  restaurarModo(state.cur);
   const curtaAtiva = wid => !!(curta && state.cur && state.cur.wid === wid && curta.start === state.cur.start);
   const temTronco = w => w.ex.some(e => e.tronco);
   const exibidos = w => curtaAtiva(w.id) ? w.ex.filter((e, i) => i < 4 || (curta.tronco && e.tronco)) : w.ex;
   // Séries que valem hoje.
-  const S = e => e.f === ATUAL && (adaptacao() || curtaAtiva(e.w)) ? Math.min(2, e.s) : e.s;
+  const S = e => state.cur && state.cur.wid === e.w && state.cur.ficha === e.f && state.cur.plano && state.cur.plano[e.id]
+    || (e.f === ATUAL && (adaptacao() || curtaAtiva(e.w)) ? Math.min(2, e.s) : e.s);
+  function registrarPlanoAtual(){
+    const c = state.cur;
+    if (!c) return;
+    delete c.plano; delete c.modo;
+    const w = treinoDe(c.ficha, c.wid);
+    c.plano = Object.fromEntries(exibidos(w).map(e => [e.id, S(e)]));
+    c.modo = curtaAtiva(w.id) ? 'curto' : w.f === ATUAL && adaptacao() ? 'adaptacao' : 'completo';
+  }
   function seriesTxt(e, sets){
     if (e.tempo) return joinPt(sets.map(s => (s.reps || 0) + ' s'));
     const kgs = sets.map(s => s.kg || 0);
@@ -671,6 +791,7 @@ details.how .lbl{font-weight:700}
   function proximo(){
     if (state.cur) return state.cur.wid;
     for (let i = state.hist.length - 1; i >= 0; i--) {
+      if (state.hist[i].interrompido) continue;
       const k = ORDEM.indexOf(state.hist[i].wid);
       if (k >= 0) return ORDEM[(k + 1) % ORDEM.length];
     }
@@ -678,7 +799,7 @@ details.how .lbl{font-weight:700}
   }
   function diasTreinados(){
     const d = new Set();
-    state.hist.forEach(h => d.add(ymd(new Date(h.start))));
+    state.hist.forEach(h => { if (!h.interrompido) d.add(ymd(new Date(h.start))); });
     return d;
   }
   function recentes(n){
@@ -703,7 +824,7 @@ details.how .lbl{font-weight:700}
 
   function renderSemanas(){
     const now = new Date(), nx = proximo(), ult = {};
-    state.hist.forEach(h => { ult[h.wid] = h.start; });
+    state.hist.forEach(h => { if (!h.interrompido) ult[h.wid] = h.start; });
     let html = '<h2 class="vt">Sua sequência</h2><p class="vsub">Sem dia fixo: treine nos dias que der, sempre nesta ordem. Toque num treino para abrir.</p><ul class="days seq">';
     html += ORDEM.map(id => {
       const w = WB[id];
@@ -717,7 +838,7 @@ details.how .lbl{font-weight:700}
       return '<li><button type="button" class="day seqrow' + (id === nx ? ' is-today' : '') + '" data-open="' + id + '"><span class="dw"><b>' + id + '</b>' + esc(w.nome) + '</span><span class="foco">' + esc(w.foco) + '</span>' + st + '</button></li>';
     }).join('') + '</ul>';
     html += '<section class="wk"><h3>Regras</h3><ul class="rules"><li>A e C são superiores; B e D são pernas e tronco.</li><li>3 a 4 treinos por semana, nos dias que der.</li><li>Se fizer só 3 numa semana, continue a ordem na seguinte, sem recomeçar pelo A. Não compense falta dobrando treino.</li><li>No máximo 2 dias seguidos.</li></ul></section>';
-    html += '<section class="wk"><h3>Frequência</h3><p class="wkcount">Últimos 7 dias: <b>' + recentes(7) + '</b> treinos (meta: 3 a 4).</p><p class="wkcount">Treinos registrados aqui: <b>' + state.hist.length + '</b>.</p><button type="button" class="btn" data-gocal>Ver calendário</button></section>';
+    html += '<section class="wk"><h3>Frequência</h3><p class="wkcount">Últimos 7 dias: <b>' + recentes(7) + '</b> treinos (meta: 3 a 4).</p><p class="wkcount">Treinos registrados aqui: <b>' + state.hist.filter(h => !h.interrompido).length + '</b>.</p><button type="button" class="btn" data-gocal>Ver calendário</button></section>';
     const faltam = diasEntre(now, VIAGEM);
     if (faltam > 0) html += '<section class="wk trip"><h3>Salvador em ' + faltam + (faltam > 1 ? ' dias' : ' dia') + '</h3><ul class="rules"><li>Último treino de pernas (B ou D) até 30/10.</li><li>Os 2 últimos treinos antes da viagem são leves: 2 séries por exercício, mesma carga, parando 2 a 3 repetições antes do limite.</li><li>04/11 é descanso. De 05 a 10/11 não tem treino; você volta em 11/11.</li></ul></section>';
     $('vSemanas').innerHTML = html;
@@ -751,21 +872,29 @@ details.how .lbl{font-weight:700}
     if (mudou) saveLocal();
     return txt;
   }
-  function entryMeta(h){ const n = seriesOf(h); return h.manual ? (h.fonte ? 'do app da ' + h.fonte : 'marcado à mão') : Math.max(1, Math.round((h.end - h.start) / 60000)) + ' min, ' + n + (n === 1 ? ' série' : ' séries'); }
+  function entryMeta(h){ const n = seriesOf(h); return h.interrompido ? 'Interrompido · sem séries concluídas' : h.manual ? (h.fonte ? 'do app da ' + h.fonte : 'marcado à mão') : Math.max(1, Math.round((h.end - h.start) / 60000)) + ' min, ' + n + (n === 1 ? ' série' : ' séries'); }
   const nomeTreino = h => { const w = treinoDe(h.ficha || 1, h.wid); return w ? 'Treino ' + h.wid + ' · ' + w.nome : (h.rot || 'Outro treino'); };
   function setsList(h){
     const w = treinoDe(h.ficha || 1, h.wid);
+    const relatos = Object.entries(h.feedback || {}).map(([id, f]) => {
+      const e = w && w.porEx[id] || X2[id], partes = [];
+      if (Number.isInteger(f.rir)) partes.push('reserva de ' + f.rir + (f.rir === 5 ? ' ou mais' : '') + (f.rir === 1 ? ' repetição' : ' repetições'));
+      if (f.tecnica) partes.push(f.tecnica === 'boa' ? 'execução controlada' : 'precisa ajustar a execução');
+      if (f.dor) partes.push(f.dor === 'sim' ? 'dor ou desconforto relatado' : 'sem dor ou desconforto relatado');
+      return '<li>' + esc(e ? e.nome : id) + ': ' + esc(partes.join('; ')) + '.</li>';
+    }).join('');
+    const feedback = relatos ? '<p class="dnote">Seu relato:</p><ul class="feedback-history">' + relatos + '</ul>' : '';
     if (w && h.sets && Object.keys(h.sets).length) {
       // Exercícios do treino e, no fim, os que saíram da ficha depois (ex.: e1).
       const lista = w.ex.concat(Object.keys(h.sets).filter(id => !w.porEx[id] && X2[id]).map(id => X2[id]));
       return '<ul>' + lista.filter(e => h.sets[e.id] && h.sets[e.id].some(x => x && x.done)).map(e => {
         const d = h.sets[e.id].filter(x => x && x.done);
         return '<li>' + esc(e.nome) + ': ' + esc(seriesTxt(e, d)) + '</li>';
-      }).join('') + '</ul>';
+      }).join('') + '</ul>' + feedback;
     }
-    return '<p class="dnote">' + (h.manual ? (h.fonte ? 'Veio do calendário da ' + h.fonte + ', sem as séries.' : 'Marcado sem as séries.') : 'Treino antigo: só o resumo fica guardado.') + '</p>';
+    return '<p class="dnote">' + (h.interrompido ? 'Relato preservado. Não conta como treino concluído e não avança a sequência.' : h.manual ? (h.fonte ? 'Veio do calendário da ' + h.fonte + ', sem as séries.' : 'Marcado sem as séries.') : 'Treino antigo: só o resumo fica guardado.') + '</p>' + feedback;
   }
-  const diaOcupado = k => state.hist.some(h => ymd(new Date(h.start)) === k) || !!(state.cur && ymd(new Date(state.cur.start)) === k);
+  const diaOcupado = k => state.hist.some(h => !h.interrompido && ymd(new Date(h.start)) === k) || !!(state.cur && ymd(new Date(state.cur.start)) === k);
   function registrar(wid){
     if (wid !== 'X' && !WB[wid]) return;
     const hoje = ymd(new Date());
@@ -794,12 +923,13 @@ details.how .lbl{font-weight:700}
     const now = new Date(), hoje = ymd(now), nx = proximo();
     const byDay = {};
     state.hist.forEach(h => { const k = ymd(new Date(h.start)); (byDay[k] = byDay[k] || []).push(h); });
-    const semanas = new Set(state.hist.map(h => ymd(segunda(new Date(h.start)))));
+    const concluidos = state.hist.filter(h => !h.interrompido);
+    const semanas = new Set(concluidos.map(h => ymd(segunda(new Date(h.start)))));
     const d = segunda(now);
     let seguidas = 0;
     if (!semanas.has(ymd(d))) d.setDate(d.getDate() - 7);
     while (semanas.has(ymd(d))) { seguidas++; d.setDate(d.getDate() - 7); }
-    const noAno = state.hist.filter(h => new Date(h.start).getFullYear() === now.getFullYear()).length;
+    const noAno = concluidos.filter(h => new Date(h.start).getFullYear() === now.getFullYear()).length;
     let html = '<div class="cal-stats"><div class="stat"><b>' + FLAME + seguidas + '</b><span>' + (seguidas === 1 ? 'Semana seguida' : 'Semanas seguidas') + '</span></div>' +
       '<div class="stat"><b>' + noAno + '</b><span>Treinos em ' + now.getFullYear() + '</span></div></div>';
 
@@ -817,14 +947,14 @@ details.how .lbl{font-weight:700}
     for (let i = 0; i < total; i++) {
       const dt = new Date(calY, calM, 1 - off + i), k = ymd(dt), es = byDay[k] || [];
       const cls = 'cd' + (dt.getMonth() !== calM ? ' out' : '') + (k === hoje ? ' today' : '') + (k === calSel ? ' sel' : '');
-      const mk = es.slice(0, 2).map((h, j) => (j === 1 && es.length > 2) ? '<i class="chip">+' + (es.length - 1) + '</i>' : '<i class="chip">' + (WB[h.wid] ? h.wid : CHECK) + '</i>').join('');
-      const rot = dt.toLocaleDateString('pt-BR', { day:'numeric', month:'long' }) + (k === hoje ? ', hoje' : '') + (es.length ? ': ' + es.map(nomeTreino).join(' e ') : '');
+      const mk = es.slice(0, 2).map((h, j) => (j === 1 && es.length > 2) ? '<i class="chip">+' + (es.length - 1) + '</i>' : '<i class="chip">' + (h.interrompido ? '!' : WB[h.wid] ? h.wid : CHECK) + '</i>').join('');
+      const rot = dt.toLocaleDateString('pt-BR', { day:'numeric', month:'long' }) + (k === hoje ? ', hoje' : '') + (es.length ? ': ' + es.map(h => nomeTreino(h) + (h.interrompido ? ', interrompido' : '')).join(' e ') : '');
       g += '<button type="button" class="' + cls + '" data-cd="' + k + '" aria-pressed="' + (k === calSel) + '" aria-label="' + esc(rot) + '"' + (k === hoje ? ' aria-current="date"' : '') + (k > hoje ? ' disabled' : '') + '>' +
         '<span class="n">' + (k === hoje ? 'Hoje' : dt.getDate()) + '</span><span class="mk">' + mk + '</span></button>';
     }
     html += '<div class="calbox"><div class="cal">' + g + '</div></div>';
 
-    const doMes = state.hist.filter(h => { const x = new Date(h.start); return x.getFullYear() === calY && x.getMonth() === calM; });
+    const doMes = concluidos.filter(h => { const x = new Date(h.start); return x.getFullYear() === calY && x.getMonth() === calM; });
     if (doMes.length) {
       const c = {};
       doMes.forEach(h => { c[h.wid] = (c[h.wid] || 0) + 1; });
@@ -861,7 +991,8 @@ details.how .lbl{font-weight:700}
           setsList(h) + '<button type="button" class="btn quiet" data-del="' + esc(h.id) + '">Apagar registro</button></details></li>';
       }).join('') + '</ul>';
       // Dias de antes da regra podem ter ficado com dois treinos.
-      if (es.length > 1) html += '<p class="dnote">Esse dia tem ' + es.length + ' treinos, mas vale um por dia: apague o que sobrou.</p>';
+      const feitosNoDia = es.filter(h => !h.interrompido).length;
+      if (feitosNoDia > 1) html += '<p class="dnote">Esse dia tem ' + feitosNoDia + ' treinos, mas vale um por dia: apague o que sobrou.</p>';
     } else if (!vivo) html += '<p class="dayempty">Nenhum treino registrado nesta data.</p>';
     html += '</section>';
     $('vCal').innerHTML = html;
@@ -913,15 +1044,32 @@ details.how .lbl{font-weight:700}
       '<input data-f="reps" inputmode="numeric" placeholder="' + faixa(e) + '" value="' + repsVal + '" aria-label="Série ' + (i + 1) + ', repetições"' + dis + '>' + btnDone + '</div>';
   }
 
-  // O card do 1º exercício lembra as séries de aquecimento; nos demais, prepare na própria máquina se necessário. Aquecimento não conta nas séries do treino.
+  // A preparação de cada exercício aparece nele; o checklist inicial termina antes das séries do treino.
   const nomeCurto = e => { const n = e.nome.split(',')[0]; return n.charAt(0).toLowerCase() + n.slice(1); };
   function aqueceHTML(e, idx){
-    const t = idx === 0 ? 'Antes: 2 a 3 séries leves e progressivas para aquecer. Elas não contam nas séries do treino.' : '';
+    const t = idx === 0
+      ? 'Antes: 2 a 3 séries leves e progressivas para aquecer. Elas não contam nas séries do treino.'
+      : e.tempo || e.semPeso
+        ? 'Se precisar, ensaie o movimento de forma leve antes das séries abaixo. Essa preparação não conta nas séries previstas.'
+        : 'Antes das séries abaixo: se precisar, faça 1 série leve de preparação neste exercício. Ela não conta nas séries previstas.';
     return t ? '<p class="aquece">' + FLAME + '<span>' + esc(t) + '</span></p>' : '';
   }
   // Séries feitas deste exercício no treino em andamento.
   const doCur = e => !!(state.cur && state.cur.wid === e.w && state.cur.ficha === e.f);
   function feitasEx(e){ return doCur(e) ? (state.cur.sets[e.id] || []).filter(x => x && x.done) : []; }
+  function feedbackHTML(e, lock){
+    const ativo = doCur(e), f = ativo && state.cur.feedback && state.cur.feedback[e.id] || {};
+    const dis = lock || !ativo ? ' disabled' : '';
+    const campo = (key, label, options) => '<label>' + esc(label) + '<select data-feedback="' + key + '" data-feedback-ex="' + e.id + '"' + dis + '>' +
+      [['', 'Não informado']].concat(options).map(([value, text]) => '<option value="' + value + '"' + (String(f[key] ?? '') === String(value) ? ' selected' : '') + '>' + esc(text) + '</option>').join('') + '</select></label>';
+    return '<details class="feedback"><summary>Como foi este exercício?' + (Object.keys(f).length ? ' · registrado' : '') + '</summary>' +
+      '<p>Opcional. Registre ao terminar; as respostas ajudam a interpretar seu treino.</p>' +
+      (!ativo ? '<p>Comece o treino para registrar.</p>' : '') +
+      (e.tempo ? '' : campo('rir', 'Na última série, quantas repetições ainda conseguiria fazer?', [[0, '0 — cheguei ao limite'], [1, '1 repetição'], [2, '2 repetições'], [3, '3 repetições'], [4, '4 repetições'], [5, '5 ou mais repetições']])) +
+      campo('tecnica', 'Manteve a execução controlada nas séries?', [['boa', 'Sim'], ['ajustar', 'Preciso ajustar']]) +
+      campo('dor', 'Sentiu dor ou desconforto diferente do esforço muscular?', [['nao', 'Não'], ['sim', 'Sim']]) +
+      '<p>Isso registra sua percepção e não identifica a causa de sintomas.</p></details>';
+  }
   function exHTML(e, idx, lock){
     const feitas = feitasEx(e), completo = feitas.length >= S(e);
     const lado = (e.lado ? (e.perna ? ' cada perna' : e.braco ? ' cada braço' : ' cada lado') : '') + (e.extra ? ', ' + e.extra : '');
@@ -942,11 +1090,12 @@ details.how .lbl{font-weight:700}
         '<span class="abrir">Abrir</span></button></li>';
     }
     const sg = suggest(e);
+    const sobram = e.f === ATUAL && adaptacao() ? '3' : e.pernas ? '2 ou 3' : '1 ou 2';
     let info = '';
     if (sg.last) info += '<p class="last">' + esc(lastTxt(e, sg.last)) + '</p>';
     else if (e.kg) info += '<p class="last">Primeira vez aqui: comece com ' + fmt(e.kg) + ' kg (a carga do seu app).</p>';
-    else if (!e.tempo && !e.semPeso) info += '<p class="last">Primeira vez: escolha uma carga em que a última repetição saia com esforço, sobrando ' + (e.pernas ? '2 ou 3' : '1 ou 2') + '.</p>';
-    if (sg.up) info += '<span class="up">' + (e.tempo ? 'Hora de subir: tente ' + sg.secs + ' s' : 'Hora de subir: ' + fmt(sg.kg) + ' kg') + '</span>';
+    else if (!e.tempo && !e.semPeso) info += '<p class="last">Primeira vez: escolha uma carga em que a última repetição saia com esforço, sobrando ' + sobram + '.</p>';
+    if (sg.up) info += '<span class="up">Duas sessões completas no topo. Se a técnica e a reserva foram adequadas, ' + (e.tempo ? 'avalie aumentar um pouco o tempo.' : 'teste o menor aumento de carga disponível.') + '</span>';
     const desc = e.par ? 'sem descanso: vai direto pro próximo' : 'descanso ' + descansoTxt(e.rest);
     let rows = '';
     if (e.tempo) {
@@ -966,7 +1115,7 @@ details.how .lbl{font-weight:700}
       '<div class="exhead"><span class="num">' + (idx + 1) + '</span><div><h3>' + esc(e.nome) + '</h3><p class="maq">Na Smart Fit: ' + esc(e.maq) + '</p></div>' +
       '<button type="button" class="minbtn" data-fechar="' + e.id + '">Minimizar</button></div>' +
       '<p class="target"><strong>' + esc(alvoCard) + '</strong><span>' + esc(desc) + '</span></p>' + aqueceHTML(e, idx) + par + info +
-      '<div class="sets">' + rows + '</div>' +
+      '<div class="sets">' + rows + '</div>' + feedbackHTML(e, lock) +
       '<div class="exfoot">' +
         '<div class="videoarea">' +
           (e.vid ? '<button type="button" class="btn primary" data-video="' + e.id + '" aria-expanded="false">Ver vídeo</button><div class="video-wrap" data-video-box="' + e.id + '" hidden></div>' : '') +
@@ -999,16 +1148,15 @@ details.how .lbl{font-weight:700}
     const itens = [
       '5 a 8 minutos leves de caminhada ou bike.',
       'No primeiro exercício, ' + nomeCurto(first) + ', faça 2 a 3 séries leves e progressivas de aquecimento antes das séries do treino. Elas não contam nas séries previstas.',
-      'Nos exercícios seguintes, faça uma série leve de preparação na própria máquina antes das séries do treino, conforme necessário. Essa preparação não conta nas séries previstas.',
     ];
     const warm = state.cur && state.cur.wid === w.id ? state.cur.warm : {};
     const completo = itens.every((t, i) => warm[i]);
     if ((completo && !abertos.has('warm')) || (!completo && fechados.has('warm'))) {
       const n = itens.filter((t, i) => warm[i]).length;
       return '<article class="card warm mini"><button type="button" class="minirow" data-abrir="warm" aria-expanded="false">' +
-        '<span class="num' + (completo ? '' : ' pend') + '">' + (completo ? CHECK : FLAME) + '</span><span class="mt"><b>Aquecimento</b><small>' + (completo ? 'Feito' : n + ' de 3 feitos') + '</small></span><span class="abrir">Abrir</span></button></article>';
+        '<span class="num' + (completo ? '' : ' pend') + '">' + (completo ? CHECK : FLAME) + '</span><span class="mt"><b>Aquecimento inicial</b><small>' + (completo ? 'Feito' : n + ' de ' + itens.length + ' feitos') + '</small></span><span class="abrir">Abrir</span></button></article>';
     }
-    return '<article class="card warm"><div class="whead2"><h3>Aquecimento</h3><button type="button" class="minbtn" data-fechar="warm">Minimizar</button></div><ul>' + itens.map((t, i) =>
+    return '<article class="card warm"><div class="whead2"><h3>Aquecimento inicial</h3><button type="button" class="minbtn" data-fechar="warm">Minimizar</button></div><ul>' + itens.map((t, i) =>
       '<li><button type="button" class="done chk" data-warm="' + i + '" aria-pressed="' + !!warm[i] + '" aria-label="' + esc(t) + '"' + (lock ? ' disabled' : '') + '>' + CHECK + '</button><span>' + esc(t) + '</span></li>').join('') + '</ul></article>';
   }
 
@@ -1016,8 +1164,8 @@ details.how .lbl{font-weight:700}
   function avisosHTML(w){
     const pernas = !w.sup;
     let t = adaptacao()
-      ? '<b>Primeira semana da ficha nova:</b> 2 séries em cada exercício, para o corpo se acostumar. Termine cada série com umas 3 repetições sobrando. ' +
-        'Depois que você fizer ' + (faltamAdaptacao().length === 1 ? 'o ' : '') + joinPt(faltamAdaptacao()) + ' uma vez, os exercícios principais passam para 3 séries.'
+      ? '<b>Adaptação à ficha nova:</b> 2 séries em cada exercício, para o corpo se acostumar. Termine cada série com umas 3 repetições sobrando. ' +
+        'Depois que você fizer ' + (faltamAdaptacao().length === 1 ? 'o ' : '') + joinPt(faltamAdaptacao()) + ' uma vez, os exercícios principais passam para 3 séries. Essa etapa não recomeça a cada semana.'
       : '<b>Esforço:</b> termine cada série com ' + (pernas ? '2 a 3' : '1 a 2') + ' repetições sobrando. Não precisa ir até a falha.';
     if (pernas) t += ' As cargas antigas de perna (160 kg no leg press, 90 kg na extensora) não são meta.';
     return '<p class="aviso-treino">' + t + '</p>' +
@@ -1028,7 +1176,7 @@ details.how .lbl{font-weight:700}
   function treinoHoje(){
     if (state.cur) return null;
     const ini = new Date(); ini.setHours(0, 0, 0, 0);
-    const h = state.hist[state.hist.length - 1];
+    const h = state.hist.findLast(x => !x.interrompido);
     return h && h.start >= ini.getTime() ? h : null;
   }
   const travado = w => !!(state.cur ? state.cur.wid !== w.id : treinoHoje());
@@ -1053,15 +1201,17 @@ details.how .lbl{font-weight:700}
   // Treino finalizado sem querer: volta a ficar em andamento, com as séries marcadas.
   // O salvo continua no histórico até finalizar de novo (aí é substituído); descartar não apaga ele.
   function reabrir(id){
-    const h = state.hist.find(x => x.id === id && !x.manual);
+    const h = state.hist.find(x => x.id === id && !x.manual && !x.interrompido);
     if (!h || state.cur) return;
     state.cur = { wid:h.wid, ficha:h.ficha || 1, start:h.start, sets:JSON.parse(JSON.stringify(h.sets || {})), warm:{ '0':true, '1':true, '2':true } };
+    sessionExtras(h, state.cur);
     sel = h.wid;
     abertos.clear(); fechados.clear(); seriesAbertas.clear(); lastSummary = null;
     commit(); wake(true); renderAll();
     say('Treino ' + h.wid + ' reaberto.');
   }
   function renderWorkout(){
+    restaurarModo(state.cur);
     const w = treinoTela(sel);
     const c = state.cur;
     const ativo = c && c.wid === w.id;
@@ -1077,7 +1227,7 @@ details.how .lbl{font-weight:700}
     } else if (ativo) {
       html += '<p id="progresso"></p>';
       if (nova && curtaAtiva(w.id)) {
-        html += '<p class="curta-on">Versão curta: ' + exibidos(w).length + ' exercícios, 2 séries.</p>' +
+        html += '<p class="curta-on">Versão curta: ' + exibidos(w).length + ' exercícios, 2 séries. Reserve cerca de 30 a 40 min; use de vez em quando, quando faltar tempo ou disposição.</p>' +
           (temTronco(w) ? '<button type="button" class="minbtn" data-curta="tronco">' + (curta.tronco ? 'Tirar o tronco' : 'Incluir o tronco') + '</button>' : '') +
           '<button type="button" class="minbtn" data-curta="sair">Voltar ao treino completo</button>';
       } else if (nova) html += '<button type="button" class="minbtn" data-curta="ligar">Versão curta</button>';
@@ -1120,17 +1270,72 @@ details.how .lbl{font-weight:700}
     $('hist').innerHTML = html;
   }
 
+  function resumoSessao(e, sessao){
+    if (!sessao.sets.length) return 'Sem séries concluídas; relato registrado.';
+    return sessao.sets.map(s => {
+      const rep = s.reps === null ? 'não anotado' : fmt(s.reps);
+      return e.tempo ? rep + ' s' : (e.semPeso ? '' : s.kg === null ? 'carga não anotada × ' : fmt(s.kg) + ' kg × ') + rep;
+    }).join(' · ');
+  }
+  function progressoCard(e, analise){
+    let html = '<article class="card evolucao" data-ex-progress="' + e.id + '" data-status="' + analise.status + '"><h3>' + esc(e.nome) + '</h3><span class="estado">' + esc(analise.titulo) + '</span>';
+    html += '<p>' + esc(analise.texto) + '</p>';
+    if (analise.sessoes.length) {
+      html += '<table><caption>Últimos registros deste exercício</caption><thead><tr><th scope="col">Quando</th><th scope="col">Séries feitas</th></tr></thead><tbody>';
+      html += analise.sessoes.map(s => {
+        const dia = new Date(s.h.start).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'2-digit' });
+        const modo = s.h.modo === 'curto' ? ' · curto' : s.h.modo === 'adaptacao' ? ' · adaptação' : '';
+        return '<tr><th scope="row">' + esc(dia + ' · ' + s.h.wid + modo) + '</th><td>' + esc(resumoSessao(e, s)) + '</td></tr>';
+      }).join('') + '</tbody></table>';
+      html += '<p class="tendencia">' + esc(analise.tendencia) + '</p>';
+    }
+    html += '<button type="button" class="btn quiet" data-go="' + e.w + '">Ver no treino ' + e.w + '</button></article>';
+    return html;
+  }
+  function renderProgresso(){
+    const dias7 = recentes(7), dias28 = recentes(28);
+    let html = '<h2 class="vt" id="progressoTitle">Seu progresso</h2><p class="vsub">Atualizado com os treinos salvos neste aparelho e os backups que você restaurar.</p>';
+    html += '<div class="cal-stats"><div class="stat"><b data-frequencia="7">' + dias7 + '</b><span>dias treinados nos últimos 7 dias</span></div><div class="stat"><b data-frequencia="28">' + dias28 + '</b><span>dias treinados nos últimos 28 dias</span></div></div>';
+    html += '<p class="note">Sua referência é uma rotina sustentável de 3 a 4 treinos por semana. A sequência continua de onde você parou; não precisa compensar faltas.</p>';
+    html += '<p><b>' + (state.cur ? 'Em andamento: ' : 'Próximo da sequência: ') + 'Treino ' + proximo() + '.</b></p>';
+    html += '<p class="fine">A leitura abaixo usa regras de comparação, funciona offline e não altera as cargas sozinha. Mais peso ou repetições não confirma ganho de massa nem garante que uma carga seja adequada. Relatos ausentes continuam desconhecidos.</p>';
+    const vistos = new Set(), lista = [];
+    const registros = state.cur ? state.hist.concat(state.cur) : state.hist;
+    for (let i = registros.length - 1; i >= 0; i--) {
+      const h = registros[i];
+      if ((h.ficha || 1) !== ATUAL || h.start > Date.now()) continue;
+      const w = treinoDe(ATUAL, h.wid);
+      if (!w) continue;
+      for (const id of new Set(Object.keys(h.sets || {}).concat(Object.keys(h.feedback || {})))) {
+        if (vistos.has(id) || !w.porEx[id]) continue;
+        if (!(h.sets[id] || []).some(s => s && s.done) && !(h.feedback && h.feedback[id] && Object.keys(h.feedback[id]).length)) continue;
+        vistos.add(id);
+        const e = w.porEx[id];
+        lista.push({ e, analise:analisarExercicio(e) });
+      }
+    }
+    html += '<h3>Exercícios da ficha atual</h3>';
+    if (!lista.length) html += '<div class="card"><p>Finalize um treino com séries anotadas para começar a comparação. Seu histórico antigo continua no calendário.</p></div>';
+    const prioridade = a => ['revisar','reserva'].includes(a.analise.status) ? 0 : 1;
+    lista.sort((a, b) => prioridade(a) - prioridade(b));
+    html += lista.slice(0, 6).map(x => progressoCard(x.e, x.analise)).join('');
+    if (lista.length > 6) html += '<details class="mais-progresso"><summary>Ver mais ' + (lista.length - 6) + ' exercícios</summary>' + lista.slice(6).map(x => progressoCard(x.e, x.analise)).join('') + '</details>';
+    $('vProgresso').innerHTML = html;
+  }
+
   function renderAll(){
     $('today').textContent = todayInfo().txt;
     $('views').querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === view)));
     $('vTreino').hidden = view !== 'treino';
     $('vSemanas').hidden = view !== 'semanas';
     $('vCal').hidden = view !== 'cal';
+    $('vProgresso').hidden = view !== 'progresso';
     renderTabs();
     renderWorkout();
     renderHist();
     renderSemanas();
     renderCal();
+    renderProgresso();
     renderBackup();
     updateDock();
   }
@@ -1146,7 +1351,8 @@ details.how .lbl{font-weight:700}
   // ---------------- sessão ----------------
   function startSession(wid){
     if (state.cur) return state.cur.wid === wid;
-    state.cur = { wid, ficha:ATUAL, start:Date.now(), sets:{}, warm:{} };
+    state.cur = { wid, ficha:ATUAL, start:Date.now(), sets:{}, warm:{}, feedback:{} };
+    registrarPlanoAtual();
     // Treino novo começa com tudo aberto (os ids se repetem entre os treinos da ficha 2).
     abertos.clear();
     fechados.clear();
@@ -1170,11 +1376,19 @@ details.how .lbl{font-weight:700}
     const w = treinoDe(c.ficha, c.wid), total = totalSets(w);
     const sets = {};
     for (const [k, arr] of Object.entries(c.sets)) if (arr.some(x => x && x.done)) sets[k] = arr;
-    const feitas = countDone(c), salvar = Object.keys(sets).length > 0;
+    const feitas = countDone(c), temSeries = Object.keys(sets).length > 0;
+    const interrompido = !temSeries && Object.keys(cleanFeedback(c.feedback)).length > 0;
+    const salvar = temSeries || interrompido;
     // Esqueceu aberto: salva com a duração normal do treino em vez de horas.
     const fim = esquecido(c) ? c.start + w.min * 60000 : Date.now();
     const min = Math.max(1, Math.round((fim - c.start) / 60000));
-    if (salvar) addEntry({ id:String(c.start), wid:c.wid, ficha:c.ficha, start:c.start, end:fim, sets });
+    const plano = Object.fromEntries(exibidos(w).map(e => [e.id, S(e)]));
+    const modo = c.modo || (curtaAtiva(w.id) ? 'curto' : w.f === ATUAL && adaptacao() ? 'adaptacao' : 'completo');
+    if (salvar) {
+      const registro = sessionExtras({ feedback:c.feedback, plano, modo }, { id:String(c.start), wid:c.wid, ficha:c.ficha, start:c.start, end:fim, sets });
+      if (interrompido) registro.interrompido = true;
+      addEntry(registro);
+    }
     gravarCurta(null);
     state.cur = null;
     commit();
@@ -1182,14 +1396,17 @@ details.how .lbl{font-weight:700}
     rest = null;
     hold = null;
     const subir = w.ex.map(e => ({ e, sg:suggest(e) })).filter(x => x.sg.up);
-    let html = '<div class="summary"><h3>Treino ' + w.id + ' salvo</h3><p>' + min + ' min e ' + feitas + ' de ' + total + ' séries.</p>';
-    html += subir.length ? '<p>Na próxima, sobe a carga em:</p><ul>' + subir.map(x => '<li>' + esc(x.e.nome) + ': ' + (x.e.tempo ? x.sg.secs + ' s' : fmt(x.sg.kg) + ' kg') + '</li>').join('') + '</ul>'
-      : '<p>Na próxima, repita as cargas e tente mais repetições.</p>';
-    html += '<button type="button" class="btn" data-gocal>Ver no calendário</button></div>';
+    let html = '<div class="summary"><h3>' + (interrompido ? 'Relato salvo · treino interrompido' : 'Treino ' + w.id + ' salvo') + '</h3><p>' + (interrompido ? 'Sem séries concluídas. Seu relato foi guardado; a sequência e a frequência não mudaram.' : min + ' min e ' + feitas + ' de ' + total + ' séries.') + '</p>';
+    const respostas = Object.values(c.feedback || {});
+    if (respostas.some(f => f.dor === 'sim')) html += '<p>Você registrou desconforto. Reveja os exercícios indicados em Progresso antes de repetir ou aumentar a carga.</p>';
+    else if (respostas.some(f => f.tecnica === 'ajustar' || f.rir === 0)) html += '<p>Revise a execução e o esforço em Progresso antes de aumentar carga ou repetições.</p>';
+    else html += subir.length ? '<p>Se a técnica e a reserva foram adequadas nas duas sessões, avalie um pequeno aumento em:</p><ul>' + subir.map(x => '<li>' + esc(x.e.nome) + ': ' + (x.e.tempo ? 'um pouco mais de tempo' : 'o menor incremento de carga disponível') + '</li>').join('') + '</ul>'
+      : '<p>Confira a análise em Progresso antes de escolher as cargas do próximo treino.</p>';
+    html += '<div class="bkrow"><button type="button" class="btn" data-view="progresso">Ver progresso</button><button type="button" class="btn" data-gocal>Ver no calendário</button></div></div>';
     lastSummary = salvar ? { wid:w.id, html } : null;
     renderAll();
     if (salvar) nuvemAgendar();
-    say(salvar ? 'Treino salvo.' : 'Nenhuma série marcada: nada foi salvo.');
+    say(interrompido ? 'Relato salvo. Treino interrompido, sem séries concluídas.' : salvar ? 'Treino salvo.' : 'Nenhuma série marcada: nada foi salvo.');
   }
   function discardSession(){
     state.cur = null;
@@ -1387,7 +1604,7 @@ details.how .lbl{font-weight:700}
     return novo;
   }
   function estaCompleto(id){
-    if (id === 'warm') return !!(state.cur && ['0', '1', '2'].every(x => state.cur.warm[x]));
+    if (id === 'warm') return !!(state.cur && WARM_KEYS.every(x => state.cur.warm[x]));
     const e = exTela(id);
     return !!e && feitasEx(e).length >= S(e);
   }
@@ -1399,8 +1616,9 @@ details.how .lbl{font-weight:700}
     setTimeout(() => {
       const card = id === 'warm' ? document.querySelector('#workout .card.warm') : $('ex-' + id);
       if (!card || card.classList.contains('mini') || abertos.has(id) || !estaCompleto(id)) return;
+      if (card.querySelector('.feedback[open]')) return; // O relato continua aberto mesmo após marcar a última série.
       // Está corrigindo um número: fecha quando sair do campo.
-      if (card.contains(document.activeElement) && document.activeElement.matches('input')) {
+      if (card.contains(document.activeElement) && document.activeElement.matches('input,select,textarea')) {
         card.addEventListener('focusout', () => fecharDepois(id), { once:true });
         return;
       }
@@ -1447,6 +1665,12 @@ details.how .lbl{font-weight:700}
     if (r && rest) { if (r.dataset.rest === 'skip') { rest = null; } else { rest.end += 30000; rest.total += 30; } updateDock(); return; }
   });
   $('workout').addEventListener('click', ev => {
+    const feedbackSummary = ev.target.closest('.feedback summary');
+    if (feedbackSummary) {
+      const card = feedbackSummary.closest('.card.ex');
+      if (card) abertos.add(card.id.slice(3)); // Não minimize enquanto ele responde.
+      return;
+    }
     const ra = ev.target.closest('[data-reabrir]');
     if (ra) { arm(ra, 'Toque de novo para reabrir', () => reabrir(ra.dataset.reabrir)); return; }
     const df = ev.target.closest('[data-desfazer]');
@@ -1461,6 +1685,8 @@ details.how .lbl{font-weight:700}
       if (acao === 'ligar') { if (!startSession(sel)) return; gravarCurta({ start:state.cur.start, tronco:false }); }
       else if (acao === 'tronco' && curta) gravarCurta({ start:curta.start, tronco:!curta.tronco });
       else if (acao === 'sair') gravarCurta(null);
+      registrarPlanoAtual();
+      commit();
       renderWorkout();
       return;
     }
@@ -1504,7 +1730,7 @@ details.how .lbl{font-weight:700}
       const wbNow = document.querySelector('#workout [data-warm="' + k + '"]') || wb;
       wbNow.setAttribute('aria-pressed', String(!!state.cur.warm[k]));
       commit();
-      if (['0', '1', '2'].every(x => state.cur.warm[x])) fecharDepois('warm');
+      if (WARM_KEYS.every(x => state.cur.warm[x])) fecharDepois('warm');
       return;
     }
     const rb = ev.target.closest('[data-rs]');
@@ -1595,6 +1821,30 @@ details.how .lbl{font-weight:700}
       progressText();
       return;
     }
+  });
+  $('workout').addEventListener('change', ev => {
+    const input = ev.target.closest('[data-feedback]');
+    if (!input || input.disabled) return;
+    const e = exTela(input.dataset.feedbackEx);
+    if (!e || !doCur(e)) return;
+    const key = input.dataset.feedback, value = input.value;
+    const feedback = state.cur.feedback || (state.cur.feedback = {});
+    const item = Object.assign({}, feedback[e.id] || {});
+    if (value === '') delete item[key];
+    else item[key] = key === 'rir' ? Number(value) : value;
+    const cleaned = cleanFeedback({ [e.id]:item });
+    if (cleaned[e.id]) feedback[e.id] = cleaned[e.id];
+    else delete feedback[e.id];
+    input.closest('.feedback').querySelector('summary').textContent = 'Como foi este exercício?' + (feedback[e.id] ? ' · registrado' : '');
+    const card = input.closest('.card.ex'), aviso = card.querySelector('.up');
+    if (aviso && !suggest(e).up) aviso.remove();
+    let alerta = card.querySelector('.feedback-alert');
+    const analise = analisarExercicio(e);
+    if (['revisar', 'reserva'].includes(analise.status)) {
+      if (!alerta) { alerta = document.createElement('p'); alerta.className = 'feedback-alert'; alerta.setAttribute('role', 'status'); input.closest('.feedback').appendChild(alerta); }
+      alerta.textContent = analise.titulo + '. ' + analise.texto;
+    } else if (alerta) alerta.remove();
+    commit();
   });
   // ---------------- peso e repetições digitados uma vez só ----------------
   // O peso (ou as repetições) de uma série vale para as séries seguintes do mesmo exercício
@@ -1776,7 +2026,7 @@ details.how .lbl{font-weight:700}
       const limpo = sanitize(dados);
       const { novos:n, retomado } = juntarHist(limpo.hist, limpo.cur);
       if (n || retomado) nuvemAgendar();
-      const mensagem = n ? n + (n > 1 ? ' treinos restaurados.' : ' treino restaurado.') : '';
+      const mensagem = n ? n + (n > 1 ? ' registros restaurados.' : ' registro restaurado.') : '';
       avisar((mensagem + (retomado ? ' Treino em andamento restaurado.' : '')).trim() || 'Esse backup não tinha treinos novos.');
     } catch (e) { avisar('Esse arquivo não é um backup do app de treino.'); }
   }
@@ -1801,9 +2051,20 @@ details.how .lbl{font-weight:700}
   const ARQ_NV = 'backup.json';
   let nv = {}, enviando = false, configurando = false, mudancas = 0;
   try { nv = JSON.parse(localStorage.getItem(LS_NV)) || {}; } catch (e) {}
-  function gravarNv(){ try { localStorage.setItem(LS_NV, JSON.stringify(nv)); } catch (e) {} }
+  function gravarNv(){
+    try { localStorage.setItem(LS_NV, JSON.stringify(nv)); return true; }
+    catch (e) { return false; }
+  }
   const nvLigado = () => !!(nv.repo && nv.token);
   const nvMsg = t => { $('nvMsg').textContent = t; };
+  // Só confirma uma configuração nova depois de guardar a chave e o envio pendente.
+  function confirmarConfigNv(antes){
+    if (gravarNv()) { $('nvToken').value = ''; return true; }
+    nv = antes;
+    renderNuvem();
+    nvMsg('Não consegui guardar a configuração neste aparelho. A configuração anterior foi mantida. Tente novamente.');
+    return false;
+  }
   function gh(caminho, opts = {}){
     const headers = Object.assign({ Authorization:'Bearer ' + nv.token, Accept:'application/vnd.github+json' }, opts.headers || {});
     return fetch('https://api.github.com/repos/' + nv.repo + caminho, Object.assign({}, opts, { headers, cache:'no-store' }));
@@ -1858,7 +2119,7 @@ details.how .lbl{font-weight:700}
       const resp = await gh('/contents/' + ARQ_NV, {
         method:'PUT',
         headers:{ 'Content-Type':'application/json' },
-        body:JSON.stringify({ message:'Backup ' + dm(agora) + ' ' + agora.toTimeString().slice(0, 5) + ' (' + state.hist.length + ' treinos)', content:base64(JSON.stringify(state)), sha })
+        body:JSON.stringify({ message:'Backup ' + dm(agora) + ' ' + agora.toTimeString().slice(0, 5) + ' (' + state.hist.length + ' registros)', content:base64(JSON.stringify(state)), sha })
       });
       if (!resp.ok) throw { status:resp.status };
       if (nv !== conf) return; // desligou ou trocou a configuração durante o envio
@@ -1905,7 +2166,6 @@ details.how .lbl{font-weight:700}
       nv = antes;
       return nvMsg(e.message === 'backup-invalido' || e instanceof SyntaxError ? 'O backup do GitHub é inválido. Ele foi preservado; confira o arquivo antes de ligar.' : 'Sem internet agora. Tente de novo com sinal.');
     } finally { $('nvLigar').disabled = false; configurando = false; }
-    $('nvToken').value = '';
     if (existente) {
       juntarHist(existente.hist, existente.cur);
       // Treinos deste celular que o GitHub ainda não tem (ou um envio que tinha falhado com a chave antiga):
@@ -1915,17 +2175,18 @@ details.how .lbl{font-weight:700}
       nv.erro = ''; nv.ultimo = antes.repo === repo ? antes.ultimo || 0 : 0;
       if (!falta) {
         nv.pendente = false;
-        gravarNv(); renderNuvem();
+        if (!confirmarConfigNv(antes)) return;
+        renderNuvem();
         return nvMsg('Backup ligado. Histórico recuperado do GitHub; o arquivo foi preservado.');
       }
       mudancas++;
       nv.pendente = true;
-      gravarNv();
+      if (!confirmarConfigNv(antes)) return;
       await nuvemEnviar();
       return nvMsg(nv.erro ? nv.erro : 'Backup ligado. Histórico do GitHub juntado com o deste celular e enviado.');
     }
     nv.pendente = true; nv.erro = '';
-    gravarNv();
+    if (!confirmarConfigNv(antes)) return;
     await nuvemEnviar();
     nvMsg(nv.erro ? nv.erro : 'Pronto: backup automático ligado e primeiro envio feito.');
   }
@@ -1942,7 +2203,13 @@ details.how .lbl{font-weight:700}
   $('nvLigar').addEventListener('click', nuvemLigar);
   $('nvRestaurar').addEventListener('click', nuvemRestaurar);
   $('nvDesligar').addEventListener('click', ev => arm(ev.currentTarget, 'Toque de novo para desligar', () => {
-    nv = {}; gravarNv(); renderNuvem(); nvMsg('Backup automático desligado. A chave foi apagada deste celular.');
+    const antes = nv;
+    nv = {};
+    if (!gravarNv()) {
+      nv = antes; renderNuvem();
+      return nvMsg('Não consegui apagar a configuração salva neste aparelho. O backup continua ligado. Tente novamente.');
+    }
+    renderNuvem(); nvMsg('Backup automático desligado. A chave foi apagada deste celular.');
   }));
   window.addEventListener('online', nuvemEnviar);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') nuvemEnviar(); });
