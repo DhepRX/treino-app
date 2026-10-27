@@ -22,7 +22,7 @@ Na pasta do app (a que tem o `index.html`):
 node testes/rodar.js
 ```
 
-O mesmo comando funciona no PowerShell, Bash e terminal do macOS. Ele inicia o servidor em `http://127.0.0.1:8766/treino-app/`, executa os onze roteiros em sequência e encerra o servidor. Se a porta estiver ocupada, avisa em vez de usar outro servidor. Não rode testes de rede em paralelo.
+O mesmo comando funciona no PowerShell, Bash e terminal do macOS. Ele inicia o servidor em `http://127.0.0.1:8766/treino-app/`, executa os treze roteiros em sequência e encerra o servidor. Se a porta estiver ocupada, avisa em vez de usar outro servidor. Não rode testes de rede em paralelo.
 
 Para um roteiro isolado: abra um terminal com `node testes/servidor.js`; em outro, rode por exemplo `node testes/teste-nuvem.js`. Encerre o servidor com Ctrl+C.
 
@@ -32,11 +32,13 @@ Os prints ficam em `testes/prints/`, criada pelos próprios roteiros e ignorada 
 
 | Roteiro | O que testa |
 | --- | --- |
+| `teste-feedback.js` | Respostas opcionais por exercício, persistência/reabertura, plano e modo da sessão, validação dos novos campos e compatibilidade do backup |
+| `teste-progresso.js` | Frequência registrada, comparação entre sessões, dados insuficientes, bloqueios por desconforto/esforço/execução e critérios de progressão sem aumentar carga automaticamente |
 | `teste-ficha2.js` | Ficha 2: próximo treino, adaptação com 2 séries, aquecimento na própria máquina antes das séries do treino, sem substituir as séries previstas, cargas sugeridas, nomes da ficha 1 no calendário, regra das pernas, versão curta, backup antigo e treino da ficha 1 aberto |
 | `teste-correcoes.js` | Correções da revisão de 28/09/2026: aquecimento no primeiro toque, séries do mesmo exercício em dois treinos, editar e trocar de aba, versão curta (progresso e número do card), "Minimizar todos" que não passa para o próximo treino, treino marcado à mão num dia da ficha 1, aviso de falha ao salvar, vídeo em todos os exercícios, ícones no tamanho certo, remada com halteres no lugar da remada na máquina (com o histórico antigo preservado), um treino por dia (aba concluída, outras travadas, reabrir, descartar sem perder, calendário sem segundo registro, desfazer marcação), tema claro |
 | `teste-serie.js` | Série marcada vira linha, editar, desmarcar, descanso que some, prancha pelo cronômetro |
 | `teste-peso.js` | Peso digitado na série 1 vai para as outras; série trocada na mão não muda |
-| `teste-mini.js` | Card minimiza na última série; abrir, minimizar, corrigindo um número, trocar de aba, finalizar |
+| `teste-mini.js` | Aquecimento inicial termina com 2 itens, antes das séries de trabalho, e continua concluído ao reabrir; card minimiza na última série; abrir, minimizar, corrigindo um número, trocar de aba, finalizar |
 | `teste-todos.js` | Minimizar todos, abrir um, próximo abre sozinho, repetições que seguem a série 1 |
 | `teste-revisao.js` | Treino esquecido aberto, relógio com horas, finalizar sem séries, resumo sem "0 kg" |
 | `teste-nuvem.js` | Backup automático no GitHub com a API **simulada**, incluindo configuração pela interface num celular novo, sem sobrescrever o backup, app fechado no meio do envio e chave nova depois de uma vencida (não usa token real) |

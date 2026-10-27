@@ -11,7 +11,7 @@ async function api(route) {
   if (gh.semRede) return route.abort('internetdisconnected');
   const req = route.request(), url = new URL(req.url()), auth = req.headers()['authorization'];
   const json = (status, body) => route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
-  if (auth !== 'Bearer github_pat_BOM1234') return json(401, { message: 'Bad credentials' });
+  if (!['Bearer github_pat_BOM1234', 'Bearer github_pat_NOVO5678'].includes(auth)) return json(401, { message: 'Bad credentials' });
   const m = url.pathname.match(/^\/repos\/DhepRX\/(treino-dados|publico)(\/contents\/backup\.json)?$/);
   if (!m) return json(404, { message: 'Not Found' });
   if (!m[2]) return json(200, { full_name: 'DhepRX/' + m[1], private: m[1] === 'treino-dados' });
@@ -170,6 +170,63 @@ async function api(route) {
   assert.equal(gh.puts.length, putsComAndamento, 'Recuperar andamento na configuração não faz PUT');
   assert.equal(await p4.evaluate(() => JSON.parse(localStorage.getItem('treino-renan-nuvem')).pendente), false);
   console.log('11. celular novo: treino em andamento recuperado, sem substituir o backup remoto.');
+
+  // Falha ao guardar a configuração não ativa backup nem permite o primeiro PUT.
+  const ctx5 = await browser.newContext({ ...devices['iPhone 13'], serviceWorkers:'block', timezoneId:'America/Sao_Paulo' });
+  await ctx5.addInitScript(() => {
+    window.bloquearConfigBackup = true;
+    const original = Storage.prototype.setItem;
+    Storage.prototype.setItem = function(key, value){
+      if (key === 'treino-renan-nuvem' && window.bloquearConfigBackup) throw new DOMException('Sem espaço', 'QuotaExceededError');
+      return original.call(this, key, value);
+    };
+  });
+  await ctx5.route('https://api.github.com/**', api);
+  const p5 = await ctx5.newPage();
+  p5.on('pageerror', e => erros.push('p5: ' + e.message));
+  const arquivoAntes12 = gh.arquivo, shaAntes12 = gh.sha, putsAntes12 = gh.puts.length;
+  gh.arquivo = null; gh.sha = null;
+  await p5.goto(URL_APP); await p5.click('#nvConfig summary');
+  await p5.fill('#nvToken', 'github_pat_BOM1234'); await p5.click('#nvLigar');
+  await p5.waitForFunction(() => document.querySelector('#nvMsg').textContent.includes('Não consegui guardar'));
+  assert.match(await p5.textContent('#nvStatus'), /^Desligado/);
+  assert.equal(await p5.evaluate(() => localStorage.getItem('treino-renan-nuvem')), null);
+  assert.equal(gh.puts.length, putsAntes12, 'Sem persistir a configuração, não cria backup remoto');
+  assert.equal(gh.arquivo, null);
+
+  // O mesmo bloqueio também vale quando o GitHub já tem um backup.
+  gh.arquivo = arquivoAntes12; gh.sha = shaAntes12;
+  await p5.click('#nvLigar');
+  await p5.waitForFunction(() => document.querySelector('#nvMsg').textContent.includes('Não consegui guardar'));
+  assert.match(await p5.textContent('#nvStatus'), /^Desligado/);
+  assert.equal(await p5.evaluate(() => localStorage.getItem('treino-renan-nuvem')), null);
+  assert.equal(gh.arquivo, arquivoAntes12);
+  assert.equal(gh.puts.length, putsAntes12);
+
+  await p5.evaluate(() => { window.bloquearConfigBackup = false; });
+  await p5.click('#nvLigar');
+  await p5.waitForFunction(() => document.querySelector('#nvMsg').textContent.includes('Histórico recuperado'));
+  const configAntes12 = await p5.evaluate(() => localStorage.getItem('treino-renan-nuvem'));
+  assert.ok(configAntes12, 'Depois de liberar o armazenamento, a configuração fica salva');
+  await p5.evaluate(() => { window.bloquearConfigBackup = true; });
+  await p5.fill('#nvToken', 'github_pat_NOVO5678'); await p5.click('#nvLigar');
+  await p5.waitForFunction(() => document.querySelector('#nvMsg').textContent.includes('Não consegui guardar'));
+  assert.equal(await p5.evaluate(() => localStorage.getItem('treino-renan-nuvem')), configAntes12, 'Troca de chave malsucedida preserva a configuração salva');
+  assert.match(await p5.getAttribute('#nvToken', 'placeholder'), /…1234/, 'Configuração em memória também volta para a chave anterior');
+  assert.match(await p5.textContent('#nvStatus'), /^Ligado/);
+  assert.equal(gh.puts.length, putsAntes12);
+
+  await p5.click('#nvDesligar'); await p5.click('#nvDesligar');
+  await p5.waitForFunction(() => document.querySelector('#nvMsg').textContent.includes('Não consegui apagar'));
+  assert.match(await p5.textContent('#nvStatus'), /^Ligado/);
+  assert.equal(await p5.evaluate(() => localStorage.getItem('treino-renan-nuvem')), configAntes12, 'Falha ao desligar preserva a configuração e não afirma que apagou a chave');
+  await p5.evaluate(() => { window.bloquearConfigBackup = false; });
+  await p5.click('#nvDesligar'); await p5.click('#nvDesligar');
+  assert.deepEqual(await p5.evaluate(() => JSON.parse(localStorage.getItem('treino-renan-nuvem'))), {});
+  await p5.reload();
+  assert.match(await p5.textContent('#nvStatus'), /^Desligado/, 'Desligamento confirmado continua valendo após recarregar');
+  assert.equal(gh.puts.length, putsAntes12);
+  console.log('12. configuração: falhas de armazenamento impedem ativação, preservam a chave anterior e não simulam desligamento.');
   assert.deepEqual(erros, [], 'Não deve haver erros de JavaScript inesperados');
   console.log('erros: nenhum');
   await browser.close();
