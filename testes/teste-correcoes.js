@@ -53,8 +53,8 @@ const URL_APP = 'http://127.0.0.1:8766/treino-app/';
   await p.click('#dockBtns [data-rest="skip"]');
   await p.click('[data-curta="ligar"]');
   assert.match(await p.textContent('#progresso'), /1 de 8 séries feitas/);
-  // Aquecimento não pede série leve em outras máquinas.
-  assert.equal((await p.$$eval('.card.warm li span', s => s.map(x => x.textContent)))[2], 'Nos outros exercícios não precisa aquecer à parte: faça a 1ª série mais leve, sem pegar a máquina antes.');
+  // A preparação vem antes das séries previstas, quando chegar à própria máquina.
+  assert.equal((await p.$$eval('.card.warm li span', s => s.map(x => x.textContent)))[2], 'Nos exercícios seguintes, faça uma série leve de preparação na própria máquina antes das séries do treino, conforme necessário. Essa preparação não conta nas séries previstas.');
   await p.click('[data-curta="tronco"]');
   assert.equal(await p.textContent('#ex-e4 .num'), '5');
   await p.click('#ex-e4 [data-fechar="e4"]');

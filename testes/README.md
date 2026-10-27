@@ -26,13 +26,13 @@ O mesmo comando funciona no PowerShell, Bash e terminal do macOS. Ele inicia o s
 
 Para um roteiro isolado: abra um terminal com `node testes/servidor.js`; em outro, rode por exemplo `node testes/teste-nuvem.js`. Encerre o servidor com Ctrl+C.
 
-Os prints ficam em `testes/prints/`.
+Os prints ficam em `testes/prints/`, criada pelos próprios roteiros e ignorada pelo Git. Essa pasta pode ser apagada depois dos testes.
 
 ## O que cada um testa
 
 | Roteiro | O que testa |
 | --- | --- |
-| `teste-ficha2.js` | Ficha 2: próximo treino, adaptação com 2 séries, aquecimento sem série leve em outras máquinas, cargas sugeridas, nomes da ficha 1 no calendário, regra das pernas, versão curta, backup antigo e treino da ficha 1 aberto |
+| `teste-ficha2.js` | Ficha 2: próximo treino, adaptação com 2 séries, aquecimento na própria máquina antes das séries do treino, sem substituir as séries previstas, cargas sugeridas, nomes da ficha 1 no calendário, regra das pernas, versão curta, backup antigo e treino da ficha 1 aberto |
 | `teste-correcoes.js` | Correções da revisão de 28/09/2026: aquecimento no primeiro toque, séries do mesmo exercício em dois treinos, editar e trocar de aba, versão curta (progresso e número do card), "Minimizar todos" que não passa para o próximo treino, treino marcado à mão num dia da ficha 1, aviso de falha ao salvar, vídeo em todos os exercícios, ícones no tamanho certo, remada com halteres no lugar da remada na máquina (com o histórico antigo preservado), um treino por dia (aba concluída, outras travadas, reabrir, descartar sem perder, calendário sem segundo registro, desfazer marcação), tema claro |
 | `teste-serie.js` | Série marcada vira linha, editar, desmarcar, descanso que some, prancha pelo cronômetro |
 | `teste-peso.js` | Peso digitado na série 1 vai para as outras; série trocada na mão não muda |

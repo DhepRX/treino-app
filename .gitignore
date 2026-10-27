@@ -1,3 +1,5 @@
 node_modules/
-testes/prints/*
-!testes/prints/.gitkeep
+testes/prints/
+/backup.json
+/treino-backup-*.json
+.DS_Store

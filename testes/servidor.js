@@ -6,6 +6,8 @@ const TIPOS = { '.html':'text/html; charset=utf-8', '.js':'application/javascrip
 let lento = false, mudou = false;
 http.createServer((req, res) => {
   const u = new URL(req.url, 'http://x');
+  // Ao abrir uma página de texto (como o README), o navegador procura o favicon na raiz.
+  if (u.pathname === '/favicon.ico') { res.writeHead(302, { Location:'/treino-app/icon-192.png?v=2' }); return res.end(); }
   if (u.pathname === '/__lento') { lento = true; return res.end('lento'); }
   if (u.pathname === '/__mudou') { mudou = true; return res.end('mudou'); }
   if (u.pathname === '/__normal') { lento = false; mudou = false; return res.end('normal'); }

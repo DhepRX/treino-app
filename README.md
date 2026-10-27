@@ -9,6 +9,8 @@ Endereço: **https://dheprx.github.io/treino-app/**
 - `manifest.webmanifest`, `icon-*.png` e `icone.svg`: nome e ícone na Tela de Início
 - `.nojekyll`: faz o GitHub Pages publicar os arquivos como estão
 
+A pasta `testes/` é usada só no desenvolvimento. Os roteiros recriam `testes/prints/` quando precisam; prints e `node_modules/` não entram no Git nem são necessários para usar o app. Guarde os arquivos de backup no aparelho ou no repositório privado `treino-dados`, separado deste site público.
+
 ## 1. Colocar no ar (uma vez só)
 
 O app precisa de um endereço que comece com `https://`. Abrindo o arquivo direto no celular, o iPhone não instala o app, não guarda os treinos direito e os vídeos do YouTube não tocam.
@@ -58,11 +60,11 @@ A ficha tira carga direta da coluna (sem afundo com carga, abdominal com carga n
 ## 4. Seus treinos
 
 - No primeiro uso, o app já vem com os 8 treinos registrados até 26/09/2026.
-- Depois disso, os treinos ficam salvos só neste celular. Toque em **Salvar backup** de vez em quando e guarde o arquivo no Arquivos, no iCloud Drive ou no WhatsApp. O app mostra a data do último backup e destaca a seção quando passa de 7 dias com treinos novos.
-- **Restaurar backup** junta os treinos do arquivo com os do celular, sem apagar nada.
-- **Backup automático no GitHub** (recomendado): em **Backup dos treinos > Backup automático no GitHub > Configurar**, siga os 3 passos uma vez.
+- Depois disso, os treinos ficam salvos neste celular e, quando o backup automático está ligado, também têm uma cópia no GitHub. **Salvar backup** permite guardar uma cópia em arquivo. O app mostra a data do último backup e destaca a seção quando passa de 7 dias com treinos novos.
+- **Restaurar backup** junta os treinos do arquivo com os do celular, sem apagar nada. Também recupera o treino em andamento, com suas séries e o aquecimento marcado, se não houver outro aberto neste celular e ele ainda não tiver sido finalizado. Arquivos que não são backups do app são recusados.
+- **Backup automático no GitHub** (recomendado): em **Backup dos treinos > Backup automático no GitHub > Configurar backup automático**, siga os 3 passos uma vez.
   Depois disso, cada treino finalizado (e cada registro feito ou apagado no calendário) vai sozinho para o `backup.json` do repositório privado `treino-dados`.
-  Sem internet, o app envia quando o sinal voltar. Em outro celular, configure com a mesma chave: o histórico existente é recuperado antes de habilitar novos envios. A configuração preserva o arquivo remoto; o próximo treino finalizado envia o histórico reunido. **Restaurar do GitHub** continua disponível para repetir a recuperação.
+  Sem internet, o app envia quando o sinal voltar. Em outro celular, configure com a mesma chave: o histórico existente e um treino em andamento no backup são recuperados antes de habilitar novos envios, seguindo as mesmas regras da restauração por arquivo. A configuração preserva o arquivo remoto; o próximo treino finalizado envia o histórico reunido. **Restaurar do GitHub** continua disponível para repetir a recuperação.
   O GitHub guarda cada versão no histórico do repositório. Quando a chave vencer, o app avisa; crie outra e cole em **Configurar**.
 - Este app e o app de dentro do Claude são separados: o que você marca em um não aparece no outro.
 - Apagar o app da Tela de Início apaga os treinos junto. Salve um backup antes.

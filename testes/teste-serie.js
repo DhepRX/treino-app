@@ -21,6 +21,22 @@ const { paraOntem } = require('./ajuda');
   assert.equal(await mini('d1', 0), true); assert.equal(await restVis('d1',0), true);
   console.log('1. marcou série 1 -> linha?', await mini('d1', 0), '|', await p.textContent(row('d1', 0) + ' .setmini'), '| descanso dela visível (contando):', await restVis('d1', 0));
   console.log('   séries 2 e 3 continuam com campos:', !(await mini('d1', 1)), !(await mini('d1', 2)), '| peso 18 nelas:', await p.inputValue(row('d1', 1) + ' [data-f="kg"]'));
+  // Em segundo plano a tela para de ser redesenhada, mas o descanso continua contando.
+  const antesDeOcultar = await p.evaluate(() => {
+    Object.defineProperty(document, 'visibilityState', { configurable:true, value:'hidden' });
+    document.dispatchEvent(new Event('visibilitychange'));
+    return document.querySelector('#dockClock').textContent;
+  });
+  await p.waitForTimeout(1200);
+  assert.equal(await p.textContent('#dockClock'), antesDeOcultar, 'O relógio não redesenha a tela oculta');
+  await p.evaluate(() => {
+    delete document.visibilityState;
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  const segundos = texto => texto.split(':').reduce((total, parte) => total * 60 + Number(parte), 0);
+  assert.ok(segundos(await p.textContent('#dockClock')) < segundos(antesDeOcultar), 'Ao voltar, o descanso considera o tempo real decorrido');
+  assert.equal(await p.locator('.restbtn.on').count(), 1, 'O descanso ativo continua destacado ao voltar');
+  console.log('   segundo plano: sem redesenhos; retorno atualiza o descanso pelo tempo real');
   await p.click('#dockBtns [data-rest="skip"]'); await p.waitForTimeout(400);
   console.log('   pulou o descanso -> linha de descanso da série 1 visível?', await restVis('d1', 0), '| da série 2:', await restVis('d1', 1));
   await p.screenshot({ path: __dirname + '/prints/serie-mini.png' });

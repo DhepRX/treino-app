@@ -154,6 +154,22 @@ async function api(route) {
   assert.equal(gh.arquivo, '{invalido');
   assert.equal(await p3.evaluate(() => localStorage.getItem('treino-renan-nuvem')), null);
   console.log('10. backup inválido: preservado, configuração não ativada.');
+
+  // Configurar um celular sem treino aberto recupera o andamento remoto sem reenviar o arquivo.
+  const abertoRemoto = { wid:'D', ficha:2, start:Date.UTC(2026,9,22,12), sets:{ c4:[{ kg:35, reps:10, done:true }] }, warm:{ '0':true, '1':true } };
+  gh.arquivo = JSON.stringify({ ...JSON.parse(remotoAntes), cur:abertoRemoto });
+  const arquivoComAndamento = gh.arquivo, putsComAndamento = gh.puts.length;
+  const p4 = await (await browser.newContext({ ...devices['iPhone 13'], serviceWorkers:'block', timezoneId:'America/Sao_Paulo' })).newPage();
+  await p4.context().route('https://api.github.com/**', api);
+  p4.on('pageerror', e => erros.push('p4: ' + e.message));
+  await p4.goto(URL_APP); await p4.click('#nvConfig summary');
+  await p4.fill('#nvToken', 'github_pat_BOM1234'); await p4.click('#nvLigar');
+  await p4.waitForFunction(() => document.querySelector('#nvMsg').textContent.includes('Histórico recuperado'));
+  assert.deepEqual(await p4.evaluate(() => JSON.parse(localStorage.getItem('treino-renan-v1')).cur), abertoRemoto);
+  assert.equal(gh.arquivo, arquivoComAndamento, 'Recuperar andamento na configuração preserva o arquivo remoto');
+  assert.equal(gh.puts.length, putsComAndamento, 'Recuperar andamento na configuração não faz PUT');
+  assert.equal(await p4.evaluate(() => JSON.parse(localStorage.getItem('treino-renan-nuvem')).pendente), false);
+  console.log('11. celular novo: treino em andamento recuperado, sem substituir o backup remoto.');
   assert.deepEqual(erros, [], 'Não deve haver erros de JavaScript inesperados');
   console.log('erros: nenhum');
   await browser.close();

@@ -21,7 +21,7 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
 ## Regras que não podem quebrar
 
 1. **Caminhos relativos** (`./sw.js`, `icon-192.png`). O site roda na subpasta `/treino-app/`.
-2. **Ao publicar qualquer mudança, troque `VERSAO` em `sw.js`** (hoje `treino-renan-v22`) para o celular pegar a versão nova.
+2. **Ao publicar qualquer mudança, troque `VERSAO` em `sw.js`** (hoje `treino-renan-v23`) para o celular pegar a versão nova.
 3. **Não mude o formato dos dados salvos sem migração.** Os treinos ficam só no celular (`localStorage`); perder o formato é perder o histórico.
 4. **Não renomeie os `id` dos exercícios** (`a1`…`d6`, `e1`…`e7`): eles são as chaves do histórico e da sugestão de carga. Para trocar um exercício, mude `nome`, `maq`, `como` etc. e mantenha o `id`. Movimento novo ou com carga que não dá para comparar (máquina → halteres ou polia) ganha id novo (próximo: `e8`). O que sai dos treinos continua em `X2` (ou em `W1`), porque `CONHECIDOS` e o histórico dependem dele: `e1` (remada na máquina) saiu em 28/09/2026 e foi trocada pela `e5`; `a3` e `b4` (voador) saíram do C e foram trocados pelas `e6` e `e7` (polia), porque a Smart Fit do dono não tem o voador.
 5. Sem bibliotecas externas além da fonte Archivo do Google Fonts. Sem framework nem dependências npm no app. Playwright é permitido somente para testes; veja `testes/README.md`.
@@ -41,7 +41,7 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
 - `treino-renan-backup`: data (ms) do último backup, manual ou automático.
 - `treino-renan-curta`: versão curta do treino em andamento `{ start, tronco }` (fica fora dos dados do treino).
 - `treino-renan-nuvem`: backup automático `{ repo, token, pendente, ultimo, erro }`. Grava `backup.json` num repositório **privado** via GitHub Contents API (`PUT /repos/{repo}/contents/backup.json`), com uma chave fine-grained. O token fica só no aparelho; nunca coloque token no código.
-  `pendente` só vira `false` quando o GitHub confirma o envio. Ao configurar num celular com `backup.json` já no GitHub, o app junta o histórico de lá e só envia se este celular tiver treinos que o GitHub não tem.
+  `pendente` só vira `false` quando o GitHub confirma o envio. Ao configurar num celular com `backup.json` já no GitHub, o app junta o histórico e recupera `cur` se não houver treino local aberto nem registro concluído com o mesmo `start` ou `id === String(cur.start)`. Só envia se este celular tiver treinos que o GitHub não tem ou um envio pendente anterior; recuperar `cur` na configuração não gera um envio.
 
 ## Onde mexer no `index.html`
 
@@ -56,7 +56,7 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
 - **Séries que valem hoje:** `S(e)`. Na **adaptação** (`adaptacao()` e `faltamAdaptacao()`: até fazer A, B, C e D uma vez na ficha 2) e na **versão curta** (`curtaAtiva()`, `exibidos()`), no máximo 2.
 - **Sugestão de carga:** `suggest()` sobe `inc` quando todas as séries feitas (pelo menos 2) bateram o topo da faixa. Com `pernas`, só depois de 2 treinos seguidos no topo, com a mesma carga (`sessoes()`, `bateuTopo()`).
 - **Avisos da ficha 2:** `avisosHTML()` (adaptação ou esforço, cargas antigas de perna, segurança).
-- **Aquecimento:** `warmHTML()` tem 3 itens: cardio leve, 2 a 3 séries leves do 1º exercício (`aqueceHTML()` repete o aviso no card dele) e, nos demais, a 1ª série mais leve. Não peça aquecimento em outras máquinas: o dono pediu que não, por causa da fila e porque perde o sentido.
+- **Aquecimento:** `warmHTML()` tem 3 itens: cardio leve, 2 a 3 séries leves do 1º exercício (`aqueceHTML()` repete o aviso só no card dele) e, nos seguintes, uma série leve de preparação na própria máquina, quando chegar ao exercício e conforme necessário. As séries leves vêm antes das séries previstas no treino e não contam como uma delas. Não peça para passar pelas outras máquinas antes de começar o treino.
 - **Séries do treino em andamento:** `curSet()` só devolve séries quando o treino em andamento é o da tela (os ids se repetem entre os treinos da ficha 2).
 - **Peso e repetições digitados uma vez:** `segue()` copia o valor para as séries seguintes; `anterior()` repete o valor da série anterior ao marcar.
 - **Séries e cards minimizados:** `setRowHTML()` desenha uma série (feita vira linha "18 kg × 8 · editar"); `trocarSerie()` redesenha só ela.
@@ -65,9 +65,9 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
   ao terminar um exercício, o próximo por fazer que estava em `fechados` abre sozinho.
 - **Um treino por dia** (pedido do dono): `treinoHoje()` acha o treino salvo hoje. Sem treino em andamento, a aba dele mostra `concluidoHTML()` e as outras `jaTreinouHTML()`; todas ficam travadas (`travado()`) até o dia seguinte. `reabrir()` volta o treino salvo para `cur` (cópia das séries); ao finalizar, `addEntry()` substitui o salvo pelo mesmo `id`, e descartar não apaga o salvo. No calendário, dia com treino (`diaOcupado()`) não mostra "Registrar treino"; dias antigos com dois treinos mostram um aviso para apagar o que sobrou.
 - **Treino esquecido aberto:** `esquecido()` (mais de 5 h); ao finalizar, salva com a duração `min` do treino.
-- **Descanso, apito e tela acesa:** `startRest()`, `beep()`, `somOn()` (libera o áudio no iPhone a cada toque), `wake()`.
+- **Descanso, apito e tela acesa:** `startRest()`, `beep()`, `somOn()` (libera o áudio no iPhone a cada toque), `wake()`. `updateDock()` só mantém um temporizador enquanto há treino e a página está visível; ao voltar, calcula o tempo decorrido por `Date.now()`.
 - **Virada do dia:** `viraDia()`. O iPhone deixa o app parado em segundo plano; ao voltar noutro dia, redesenha.
-- **Backup:** `salvarBackup()` (arquivo), `juntarBackup()` (restaura sem apagar nada), `nuvemEnviar()` / `nuvemLigar()` / `nuvemRestaurar()` (GitHub).
+- **Backup:** `salvarBackup()` (arquivo), `juntarBackup()` (valida formato `v:1` com `hist` em lista e restaura sem apagar nada), `nuvemEnviar()` / `nuvemLigar()` / `nuvemRestaurar()` (GitHub). `juntarHist()` acrescenta registros por `id` e só recupera o treino em andamento quando não há outro local nem registro concluído com o mesmo início ou id. Preserva séries, ficha e aquecimento; não reabre automaticamente treinos já finalizados.
 - `connect()` / `window.claude`: sincronização que só funciona dentro do Claude. Fora dele, não faz nada. Mantenha.
 
 ## Limites do iPhone (não tente contornar)
