@@ -21,7 +21,7 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
 ## Regras que não podem quebrar
 
 1. **Caminhos relativos** (`./sw.js`, `icon-192.png`). O site roda na subpasta `/treino-app/`.
-2. **Ao publicar qualquer mudança, troque `VERSAO` em `sw.js`** (hoje `treino-renan-v24`) para o celular pegar a versão nova.
+2. **Ao publicar qualquer mudança, troque `VERSAO` em `sw.js`** (hoje `treino-renan-v25`) para o celular pegar a versão nova.
 3. **Não mude o formato dos dados salvos sem migração.** Os treinos ficam só no celular (`localStorage`); perder o formato é perder o histórico.
 4. **Não renomeie os `id` dos exercícios** (`a1`…`d6`, `e1`…`e7`): eles são as chaves do histórico e da sugestão de carga. Para trocar um exercício, mude `nome`, `maq`, `como` etc. e mantenha o `id`. Movimento novo ou com carga que não dá para comparar (máquina → halteres ou polia) ganha id novo (próximo: `e8`). O que sai dos treinos continua em `X2` (ou em `W1`), porque `CONHECIDOS` e o histórico dependem dele: `e1` (remada na máquina) saiu em 28/09/2026 e foi trocada pela `e5`; `a3` e `b4` (voador) saíram do C e foram trocados pelas `e6` e `e7` (polia), porque a Smart Fit do dono não tem o voador.
 5. Sem bibliotecas externas além da fonte Archivo do Google Fonts. Sem framework nem dependências npm no app. Playwright é permitido somente para testes; veja `testes/README.md`.
@@ -69,21 +69,22 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
   ao terminar um exercício, o próximo por fazer que estava em `fechados` abre sozinho.
 - **Um treino por dia** (pedido do dono): `treinoHoje()` acha o treino salvo hoje. Sem treino em andamento, a aba dele mostra `concluidoHTML()` e as outras `jaTreinouHTML()`; todas ficam travadas (`travado()`) até o dia seguinte. `reabrir()` volta o treino salvo para `cur` (cópia das séries); ao finalizar, `addEntry()` substitui o salvo pelo mesmo `id`, e descartar não apaga o salvo. No calendário, dia com treino (`diaOcupado()`) não mostra "Registrar treino"; dias antigos com dois treinos mostram um aviso para apagar o que sobrou.
 - **Treino esquecido aberto:** `esquecido()` (mais de 5 h); ao finalizar, salva com a duração `min` do treino.
-- **Descanso, apito e tela acesa:** `startRest()`, `beep()`, `somOn()` (libera o áudio no iPhone a cada toque), `wake()`. `updateDock()` só mantém um temporizador enquanto há treino e a página está visível; ao voltar, calcula o tempo decorrido por `Date.now()`.
+- **Descanso, apito e tela acesa:** `startRest()`, `beep()`, `somOn()`, `wake()`. Apitos desligados por padrão; preferência local `treino-renan-som` só é ligada pelo botão `somAvisos`. Desligados, não crie/resuma AudioContext nem toque buffer silencioso: isso interrompe música no iOS. `fecharAudio()` libera o contexto ao desligar, ocultar, finalizar/descartar e depois do apito. `updateDock()` só mantém um temporizador enquanto há treino e a página está visível; ao voltar, calcula o tempo decorrido por `Date.now()`.
+- **Vídeo e música:** um iframe por vez, inicialmente mudo. `fecharVideos()` remove o player ao pausar após reproduzir, terminar, ocultar a página ou iniciar descanso/prancha. Mensagens do player exigem origem `https://www.youtube-nocookie.com` e source do iframe ativo. O botão Voltar à música serve quando o iOS não notifica mudança de visibilidade. O site não controla a reprodução em outro aplicativo.
 - **Virada do dia:** `viraDia()`. O iPhone deixa o app parado em segundo plano; ao voltar noutro dia, redesenha.
 - **Backup:** `salvarBackup()` (arquivo), `juntarBackup()` (valida formato `v:1` com `hist` em lista e restaura sem apagar nada), `nuvemEnviar()` / `nuvemLigar()` / `nuvemRestaurar()` (GitHub). `juntarHist()` acrescenta registros por `id` e só recupera o treino em andamento quando não há outro local nem registro concluído com o mesmo início ou id. Preserva séries, ficha e aquecimento; não reabre automaticamente treinos já finalizados.
 - `connect()` / `window.claude`: sincronização que só funciona dentro do Claude. Fora dele, não faz nada. Mantenha.
 
 ## Limites do iPhone (não tente contornar)
 
-- Sites não vibram; o fim do descanso só apita com o app aberto e o celular fora do silencioso.
+- Sites não vibram; quando a opção Apitos está ligada, o fim do descanso só apita com o app aberto e conforme o volume/silencioso do celular.
 - Site não salva arquivo sozinho: backup em arquivo sempre precisa de um toque (por isso existe o backup no GitHub).
 - O app da Tela de Início e o Safari guardam dados separados.
 - O ícone só muda quando o app é adicionado de novo à Tela de Início, e apagar o app de lá apaga os dados dele: backup antes, restaurar depois (passo a passo no `README.md`).
 
 ## Como testar
 
-Rode `node testes/rodar.js` após preparar o Playwright conforme `testes/README.md`. O comando inicia e encerra o servidor e executa os treze roteiros sequencialmente, também no PowerShell. Os testes devem falhar com saída diferente de zero quando uma asserção falhar. Chromium com tela de iPhone não substitui validação no Safari e na PWA instalada.
+Rode `node testes/rodar.js` após preparar o Playwright conforme `testes/README.md`. O comando inicia e encerra o servidor e executa os quatorze roteiros sequencialmente, também no PowerShell. Os testes devem falhar com saída diferente de zero quando uma asserção falhar. Chromium com tela de iPhone não substitui validação no Safari e na PWA instalada.
 
 Alternativa manual para Bash:
 
