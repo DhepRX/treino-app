@@ -87,7 +87,9 @@ Se o aparelho não conseguir salvar, aparece um aviso com **Salvar backup agora*
 - Os vídeos precisam de internet. O resto funciona sem sinal depois da primeira abertura.
 - Com sinal fraco, o app espera a internet por até 3 segundos e depois abre a cópia guardada no celular.
 - Se algum vídeo sair do ar, use **Outros vídeos no YouTube**, que fica logo abaixo.
-- O iPhone não deixa sites vibrarem. No fim do descanso, a barra de baixo fica amarela e o app apita, se o celular não estiver no silencioso. O apito só toca com o app aberto na tela.
+- **Música durante o treino:** os apitos começam desligados e o cronômetro funciona com aviso na tela. O botão **Apitos** permite ligar o som, mas ele pode pausar a música no iPhone. Desligado, o descanso e a prancha não ativam áudio.
+- Os vídeos abrem sem som e um de cada vez. Ao pausar depois de começar a reprodução, terminar, iniciar o descanso ou sair do app, o player é encerrado para liberar o áudio. **Voltar à música** também encerra o player; para rever, toque em **Ver vídeo**. O iPhone pode exigir que você dê play no aplicativo de música: o site não consegue iniciar a reprodução em outro app.
+- O iPhone não deixa sites vibrarem. Com apitos ligados, o som só funciona com o app aberto e conforme os controles de volume/silencioso do aparelho.
 - A tela fica acesa durante o treino quando o iPhone permite.
 
 ## 6. Atualizar o app

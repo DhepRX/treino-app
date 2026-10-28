@@ -320,6 +320,8 @@ details.how .lbl{font-weight:700}
     <button type="button" data-view="cal" aria-pressed="false">Calendário</button>
     <button type="button" data-view="progresso" aria-pressed="false">Progresso</button>
   </nav>
+  <div class="bkrow"><button type="button" class="btn quiet" id="somAvisos" aria-pressed="false" aria-describedby="somAvisosNota">Apitos: desligados</button></div>
+  <p class="fine" id="somAvisosNota">Descanso com aviso na tela, para acompanhar sua música.</p>
   <div id="vTreino">
     <nav class="tabs" id="tabs" aria-label="Treinos da semana"></nav>
     <section id="workout" aria-live="polite"></section>
@@ -1126,21 +1128,58 @@ details.how .lbl{font-weight:700}
       '</div></li>';
   }
 
+  const VIDEO_ORIGIN = 'https://www.youtube-nocookie.com';
+  let videoAtivo = null;
+  function fecharVideos(){
+    if (videoAtivo) clearTimeout(videoAtivo.timer);
+    videoAtivo = null;
+    document.querySelectorAll('[data-video-box]').forEach(box => { box.replaceChildren(); box.hidden = true; });
+    document.querySelectorAll('[data-video]').forEach(btn => { btn.textContent = 'Ver vídeo'; btn.setAttribute('aria-expanded', 'false'); });
+  }
+  function comandoVideo(func, args = []){
+    if (videoAtivo && videoAtivo.frame.isConnected) videoAtivo.frame.contentWindow.postMessage(JSON.stringify({ event:'command', func, args }), VIDEO_ORIGIN);
+  }
+  function prepararVideo(){
+    comandoVideo('mute');
+    comandoVideo('addEventListener', ['onStateChange']);
+  }
+  window.addEventListener('message', ev => {
+    const ativo = videoAtivo;
+    if (!ativo || !ativo.frame.isConnected || ev.origin !== VIDEO_ORIGIN || ev.source !== ativo.frame.contentWindow) return;
+    let msg;
+    try { msg = typeof ev.data === 'string' ? JSON.parse(ev.data) : ev.data; } catch { return; }
+    if (!msg || typeof msg !== 'object') return;
+    if (msg.event === 'onReady' || msg.event === 'initialDelivery') { ativo.pronto = true; clearTimeout(ativo.timer); prepararVideo(); }
+    const estado = msg.event === 'onStateChange' ? msg.info : msg.event === 'infoDelivery' && msg.info ? msg.info.playerState : undefined;
+    if (estado === 1) ativo.tocou = true;
+    // O player pode iniciar pausado. Só encerre uma pausa depois de reproduzir.
+    if (estado === 0 || (estado === 2 && ativo.tocou)) fecharVideos();
+  });
   function toggleVideo(btn){
     const id = btn.dataset.video, e = exTela(id);
     const box = document.querySelector('[data-video-box="' + id + '"]');
     if (!e || !e.vid || !box) return;
-    if (box.hidden) {
-      box.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(e.vid) + '?playsinline=1&rel=0" title="Vídeo: ' + esc(e.nome) + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>';
-      box.hidden = false;
-      btn.textContent = 'Fechar vídeo';
-      btn.setAttribute('aria-expanded', 'true');
-    } else {
-      box.hidden = true;
-      box.innerHTML = '';
-      btn.textContent = 'Ver vídeo';
-      btn.setAttribute('aria-expanded', 'false');
-    }
+    const aberto = !box.hidden;
+    fecharVideos();
+    if (aberto) return;
+    fecharAudio();
+    box.innerHTML = '<iframe id="video-' + id + '" src="' + VIDEO_ORIGIN + '/embed/' + encodeURIComponent(e.vid) + '?playsinline=1&rel=0&autoplay=0&mute=1&enablejsapi=1&origin=' + encodeURIComponent(location.origin) + '" title="Vídeo: ' + esc(e.nome) + '" allow="accelerometer; encrypted-media; gyroscope; fullscreen" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>';
+    const frame = box.querySelector('iframe');
+    const ativo = { frame, tocou:false, pronto:false, timer:null };
+    videoAtivo = ativo;
+    frame.addEventListener('load', () => {
+      let tentativas = 0;
+      const ouvir = () => {
+        if (videoAtivo !== ativo || !frame.isConnected || ativo.pronto) return;
+        frame.contentWindow.postMessage(JSON.stringify({ event:'listening', id:frame.id }), VIDEO_ORIGIN);
+        prepararVideo();
+        if (++tentativas < 20) ativo.timer = setTimeout(ouvir, 500);
+      };
+      ouvir();
+    });
+    box.hidden = false;
+    btn.textContent = 'Voltar à música';
+    btn.setAttribute('aria-expanded', 'true');
   }
 
   function warmHTML(w, lock){
@@ -1211,6 +1250,7 @@ details.how .lbl{font-weight:700}
     say('Treino ' + h.wid + ' reaberto.');
   }
   function renderWorkout(){
+    fecharVideos();
     restaurarModo(state.cur);
     const w = treinoTela(sel);
     const c = state.cur;
@@ -1391,6 +1431,7 @@ details.how .lbl{font-weight:700}
     }
     gravarCurta(null);
     state.cur = null;
+    fecharAudio();
     commit();
     wake(false);
     rest = null;
@@ -1409,6 +1450,7 @@ details.how .lbl{font-weight:700}
     say(interrompido ? 'Relato salvo. Treino interrompido, sem séries concluídas.' : salvar ? 'Treino salvo.' : 'Nenhuma série marcada: nada foi salvo.');
   }
   function discardSession(){
+    fecharAudio();
     state.cur = null;
     gravarCurta(null);
     rest = null;
@@ -1420,10 +1462,34 @@ details.how .lbl{font-weight:700}
   }
 
   // ---------------- descanso e relógio ----------------
-  let rest = null, audio = null, hold = null, dockTimer = null;
-  // O iPhone só libera o som durante um toque, e trava de novo quando o app vai para o fundo.
-  // Chamado a cada toque que começa um descanso ou o cronômetro, para o apito do fim tocar.
+  let rest = null, audio = null, hold = null, dockTimer = null, audioFim = null;
+  const LS_SOM = 'treino-renan-som';
+  let somAvisos = false;
+  try { somAvisos = localStorage.getItem(LS_SOM) === '1'; } catch {}
+  function renderSom(){
+    $('somAvisos').setAttribute('aria-pressed', String(somAvisos));
+    $('somAvisos').textContent = 'Apitos: ' + (somAvisos ? 'ligados' : 'desligados');
+    $('somAvisosNota').textContent = somAvisos ? 'O apito pode pausar a música no iPhone. Desligue para priorizar sua música.' : 'Descanso com aviso na tela, para acompanhar sua música.';
+  }
+  function fecharAudio(){
+    clearTimeout(audioFim); audioFim = null;
+    const anterior = audio;
+    audio = null;
+    if (anterior && anterior.state !== 'closed') {
+      try { Promise.resolve(anterior.close()).catch(() => {}); } catch {}
+    }
+  }
+  $('somAvisos').addEventListener('click', () => {
+    somAvisos = !somAvisos;
+    try { localStorage.setItem(LS_SOM, somAvisos ? '1' : '0'); } catch {}
+    if (!somAvisos) fecharAudio();
+    renderSom();
+  });
+  renderSom();
+  // Áudio só com escolha explícita: até um buffer silencioso pode pausar a música no iOS.
   function somOn(){
+    if (!somAvisos || document.visibilityState !== 'visible' || videoAtivo) return;
+    clearTimeout(audioFim);
     try {
       audio = audio || new (window.AudioContext || window.webkitAudioContext)();
       if (audio.state !== 'running' && audio.resume) Promise.resolve(audio.resume()).catch(() => {});
@@ -1434,6 +1500,7 @@ details.how .lbl{font-weight:700}
     } catch (e) {}
   }
   function beep(){
+    if (!somAvisos || document.visibilityState !== 'visible' || videoAtivo) return;
     try {
       audio = audio || new (window.AudioContext || window.webkitAudioContext)();
       if (audio.state !== 'running' && audio.resume) Promise.resolve(audio.resume()).catch(() => {});
@@ -1444,10 +1511,13 @@ details.how .lbl{font-weight:700}
         g.gain.setValueAtTime(0.001, t + dt); g.gain.exponentialRampToValueAtTime(0.25, t + dt + 0.02); g.gain.exponentialRampToValueAtTime(0.001, t + dt + 0.18);
         o.start(t + dt); o.stop(t + dt + 0.2);
       });
-    } catch (e) {}
+      clearTimeout(audioFim);
+      audioFim = setTimeout(fecharAudio, 600);
+    } catch (e) { fecharAudio(); }
   }
   function startRest(sec, nome, exId, i){
     if (!sec) return;
+    fecharVideos();
     somOn();
     rest = { end:Date.now() + sec * 1000, total:sec, nome, exId, i, avisou:false };
     updateDock();
@@ -1543,10 +1613,12 @@ details.how .lbl{font-weight:700}
     } catch (e) { lock = null; }
   }
   document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') { fecharVideos(); fecharAudio(); }
     updateDock(); // Date.now recupera o tempo real ao voltar, inclusive um descanso já encerrado.
     if (document.visibilityState === 'visible' && state.cur) { lock = null; wake(true); }
   });
   window.addEventListener('pageshow', updateDock);
+  window.addEventListener('pagehide', () => { fecharVideos(); fecharAudio(); });
 
   function say(t){ $('live').textContent = t; }
 
@@ -1582,6 +1654,7 @@ details.how .lbl{font-weight:700}
   // ---------------- cards minimizados ----------------
   // Redesenha só um card (exercício ou aquecimento), sem mexer no resto da tela.
   function redesenhar(id){
+    if (videoAtivo && videoAtivo.frame.closest('#ex-' + id)) fecharVideos();
     const w = treinoTela(sel), outro = travado(w);
     const card = id === 'warm' ? document.querySelector('#workout .card.warm') : $('ex-' + id);
     if (!card || (id !== 'warm' && !w.porEx[id])) return null;
@@ -1662,7 +1735,7 @@ details.how .lbl{font-weight:700}
     const go = ev.target.closest('[data-go]');
     if (go) { sel = go.dataset.go; view = 'treino'; renderAll(); window.scrollTo({ top:0 }); return; }
     const r = ev.target.closest('[data-rest]');
-    if (r && rest) { if (r.dataset.rest === 'skip') { rest = null; } else { rest.end += 30000; rest.total += 30; } updateDock(); return; }
+    if (r && rest) { if (r.dataset.rest === 'skip') { rest = null; fecharAudio(); } else { rest.end += 30000; rest.total += 30; } updateDock(); return; }
   });
   $('workout').addEventListener('click', ev => {
     const feedbackSummary = ev.target.closest('.feedback summary');
@@ -1739,7 +1812,7 @@ details.how .lbl{font-weight:700}
       const i = Number(iStr), e = exTela(exId);
       if (!state.cur && !startSession(sel)) return;
       if (!state.cur || state.cur.wid !== e.w) return;
-      if (rest && rest.exId === exId && rest.i === i && rest.end > Date.now()) rest = null;
+      if (rest && rest.exId === exId && rest.i === i && rest.end > Date.now()) { rest = null; fecharAudio(); }
       else startRest(e.rest, e.nome, exId, i);
       updateDock();
       return;
@@ -1771,6 +1844,7 @@ details.how .lbl{font-weight:700}
           if (old) { old.textContent = 'Iniciar'; old.classList.remove('on'); }
         }
         hold = { exId, i, start:Date.now(), alvo:suggest(e).secs || e.r[0], avisou:false };
+        fecharVideos();
         somOn();
         rest = null;
         updateDock();
