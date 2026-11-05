@@ -22,7 +22,7 @@ Na pasta do app (a que tem o `index.html`):
 node testes/rodar.js
 ```
 
-O mesmo comando funciona no PowerShell, Bash e terminal do macOS. Ele inicia o servidor em `http://127.0.0.1:8766/treino-app/`, executa os quatorze roteiros em sequência e encerra o servidor. Se a porta estiver ocupada, avisa em vez de usar outro servidor. Não rode testes de rede em paralelo.
+O mesmo comando funciona no PowerShell, Bash e terminal do macOS. Ele inicia o servidor em `http://127.0.0.1:8766/treino-app/`, executa os dezesseis roteiros em sequência e encerra o servidor. Se a porta estiver ocupada, avisa em vez de usar outro servidor. Não rode testes de rede em paralelo.
 
 Para um roteiro isolado: abra um terminal com `node testes/servidor.js`; em outro, rode por exemplo `node testes/teste-nuvem.js`. Encerre o servidor com Ctrl+C.
 
@@ -32,6 +32,8 @@ Os prints ficam em `testes/prints/`, criada pelos próprios roteiros e ignorada 
 
 | Roteiro | O que testa |
 | --- | --- |
+| `teste-aquecimento.js` | Peso/repetições e descanso de aquecimento, persistência, sessão só com aquecimento, exclusão do volume de trabalho, backup e reabertura |
+| `teste-rotina.js` | Importação local idempotente com dados fictícios, preservação do treino e da cópia anterior, compras/estoque por base, vitamina sem duplicação, medidas sem data, custo proteico, backup e escape de texto |
 | `teste-audio.js` | Contagem silenciosa por padrão, opção de apito e liberação do áudio; ciclo de vida do vídeo com player simulado e validação de origem/remetente. Não reproduz o controle de fone do iOS. |
 | `teste-feedback.js` | Respostas opcionais por exercício, persistência/reabertura, plano e modo da sessão, validação dos novos campos e compatibilidade do backup |
 | `teste-progresso.js` | Frequência registrada, comparação entre sessões, dados insuficientes, bloqueios por desconforto/esforço/execução e critérios de progressão sem aumentar carga automaticamente |

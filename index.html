@@ -139,6 +139,17 @@ h1{font-size:1.75rem;font-weight:800;font-stretch:78%;margin:8px 0 2px;line-heig
 .feedback label{display:grid;gap:4px;margin:10px 0;font-size:.9rem;font-weight:650}
 .feedback select{width:100%;min-height:44px;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px}
 .feedback select:disabled{opacity:.55}
+.serie-notas input,.serie-notas textarea,.aquecimento input{width:100%;min-height:44px;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px}
+.serie-notas fieldset,.aquecimento fieldset{min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px;margin:10px 0}
+.serie-notas{margin-top:12px;border-top:1px solid var(--line);padding-top:4px}
+.serie-notas summary{min-height:44px;cursor:pointer;font-weight:700;padding:10px 0}
+.serie-notas label{display:grid;gap:4px;margin:10px 0;font-size:.9rem;font-weight:650}
+.serie-notas select{width:100%;min-height:44px;font:inherit;font-size:16px;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px}
+.serie-notas legend,.aquecimento legend{font-size:.9rem;font-weight:700}
+.aquecimento{margin:14px 0;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.aquecimento h4{margin:0 0 8px}.aquecimento p{font-size:.86rem;color:var(--muted);margin:6px 0 10px}
+.aquec-campos{display:grid;grid-template-columns:1fr 1fr;gap:8px}.aquec-campos label{display:grid;gap:4px;font-size:.86rem}
+.aquec-botoes{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.aquec-botoes .btn{min-height:44px}.aquecimento .restbtn{margin-top:8px;width:100%}
 
 .sets{margin-top:10px;display:grid;gap:6px}
 .setrow{display:grid;grid-template-columns:2.2rem 1fr 1fr 48px;gap:8px;align-items:center}
@@ -305,6 +316,31 @@ details.how .lbl{font-weight:700}
 .dock button{min-height:42px;padding:0 12px;border-radius:9px;border:1px solid currentColor;background:transparent;color:inherit;font-weight:700;cursor:pointer}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+#rotinaView .rt-section{margin:20px 0;border-top:1px solid var(--line);padding-top:16px}
+#rotinaView .rt-controls,#rotinaView .rt-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#rotinaView label{display:grid;gap:5px;font-size:.9rem;font-weight:700;min-width:0}
+#rotinaView input:not([type=checkbox]):not([type=file]),#rotinaView select,#rotinaView textarea{width:100%;min-width:0;max-width:100%;min-height:44px;font:inherit;font-size:16px;border:1px solid var(--line);border-radius:8px;padding:9px;background:var(--surface);color:var(--ink);box-sizing:border-box}
+#rotinaView textarea{min-height:80px;resize:vertical}
+#rotinaView .rt-check{display:flex;align-items:center;gap:9px;min-height:44px;cursor:pointer;font-weight:500}
+#rotinaView .rt-check input[type=checkbox]{flex:none;width:22px;height:22px;accent-color:var(--ink)}
+#rotinaView button,#rotinaView summary{min-height:44px}
+#rotinaView summary{display:flex;align-items:center;cursor:pointer;font-weight:700}
+#rotinaView .card{padding:14px;margin:10px 0}
+#rotinaView .rt-items{list-style:none;padding:0;margin:10px 0;display:grid;gap:8px}
+#rotinaView .rt-items li{padding:8px 0;border-bottom:1px solid var(--line)}
+#rotinaView .rt-meta{color:var(--muted);font-size:.82rem;line-height:1.45;overflow-wrap:anywhere}
+#rotinaView .rt-nota{padding:10px;background:var(--bg);border-left:3px solid var(--ink);font-size:.9rem;white-space:pre-line}
+#rotinaView .rt-table{overflow-x:auto}
+#rotinaView table{border-collapse:collapse;width:100%;font-size:.9rem}
+#rotinaView th,#rotinaView td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+#rotinaView .rt-empty{padding:18px 0;color:var(--muted)}
+#rotinaView .rt-total{font-size:1.1rem;font-weight:700}
+#rotinaView .rt-stock{max-width:150px}
+#rotinaView .rt-full{grid-column:1/-1}
+#rotinaView .rt-choose{border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0}
+#rotinaView .rt-source{font-size:.78rem;color:var(--muted);margin-top:8px}
+@media(max-width:450px){#rotinaView .rt-grid{grid-template-columns:1fr}#rotinaView .rt-controls{grid-template-columns:1fr 1fr}#rotinaView .rt-controls label{font-size:.8rem}}
+
 </style>
 </head>
 <body>
@@ -319,6 +355,7 @@ details.how .lbl{font-weight:700}
     <button type="button" data-view="semanas" aria-pressed="false">Sequência</button>
     <button type="button" data-view="cal" aria-pressed="false">Calendário</button>
     <button type="button" data-view="progresso" aria-pressed="false">Progresso</button>
+    <button type="button" data-view="rotina" aria-pressed="false">Rotina</button>
   </nav>
   <div class="bkrow"><button type="button" class="btn quiet" id="somAvisos" aria-pressed="false" aria-describedby="somAvisosNota">Apitos: desligados</button></div>
   <p class="fine" id="somAvisosNota">Descanso com aviso na tela, para acompanhar sua música.</p>
@@ -330,9 +367,22 @@ details.how .lbl{font-weight:700}
   <section id="vSemanas" hidden></section>
   <section id="vCal" hidden aria-label="Calendário de treinos"></section>
   <section id="vProgresso" hidden aria-labelledby="progressoTitle"></section>
+  <section id="rotinaView" hidden aria-labelledby="rotinaTitle">
+    <h2 id="rotinaTitle">Alimentação e acompanhamento</h2>
+    <p class="fine">Importe suas referências para organizar refeições, compras e medidas neste aparelho. Os registros são incluídos no seu backup privado.</p>
+    <div class="bkrow">
+      <button type="button" class="btn" id="rotinaImportar">Importar contexto</button>
+      <button type="button" class="btn" id="rotinaExportar">Salvar backup completo</button>
+      <button type="button" class="btn" id="rotinaCopia">Exportar cópia anterior</button>
+      <input type="file" id="rotinaArquivo" accept=".json,application/json" class="sr" tabindex="-1" aria-hidden="true">
+    </div>
+    <p id="rotinaMsg" class="bkmsg" role="status" aria-live="polite"></p>
+    <div id="rotinaConteudo"></div>
+  </section>
+
   <section class="backup" id="backup" aria-labelledby="bkTitle">
-    <h2 id="bkTitle">Backup dos treinos</h2>
-    <p>Seus treinos ficam salvos neste celular. Ative o backup automático abaixo para guardar também uma cópia no GitHub. Você pode salvar um arquivo de backup quando quiser.</p>
+    <h2 id="bkTitle">Backup dos dados</h2>
+    <p>Treinos, rotina e medidas ficam salvos neste celular. Ative o backup automático abaixo para guardar também uma cópia no GitHub. Você pode salvar um arquivo de backup quando quiser.</p>
     <p class="bklast" id="bkLast"></p>
     <div class="bkrow">
       <button type="button" class="btn" id="bkSave">Salvar backup</button>
@@ -565,7 +615,6 @@ details.how .lbl{font-weight:700}
   const ymd = d => d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
   const dm = d => pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1);
   const ORDEM = ['A', 'B', 'C', 'D'];
-  const VIAGEM = new Date(2026, 10, 5);
   const diasEntre = (a, b) => Math.round((new Date(b.getFullYear(), b.getMonth(), b.getDate()) - new Date(a.getFullYear(), a.getMonth(), a.getDate())) / 86400000);
   let view = 'treino';
   let calY = new Date().getFullYear(), calM = new Date().getMonth(), calSel = ymd(new Date()), regOpen = false;
@@ -608,6 +657,8 @@ details.how .lbl{font-weight:700}
     return out;
   }
   function sessionExtras(source, target){
+    if (['completo','reduzido','interrompido'].includes(source.encerramento)) target.encerramento = source.encerramento;
+    if (ORDEM.includes(source.proximo)) target.proximo = source.proximo;
     const feedback = cleanFeedback(source.feedback);
     if (Object.keys(feedback).length) target.feedback = feedback;
     const plano = {};
@@ -616,15 +667,36 @@ details.how .lbl{font-weight:700}
     }
     if (Object.keys(plano).length) target.plano = plano;
     if (['completo', 'curto', 'adaptacao'].includes(source.modo)) target.modo = source.modo;
+    const aquecimento = {};
+    if (source.aquecimento && typeof source.aquecimento === 'object' && !Array.isArray(source.aquecimento)) {
+      for (const [id, series] of Object.entries(source.aquecimento)) {
+        if (!CONHECIDOS.has(id) || !Array.isArray(series)) continue;
+        aquecimento[id] = series.slice(0, 6).filter(s => s && typeof s === 'object' && !Array.isArray(s)).map(s => ({
+          kg:num(s.kg), reps:num(s.reps), done:s.done === true,
+          rest:Number.isFinite(Number(s.rest)) && Number(s.rest) >= 0 && Number(s.rest) <= 900 ? Math.round(Number(s.rest)) : 60,
+        }));
+      }
+    }
+    if (Object.keys(aquecimento).length) target.aquecimento = aquecimento;
     return target;
   }
+  function serieExtras(source, target){
+    if (Number.isInteger(source.rir) && source.rir >= 0 && source.rir <= 5) target.rir = source.rir;
+    if (typeof source.nota === 'string' && source.nota.trim()) target.nota = source.nota.trim().slice(0, 240);
+    if (['halter','total','maquina','desconhecida'].includes(source.unidade)) target.unidade = source.unidade;
+    return target;
+  }
+  const temAquecimento = c => Object.values(c.aquecimento || {}).some(series => series.some(s => s && (s.done || s.kg !== null || s.reps !== null)));
   function sanitize(d){
     const out = { v:1, cur:null, hist:[], upd:Number(d && d.upd) || 0 };
+    const rotina = cleanRotina(d && d.rotina);
+    if (rotina) out.rotina = rotina;
+    if (d && d.preferenciasTreino && d.preferenciasTreino.adaptacaoConcluida === true) out.preferenciasTreino = { adaptacaoConcluida:true };
     const cleanSets = sets => {
       const o = {};
       if (sets && typeof sets === 'object') for (const [k, arr] of Object.entries(sets)) {
         if (!CONHECIDOS.has(k) || !Array.isArray(arr)) continue;
-        o[k] = arr.slice(0, 8).map(x => x && typeof x === 'object' ? { kg:num(x.kg), reps:num(x.reps), done:!!x.done } : null);
+        o[k] = arr.slice(0, 8).map(x => x && typeof x === 'object' ? serieExtras(x, { kg:num(x.kg), reps:num(x.reps), done:!!x.done }) : null);
       }
       return o;
     };
@@ -644,7 +716,7 @@ details.how .lbl{font-weight:700}
           if (typeof h.rot === 'string' && h.rot.trim()) e.rot = h.rot.trim().slice(0, 40);
           if (typeof h.fonte === 'string' && h.fonte.trim()) e.fonte = h.fonte.trim().slice(0, 30);
           sessionExtras(h, e);
-          if (h.interrompido === true && !e.manual && seriesOf(e) === 0 && Object.keys(e.feedback || {}).length) e.interrompido = true;
+          if (h.interrompido === true && !e.manual && seriesOf(e) === 0 && (Object.keys(e.feedback || {}).length || temAquecimento(e))) e.interrompido = true;
           return e;
         })
         .sort((a, b) => a.start - b.start)
@@ -658,6 +730,256 @@ details.how .lbl{font-weight:700}
     if (raw) state = sanitize(JSON.parse(raw));
     else { state = sanitize(SEED); localStorage.setItem(LS, JSON.stringify(state)); }
   } catch (e) { state = sanitize(SEED); falhaLocal = true; }
+
+  // Rotina opcional. Os dados pessoais vêm do arquivo local, nunca do código publicado.
+  function rtText(v, n = 1200){ return typeof v === 'string' ? v.trim().slice(0, n) : ''; }
+  function rtId(v){ const id = rtText(v, 180); return /^[a-zA-Z0-9_.:-]+$/.test(id) && !['__proto__','prototype','constructor'].includes(id) ? id : ''; }
+  function rtNum(v){ return typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 10000000 ? v : null; }
+  function rtDate(v){
+    if (typeof v !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(v)) return null;
+    const d = new Date(v + 'T12:00:00'); return Number.isFinite(d.getTime()) && ymd(d) === v ? v : null;
+  }
+  function rtTime(v){ return typeof v === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(v) ? v : ''; }
+  function rtStamp(v){ return typeof v === 'number' && Number.isFinite(v) && v >= 0 ? v : 0; }
+  function rtArray(v, max, clean){
+    const out = [], ids = new Set();
+    for (const x of (Array.isArray(v) ? v : []).slice(0, max)) {
+      if (!x || typeof x !== 'object' || Array.isArray(x)) continue;
+      const item = clean(x); if (!item || (item.id && ids.has(item.id))) continue;
+      if (item.id) ids.add(item.id); out.push(item);
+    }
+    return out;
+  }
+  function cleanRotina(v){
+    if (!v || typeof v !== 'object' || Array.isArray(v) || v.v !== 1) return null;
+    const basic = x => ({ id:rtId(x.id), fonte:rtId(x.fonte), nota:rtText(x.nota), status:rtText(x.status, 120) });
+    const out = { v:1, atualizado:rtStamp(v.atualizado) };
+    out.fontes = rtArray(v.fontes, 80, x => rtId(x.id) ? { id:rtId(x.id), titulo:rtText(x.titulo, 160), data:rtDate(x.data), nota:rtText(x.nota) } : null);
+    out.referencias = rtArray(v.referencias, 60, x => rtId(x.id) ? Object.assign(basic(x), { titulo:rtText(x.titulo, 160), valor:rtNum(x.valor), unidade:rtText(x.unidade, 40) }) : null);
+    out.refeicoes = rtArray(v.refeicoes, 160, x => {
+      if (!rtId(x.id) || !Number.isInteger(x.dia) || x.dia < 0 || x.dia > 6 || !['treino','descanso','ambos'].includes(x.tipo)) return null;
+      return { id:rtId(x.id), dia:x.dia, tipo:x.tipo, titulo:rtText(x.titulo, 160), horario:rtTime(x.horario),
+        itens:rtArray(x.itens, 40, z => rtId(z.id) && ['g','ml','un'].includes(z.unidade) ? Object.assign(basic(z), { nome:rtText(z.nome, 160), quantidade:rtNum(z.quantidade), unidade:z.unidade, base:['cru','pronto','comestivel','nao-informado'].includes(z.base) ? z.base : 'nao-informado' }) : null),
+        preparo:rtText(x.preparo, 3000), nota:rtText(x.nota, 2000), fonte:rtId(x.fonte) };
+    });
+    out.medidas = rtArray(v.medidas, 1000, x => rtId(x.id) ? { id:rtId(x.id), data:rtDate(x.data), horario:rtText(x.horario, 60), metodo:rtText(x.metodo, 200), condicoes:rtText(x.condicoes, 600), nota:rtText(x.nota, 1500), fonte:rtId(x.fonte), valores:rtArray(x.valores, 30, z => rtText(z.nome, 100) ? { nome:rtText(z.nome, 100), valor:rtNum(z.valor), unidade:rtText(z.unidade, 40) } : null) } : null);
+    out.precos = rtArray(v.precos, 300, x => rtId(x.id) ? { id:rtId(x.id), nome:rtText(x.nome, 160), preco:rtNum(x.preco), peso:rtNum(x.peso), porcao:rtNum(x.porcao), proteina:rtNum(x.proteina), frete:rtNum(x.frete), data:rtDate(x.data), unidade:['g','lata'].includes(x.unidade) ? x.unidade : 'g', base:rtText(x.base, 120), nota:rtText(x.nota), status:rtText(x.status, 120) } : null);
+    out.pendencias = rtArray(v.pendencias, 100, x => rtId(x.id) ? { id:rtId(x.id), texto:rtText(x.texto, 1000), resolvida:x.resolvida === true, nota:rtText(x.nota), atualizado:rtStamp(x.atualizado) } : null);
+    out.orientacoes = rtArray(v.orientacoes, 150, x => rtId(x.id) ? Object.assign(basic(x), { titulo:rtText(x.titulo, 160), texto:rtText(x.texto, 5000), data:rtDate(x.data) }) : null);
+    out.marcacoes = rtArray(v.marcacoes, 6000, x => rtId(x.id) && rtId(x.refeicaoId) && rtDate(x.dia) ? { id:rtId(x.id), refeicaoId:rtId(x.refeicaoId), dia:rtDate(x.dia), feito:x.feito === true, atualizado:rtStamp(x.atualizado) } : null);
+    out.sintomas = rtArray(v.sintomas, 1000, x => rtId(x.id) && rtDate(x.data) ? { id:rtId(x.id), data:rtDate(x.data), quando:rtText(x.quando, 80), texto:rtText(x.texto, 1500), atualizado:rtStamp(x.atualizado) } : null);
+    out.estoque = rtArray(v.estoque, 300, x => rtId(x.id) ? { id:rtId(x.id), quantidade:rtNum(x.quantidade) } : null);
+    out.preparo = rtArray(v.preparo, 100, x => rtId(x.id) ? { id:rtId(x.id), feito:x.feito === true } : null);
+    const p = v.preferencias && typeof v.preferencias === 'object' ? v.preferencias : {};
+    out.preferencias = {
+      tipos:rtArray(p.tipos, 500, x => rtDate(x.dia) && ['treino','descanso'].includes(x.tipo) ? { id:rtDate(x.dia), dia:rtDate(x.dia), tipo:x.tipo } : null),
+      comprasDatas:(Array.isArray(p.comprasDatas) ? [...new Set(p.comprasDatas.map(rtDate).filter(Boolean))] : []).slice(0, 31)
+    };
+    return out;
+  }
+  function mergeRotina(local, imported){
+    const b = cleanRotina(imported), a = cleanRotina(local);
+    if (!b) return a;
+    if (!a) return b;
+    // O local prevalece: importar de novo não desfaz edições, horários ou marcações.
+    const merge = (x, y) => { const ids = new Set(x.map(z => z.id)); return x.concat(y.filter(z => !ids.has(z.id))); };
+    const out = { v:1, atualizado:Math.max(a.atualizado, b.atualizado) };
+    for (const key of ['fontes','referencias','refeicoes','medidas','precos','pendencias','orientacoes','marcacoes','sintomas','estoque','preparo']) out[key] = merge(a[key], b[key]);
+    out.preferencias = { tipos:merge(a.preferencias.tipos, b.preferencias.tipos), comprasDatas:a.preferencias.comprasDatas.length ? a.preferencias.comprasDatas : b.preferencias.comprasDatas };
+    return cleanRotina(out);
+  }
+  function rtUI(){
+    return setupRotina._ui || (setupRotina._ui = { dia:ymd(new Date()), aba:'refeicoes', comprasInicio:ymd(new Date()), mensagem:'' });
+  }
+  function rtData(){ return state.rotina || null; }
+  function rtSource(id){
+    const f = rtData() && rtData().fontes.find(x => x.id === id);
+    return f ? esc(f.titulo) + (f.data ? ' · ' + esc(f.data) : ' · data não informada') : 'Origem não informada';
+  }
+  function rtMsg(s){ rtUI().mensagem = s; if ($('rotinaMsg')) $('rotinaMsg').textContent = s; }
+  function rtSave(redesenhar = false){
+    state.rotina.atualizado = Date.now(); commit(); nuvemAgendar();
+    if (redesenhar) renderRotina();
+  }
+  function rtType(dia){ return rtData().preferencias.tipos.find(x => x.dia === dia)?.tipo || ''; }
+  function rtSetType(dia, tipo){
+    const r = rtData(), xs = r.preferencias.tipos.filter(x => x.dia !== dia);
+    if (['treino','descanso'].includes(tipo)) xs.push({ id:dia, dia, tipo });
+    r.preferencias.tipos = xs; rtSave(true);
+  }
+  function rtMeals(dia){
+    const tipo = rtType(dia), dow = new Date(dia + 'T12:00:00').getDay();
+    return rtData().refeicoes.filter(x => x.dia === dow && (x.tipo === 'ambos' || x.tipo === tipo)).sort((a,b) => a.horario.localeCompare(b.horario));
+  }
+  function rtAmount(n, unit){ return n === null ? 'Quantidade a confirmar' : fmt(n) + ' ' + unit; }
+  function rtBase(s){ return ({cru:'peso cru',pronto:'após preparo',comestivel:'parte comestível','nao-informado':'base a confirmar'})[s] || s; }
+  function rtDone(refeicaoId, dia){ return rtData().marcacoes.find(x => x.refeicaoId === refeicaoId && x.dia === dia)?.feito === true; }
+  function rtMark(refeicaoId, dia, feito){
+    const r = rtData(), id = dia + ':' + refeicaoId;
+    r.marcacoes = r.marcacoes.filter(x => x.id !== id);
+    r.marcacoes.push({ id, refeicaoId, dia, feito, atualizado:Date.now() });
+  }
+  function rtDayTypeHTML(dia, label){
+    const tipo = rtType(dia);
+    return '<label>' + esc(label) + '<select data-rt-type="' + esc(dia) + '"><option value="">Escolher tipo de dia</option><option value="treino"' + (tipo === 'treino' ? ' selected' : '') + '>Dia com treino</option><option value="descanso"' + (tipo === 'descanso' ? ' selected' : '') + '>Dia sem treino</option></select></label>';
+  }
+  function rtMealsHTML(){
+    const ui = rtUI(), r = rtData();
+    let html = '<div class="rt-controls"><label>Dia<input type="date" id="rtDia" value="' + esc(ui.dia) + '"></label>' + rtDayTypeHTML(ui.dia, 'Organização alimentar') + '</div>';
+    if (!rtType(ui.dia)) html += '<p class="rt-nota">Escolha se este dia tem treino para ver o café correspondente. Isso organiza as refeições; não registra nem altera seu treino.</p>';
+    html += '<p class="fine">Horários e quantidades são referências importadas. Marcar uma refeição registra sua escolha, sem calcular ingestão confirmada.</p>';
+    const meals = rtMeals(ui.dia);
+    if (!meals.length) html += '<p class="rt-empty">Nenhuma refeição importada para este dia.</p>';
+    for (const m of meals) {
+      html += '<article class="card"><h3>' + esc(m.titulo) + '</h3><div class="rt-controls"><label>Horário de referência<input type="time" data-rt-time="' + esc(m.id) + '" value="' + esc(m.horario) + '"></label><label class="rt-check"><input type="checkbox" data-rt-meal="' + esc(m.id) + '"' + (rtDone(m.id,ui.dia) ? ' checked' : '') + '>Refeição feita</label></div><ul class="rt-items">';
+      for (const item of m.itens) {
+        const id = m.id + ':item:' + item.id;
+        html += '<li><label class="rt-check"><input type="checkbox" data-rt-item="' + esc(id) + '"' + (rtDone(id,ui.dia) ? ' checked' : '') + '><span>' + esc(item.nome) + ' · <b>' + esc(rtAmount(item.quantidade,item.unidade)) + '</b><br><small class="rt-meta">' + esc(rtBase(item.base)) + (item.status ? ' · ' + esc(item.status) : '') + '</small></span></label></li>';
+      }
+      html += '</ul>' + (m.preparo ? '<details><summary>Como preparar</summary><p>' + esc(m.preparo) + '</p></details>' : '') + (m.nota ? '<p class="rt-nota">' + esc(m.nota) + '</p>' : '') + '<p class="rt-source">' + rtSource(m.fonte) + '</p></article>';
+    }
+    if (r.referencias.length) html += '<details class="rt-section"><summary>Referências e limites</summary>' + r.referencias.map(x => '<p><b>' + esc(x.titulo) + ':</b> ' + (x.valor === null ? 'A confirmar' : esc(rtAmount(x.valor,x.unidade))) + (x.status ? ' · ' + esc(x.status) : '') + '<br><small>' + esc(x.nota) + '</small></p>').join('') + '</details>';
+    return html;
+  }
+  function rtShopping(){
+    const r = rtData(), rows = new Map(), incompletos = [];
+    for (const dia of r.preferencias.comprasDatas) {
+      if (!rtType(dia)) { incompletos.push(dia); continue; }
+      for (const m of rtMeals(dia)) for (const item of m.itens) {
+        const key = item.id + ':' + item.unidade + ':' + item.base;
+        const row = rows.get(key) || { id:key, nome:item.nome, unidade:item.unidade, base:item.base, total:null, desconhecido:false };
+        if (item.quantidade === null) row.desconhecido = true; else row.total = (row.total ?? 0) + item.quantidade;
+        rows.set(key,row);
+      }
+    }
+    const out = [...rows.values()].map(x => {
+      const estoque = r.estoque.find(z => z.id === x.id)?.quantidade ?? null;
+      return Object.assign(x, { estoque, falta:x.total === null ? null : Math.max(0,x.total-(estoque ?? 0)) });
+    }).sort((a,b) => a.nome.localeCompare(b.nome,'pt-BR'));
+    return { rows:out, incompletos };
+  }
+  function rtShoppingHTML(){
+    const ui = rtUI(), r = rtData(), inicio = new Date(ui.comprasInicio + 'T12:00:00');
+    let html = '<p>Selecione os dias e o tipo de rotina de cada um. O estoque só é descontado na mesma unidade e base; rendimentos de cru para pronto não são presumidos.</p><label>Primeiro dia da lista<input type="date" id="rtComprasInicio" value="' + esc(ui.comprasInicio) + '"></label>';
+    for (let i=0;i<7;i++) {
+      const d = new Date(inicio); d.setDate(inicio.getDate()+i); const dia = ymd(d);
+      html += '<div class="rt-choose rt-controls"><label class="rt-check"><input type="checkbox" data-rt-shop-day="' + dia + '"' + (r.preferencias.comprasDatas.includes(dia) ? ' checked' : '') + '>' + esc(d.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'})) + '</label>' + rtDayTypeHTML(dia,'Rotina deste dia') + '</div>';
+    }
+    const result = rtShopping();
+    if (result.incompletos.length) html += '<p class="rt-nota">Não calculados: ' + esc(result.incompletos.join(', ')) + '. Escolha o tipo desses dias.</p>';
+    html += '<div class="bkrow"><button type="button" class="btn" id="rtExportarCompras">Exportar lista</button><button type="button" class="btn" id="rtImprimirCompras">Imprimir lista</button></div>';
+    html += '<ul class="rt-items">' + result.rows.map(x => '<li><b>' + esc(x.nome) + '</b><p class="rt-meta">' + esc(rtBase(x.base)) + ' · previsto: ' + esc(rtAmount(x.total,x.unidade)) + (x.desconhecido ? ' + porção pendente' : '') + '</p><label class="rt-stock">Estoque (' + esc(x.unidade) + ', mesma base)<input type="number" min="0" step="any" inputmode="decimal" data-rt-stock="' + esc(x.id) + '" value="' + (x.estoque === null ? '' : x.estoque) + '" placeholder="Não informado"></label><p>Falta: <b>' + esc(rtAmount(x.falta,x.unidade)) + '</b>' + (x.desconhecido ? ' + quantidade a confirmar' : '') + '</p></li>').join('') + '</ul>';
+    if (!result.rows.length) html += '<p class="rt-empty">Escolha ao menos um dia e seu tipo de rotina.</p>';
+    return html;
+  }
+  function rtCost(x){ return x.preco !== null && x.frete !== null && x.peso > 0 && x.porcao > 0 && x.proteina > 0 ? (x.preco+x.frete)/((x.peso/x.porcao)*x.proteina)*100 : null; }
+  function rtPricesHTML(){
+    let html = '<p>Referências datadas, com a embalagem e a porção do mesmo produto. Peso do pó não é proteína; para sardinha, use a base comestível consumida. A unidade de 100 g de proteína serve para comparar custo.</p><div class="rt-table"><table><thead><tr><th>Produto e origem dos valores</th><th>Base da conta</th><th>Custo por 100 g de proteína</th></tr></thead><tbody>';
+    for(const x of rtData().precos){
+      const custo = rtCost(x);
+      html += '<tr><td><b>' + esc(x.nome) + '</b><br>' + esc(x.data || 'Data não informada') + (x.status ? '<br>' + esc(x.status) : '') + '<p class="rt-meta">' + esc(x.nota) + '</p></td><td>Preço: ' + (x.preco === null ? 'não informado' : 'R$ '+fmt(x.preco)) + '<br>Frete: ' + (x.frete === null ? 'não informado' : 'R$ '+fmt(x.frete)) + '<br>Embalagem: ' + esc(rtAmount(x.peso,x.unidade)) + '<br>Porção: ' + esc(rtAmount(x.porcao,x.unidade)) + '<br>Proteína/porção: ' + esc(rtAmount(x.proteina,'g')) + '<br>' + esc(x.base) + '</td><td>' + (custo === null ? 'Faltam valores para comparar' : 'R$ '+fmt(custo)) + '</td></tr>';
+    }
+    html += '</tbody></table></div><details class="rt-section"><summary>Adicionar cotação</summary><form id="rtPrecoForm" class="rt-grid"><label class="rt-full">Produto e sabor<input name="nome" required maxlength="160"></label><label>Preço (R$)<input name="preco" type="number" min="0" step="0.01" inputmode="decimal" required></label><label>Frete atribuído (R$)<input name="frete" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0 se não houver" required></label><label>Peso da embalagem<input name="peso" type="number" min="0.001" step="any" inputmode="decimal" required></label><label>Unidade do peso<select name="unidade"><option value="g">Gramas</option><option value="lata">Lata comestível inteira</option></select></label><label>Peso da porção, mesma unidade<input name="porcao" type="number" min="0.001" step="any" inputmode="decimal" required></label><label>Proteína por porção (g)<input name="proteina" type="number" min="0.001" step="any" inputmode="decimal" required></label><label>Data da cotação<input name="data" type="date" required></label><label>Base e rótulo<input name="base" maxlength="120" placeholder="Cru sem osso, pó, drenado..." required></label><label class="rt-full">Observações<textarea name="nota" maxlength="1200"></textarea></label><button class="btn" type="submit">Salvar cotação</button></form></details>';
+    return html;
+  }
+  function rtMeasuresHTML(){
+    let html = '<p>Medidas do equipamento são estimativas. A data de importação não é a data da medição; valores sem data continuam identificados assim.</p>';
+    const measures = rtData().medidas.slice().sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+    html += measures.map(m => '<article class="card"><h3>' + esc(m.data || 'Data da medição desconhecida') + '</h3><p>' + esc([m.horario,m.metodo,m.condicoes].filter(Boolean).join(' · ')) + '</p><ul class="rt-items">' + m.valores.map(x=>'<li>' + esc(x.nome) + ': <b>' + esc(rtAmount(x.valor,x.unidade)) + '</b></li>').join('') + '</ul>' + (m.nota ? '<p class="rt-nota">'+esc(m.nota)+'</p>' : '') + '<p class="rt-source">'+rtSource(m.fonte)+'</p></article>').join('');
+    html += '<details class="rt-section"><summary>Registrar nova medida</summary><form id="rtMedidaForm" class="rt-grid"><label>Data real da medição<input name="data" type="date" required></label><label>Horário<input name="horario" type="time"></label><label>Peso (kg), se medido<input name="peso" type="number" min="1" max="500" step="0.01" inputmode="decimal"></label><label>Cintura (cm), se medida<input name="cintura" type="number" min="1" max="300" step="0.1" inputmode="decimal"></label><label class="rt-full">Método ou equipamento<input name="metodo" maxlength="200" required></label><label class="rt-full">Condições: treino, alimentação e observações<textarea name="condicoes" maxlength="600"></textarea></label><button type="submit" class="btn">Salvar medida</button></form></details>';
+    html += '<details class="rt-section"><summary>Relatos durante e após o treino</summary><p>Registre o que sentiu, inclusive no dia seguinte. Estes relatos não geram diagnóstico nem alteração automática da ficha.</p><form id="rtSintomaForm" class="rt-grid"><label>Data do relato<input name="data" type="date" required></label><label>Momento<select name="quando"><option>Durante o treino</option><option>Depois do treino</option><option>No dia seguinte</option><option>Cansaço habitual</option><option>Orientação profissional</option></select></label><label class="rt-full">O que percebeu ou orientação recebida<textarea name="texto" maxlength="1500" required></textarea></label><button type="submit" class="btn">Salvar relato</button></form>';
+    html += rtData().sintomas.slice().reverse().map(x=>'<article class="card"><b>'+esc(x.data)+' · '+esc(x.quando)+'</b><p>'+esc(x.texto)+'</p></article>').join('')+'</details>';
+    return html;
+  }
+  function rtNotesHTML(){
+    const r = rtData();
+    let html = '<h3>Pontos a confirmar</h3>';
+    for(const p of r.pendencias) html += '<article class="card"><label class="rt-check"><input type="checkbox" data-rt-pending="'+esc(p.id)+'"'+(p.resolvida?' checked':'')+'>'+esc(p.texto)+'</label><label>Resposta ou observação<textarea data-rt-pending-note="'+esc(p.id)+'" maxlength="1200">'+esc(p.nota)+'</textarea></label></article>';
+    html += '<h3>Orientações importadas</h3>' + r.orientacoes.map(x=>'<details class="card"><summary>'+esc(x.titulo)+'</summary><p style="white-space:pre-line">'+esc(x.texto)+'</p><p class="rt-meta">'+esc(x.status)+(x.data?' · '+esc(x.data):' · data não informada')+'</p><p class="rt-source">'+rtSource(x.fonte)+'</p></details>').join('');
+    html += '<details class="rt-section"><summary>Fontes do contexto</summary>' + r.fontes.map(x=>'<p><b>'+esc(x.titulo)+'</b> · '+esc(x.data||'Data não informada')+'<br>'+esc(x.nota)+'</p>').join('')+'</details>';
+    return html;
+  }
+  function renderRotina(){
+    if (!$('rotinaConteudo')) return;
+    $('rotinaMsg').textContent = rtUI().mensagem;
+    const r = rtData();
+    if (!r) { $('rotinaConteudo').innerHTML = '<div class="card rt-empty"><h3>Seu contexto fica neste aparelho</h3><p>Toque em Importar contexto e escolha o arquivo de rotina. A importação junta os novos dados sem trocar a ficha ativa ou apagar treinos. Antes dela, o app guarda uma cópia do estado atual.</p></div>'; return; }
+    const ui = rtUI(), abas = [['refeicoes','Refeições'],['compras','Compras'],['precos','Proteínas'],['medidas','Medidas e relatos'],['notas','Orientações']];
+    let html = '<nav class="bkrow" aria-label="Partes da rotina">'+abas.map(([id,t])=>'<button type="button" class="btn" data-rt-tab="'+id+'" aria-pressed="'+(ui.aba===id)+'">'+t+'</button>').join('')+'</nav><div class="rt-section">';
+    html += ui.aba==='refeicoes'?rtMealsHTML():ui.aba==='compras'?rtShoppingHTML():ui.aba==='precos'?rtPricesHTML():ui.aba==='medidas'?rtMeasuresHTML():rtNotesHTML();
+    $('rotinaConteudo').innerHTML = html+'</div>';
+  }
+  function rtDownload(text, filename, type){
+    const url=URL.createObjectURL(new Blob([text],{type})), a=document.createElement('a');
+    a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000);
+  }
+  function rtShoppingText(){
+    const r=rtShopping();
+    return 'Lista de compras · '+new Date().toLocaleDateString('pt-BR')+'\nDias: '+rtData().preferencias.comprasDatas.join(', ')+'\n\n'+r.rows.map(x=>x.nome+' — falta '+rtAmount(x.falta,x.unidade)+' ('+rtBase(x.base)+'); previsto '+rtAmount(x.total,x.unidade)+'; estoque '+rtAmount(x.estoque,x.unidade)+(x.desconhecido?' + quantidade pendente':'')).join('\n')+(r.incompletos.length?'\n\nDias não calculados (tipo a escolher): '+r.incompletos.join(', '):'')+'\n\nNão há conversão automática entre cru, pronto e drenado. Confira quantidades pendentes e a refrigeração/transporte dos perecíveis.';
+  }
+  async function importarRotina(file){
+    try {
+      if (!file || file.size > 3000000) throw new Error('arquivo');
+      const parsed = JSON.parse(await file.text());
+      if (parsed.tipo!=='contexto-rotina'||parsed.versao!==1) throw new Error('arquivo');
+      const imported=cleanRotina(parsed.rotina);
+      if (!imported || (!imported.refeicoes.length&&!imported.medidas.length&&!imported.orientacoes.length&&!imported.precos.length)) throw new Error('arquivo');
+      // Estado do app apenas; a chave do GitHub vive em outra entrada e não é copiada.
+      try { localStorage.setItem('treino-renan-pre-contexto', JSON.stringify(state)); }
+      catch { return rtMsg('Não consegui guardar a cópia anterior. Salve um backup completo e libere espaço antes de importar. Nada foi importado.'); }
+      state.rotina=mergeRotina(state.rotina,imported);rtSave(true);
+      rtMsg(typeof falhaLocal !== 'undefined' && falhaLocal ? 'Contexto disponível nesta tela, mas não foi possível salvar no aparelho. Exporte o backup completo antes de fechar.' : 'Contexto importado. Ficha e treinos preservados. A cópia anterior está disponível para exportação.');
+    } catch { rtMsg('Não reconheci esse contexto. Use um arquivo JSON de rotina versão 1; nenhum dado foi importado.'); }
+  }
+  function rtInputNumber(form,key){ const value=form.elements[key].value; return value.trim()===''?null:num(value); }
+  function setupRotina(){
+    const view=$('rotinaView');if(!view||setupRotina._ready)return;setupRotina._ready=true;
+    $('rotinaImportar').addEventListener('click',()=>$('rotinaArquivo').click());
+    $('rotinaArquivo').addEventListener('change',async()=>{await importarRotina($('rotinaArquivo').files[0]);$('rotinaArquivo').value='';});
+    $('rotinaExportar').addEventListener('click',salvarBackup);
+    $('rotinaCopia').addEventListener('click',()=>{
+      try{const copy=localStorage.getItem('treino-renan-pre-contexto');if(!copy)return rtMsg('Ainda não há cópia anterior neste aparelho.');JSON.parse(copy);rtDownload(copy,'treino-antes-do-contexto.json','application/json');rtMsg('Cópia anterior exportada.');}
+      catch{rtMsg('Não foi possível ler a cópia anterior.');}
+    });
+    view.addEventListener('click',ev=>{
+      const tab=ev.target.closest('[data-rt-tab]');if(tab){rtUI().aba=tab.dataset.rtTab;renderRotina();return;}
+      if(ev.target.closest('#rtExportarCompras'))rtDownload(rtShoppingText(),'compras-'+ymd(new Date())+'.txt','text/plain;charset=utf-8');
+      if(ev.target.closest('#rtImprimirCompras')){
+        const win=window.open('','_blank');if(!win)return rtMsg('O navegador bloqueou a impressão. Use Exportar lista.');
+        win.document.open();win.document.write('<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Lista de compras</title><body><pre style="white-space:pre-wrap;font:16px sans-serif"></pre></body></html>');win.document.close();win.document.querySelector('pre').textContent=rtShoppingText();win.focus();win.print();
+      }
+    });
+    view.addEventListener('change',ev=>{
+      const el=ev.target,r=rtData();if(!r)return;
+      if(el.id==='rtDia'){if(rtDate(el.value)){rtUI().dia=el.value;renderRotina();}return;}
+      if(el.id==='rtComprasInicio'){if(rtDate(el.value)){rtUI().comprasInicio=el.value;renderRotina();}return;}
+      if(el.dataset.rtType){rtSetType(el.dataset.rtType,el.value);return;}
+      if(el.dataset.rtTime){const m=r.refeicoes.find(x=>x.id===el.dataset.rtTime);if(m){m.horario=rtTime(el.value);rtSave();}return;}
+      if(el.dataset.rtMeal){const m=r.refeicoes.find(x=>x.id===el.dataset.rtMeal);if(m){rtMark(m.id,rtUI().dia,el.checked);for(const x of m.itens)rtMark(m.id+':item:'+x.id,rtUI().dia,el.checked);rtSave(true);}return;}
+      if(el.dataset.rtItem){rtMark(el.dataset.rtItem,rtUI().dia,el.checked);const m=rtMeals(rtUI().dia).find(x=>el.dataset.rtItem.startsWith(x.id+':item:'));if(m)rtMark(m.id,rtUI().dia,m.itens.every(x=>rtDone(m.id+':item:'+x.id,rtUI().dia)));rtSave(true);return;}
+      if(el.dataset.rtShopDay){r.preferencias.comprasDatas=r.preferencias.comprasDatas.filter(x=>x!==el.dataset.rtShopDay);if(el.checked)r.preferencias.comprasDatas.push(el.dataset.rtShopDay);rtSave(true);return;}
+      if(el.dataset.rtStock){r.estoque=r.estoque.filter(x=>x.id!==el.dataset.rtStock);r.estoque.push({id:el.dataset.rtStock,quantidade:el.value.trim()===''?null:num(el.value)});rtSave(true);return;}
+      if(el.dataset.rtPending){const p=r.pendencias.find(x=>x.id===el.dataset.rtPending);if(p){p.resolvida=el.checked;p.atualizado=Date.now();rtSave();}return;}
+      if(el.dataset.rtPendingNote){const p=r.pendencias.find(x=>x.id===el.dataset.rtPendingNote);if(p){p.nota=rtText(el.value);p.atualizado=Date.now();rtSave();}return;}
+    });
+    view.addEventListener('submit',ev=>{
+      ev.preventDefault();const form=ev.target,r=rtData();if(!r)return;
+      const value=k=>form.elements[k].value.trim(), id=prefix=>prefix+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);
+      if(form.id==='rtPrecoForm'){
+        const x={id:id('cotacao'),nome:rtText(value('nome'),160),preco:rtInputNumber(form,'preco'),frete:rtInputNumber(form,'frete'),peso:rtInputNumber(form,'peso'),porcao:rtInputNumber(form,'porcao'),proteina:rtInputNumber(form,'proteina'),data:rtDate(value('data')),unidade:value('unidade'),base:rtText(value('base'),120),nota:rtText(value('nota')),status:'Cotação informada no aparelho'};
+        if(!x.nome||!x.data||rtCost(x)===null)return rtMsg('Confira preço, frete, embalagem, porção, proteína e data.');
+        r.precos.push(x);rtSave(true);rtMsg('Cotação salva com a data informada.');
+      }else if(form.id==='rtMedidaForm'){
+        const peso=rtInputNumber(form,'peso'),cintura=rtInputNumber(form,'cintura'),data=rtDate(value('data'));
+        if(!data||(!peso&&!cintura))return rtMsg('Informe a data real e ao menos uma medida.');
+        const valores=[];if(peso!==null)valores.push({nome:'Peso',valor:peso,unidade:'kg'});if(cintura!==null)valores.push({nome:'Cintura',valor:cintura,unidade:'cm'});
+        r.medidas.push({id:id('medida'),data,horario:rtTime(value('horario')),metodo:rtText(value('metodo'),200),condicoes:rtText(value('condicoes'),600),valores,nota:'Medição informada no aparelho',fonte:''});rtSave(true);rtMsg('Medida registrada com a data informada.');
+      }else if(form.id==='rtSintomaForm'){
+        const data=rtDate(value('data')),texto=rtText(value('texto'),1500);if(!data||!texto)return rtMsg('Informe a data e o relato.');
+        r.sintomas.push({id:id('relato'),data,quando:rtText(value('quando'),80),texto,atualizado:Date.now()});rtSave(true);rtMsg('Relato salvo no seu histórico privado.');
+      }
+    });
+  }
 
   // ---------------- histórico e sugestão ----------------
   // Sem ficha explícita, preserva a última carga como referência na migração da ficha antiga.
@@ -683,7 +1005,7 @@ details.how .lbl{font-weight:700}
     if (!sets || !sets.length || !sets.every(s => s.kg !== null && s.kg > 0 && s.kg === sets[0].kg)) return null;
     return sets[0].kg;
   };
-  const completa = sessao => !!(sessao && sessao.ex && !sessao.h.interrompido && sessao.h.modo !== 'curto' && sessao.h.modo !== 'adaptacao' &&
+  const completa = sessao => !!(sessao && sessao.ex && !sessao.h.interrompido && (!sessao.h.encerramento || sessao.h.encerramento === 'completo') && sessao.h.modo !== 'curto' && sessao.h.modo !== 'adaptacao' &&
     sessao.sets.length >= ((sessao.h.plano && sessao.h.plano[sessao.ex.id]) || sessao.ex.s));
   const bateuTopo = (e, sessao) => !!(completa(sessao) && sessao.ex.f === e.f &&
     sessao.sets.every(s => s.reps !== null && s.reps >= e.r[1]));
@@ -710,7 +1032,9 @@ details.how .lbl{font-weight:700}
     if (corrente) relatos.unshift(corrente);
     if (relatos.some(f => f.dor === 'sim')) return resposta('revisar', 'Rever antes de progredir', 'Há relato recente de dor ou desconforto. Não aumente a carga com base nestes números; confira a execução e a tolerância com seu professor ou fisioterapeuta.');
     if (relatos.some(f => f.tecnica === 'ajustar')) return resposta('revisar', 'Conferir a execução', 'Você marcou dificuldade para manter a técnica. Revise a execução antes de considerar aumento de carga.');
-    const reserva = e.pernas ? 2 : 1;
+    const reserva = e.f === ATUAL || e.pernas ? 2 : 1;
+    const seriesRelatadas = registros.flatMap(s => s.sets).concat(state.cur && state.cur.ficha === e.f ? state.cur.sets[e.id] || [] : []);
+    if (!e.tempo && seriesRelatadas.some(s => s && Number.isInteger(s.rir) && s.rir < reserva)) return resposta('reserva', 'Preservar a reserva', 'Há uma série com menos de ' + reserva + ' repetições em reserva registradas. Confira o esforço antes de considerar aumento de carga.');
     if (!e.tempo && relatos.some(f => Number.isInteger(f.rir) && f.rir < reserva)) return resposta('reserva', 'Preservar a reserva', 'O relato indica menos de ' + reserva + (reserva === 1 ? ' repetição possível' : ' repetições possíveis') + ' ao terminar. Evite aumentar agora; ajuste o esforço para manter a reserva prevista.');
     if (!atual || !atual.sets.length) return resposta('dados', 'Começar o acompanhamento', 'Registre carga, repetições e como foi o exercício. Um treino marcado só no calendário conta para a frequência, mas não permite avaliar desempenho.');
     if (!antes || !antes.sets.length) return resposta('dados', 'Primeira referência registrada', 'Ainda falta outra sessão deste exercício na mesma ficha. Use a última carga apenas como referência, conforme a tolerância do dia.');
@@ -748,7 +1072,7 @@ details.how .lbl{font-weight:700}
     adaptMemo = { h, n:h.length, v:ORDEM.filter(l => !feitos.has(l)) };
     return adaptMemo.v;
   }
-  const adaptacao = () => faltamAdaptacao().length > 0;
+  const adaptacao = () => !(state.preferenciasTreino && state.preferenciasTreino.adaptacaoConcluida) && faltamAdaptacao().length > 0;
   // Versão curta (dia cansado): só os 4 primeiros exercícios, com 2 séries; no B e no D, o de tronco se quiser.
   // Fica fora dos dados do treino: { start do treino em andamento, tronco }.
   const LS_CURTA = 'treino-renan-curta';
@@ -795,7 +1119,7 @@ details.how .lbl{font-weight:700}
     for (let i = state.hist.length - 1; i >= 0; i--) {
       if (state.hist[i].interrompido) continue;
       const k = ORDEM.indexOf(state.hist[i].wid);
-      if (k >= 0) return ORDEM[(k + 1) % ORDEM.length];
+      if (k >= 0) return state.hist[i].proximo || ORDEM[(k + 1) % ORDEM.length];
     }
     return 'A';
   }
@@ -839,10 +1163,8 @@ details.how .lbl{font-weight:700}
       } else st = '<span class="st">Ainda não feito</span>';
       return '<li><button type="button" class="day seqrow' + (id === nx ? ' is-today' : '') + '" data-open="' + id + '"><span class="dw"><b>' + id + '</b>' + esc(w.nome) + '</span><span class="foco">' + esc(w.foco) + '</span>' + st + '</button></li>';
     }).join('') + '</ul>';
-    html += '<section class="wk"><h3>Regras</h3><ul class="rules"><li>A e C são superiores; B e D são pernas e tronco.</li><li>3 a 4 treinos por semana, nos dias que der.</li><li>Se fizer só 3 numa semana, continue a ordem na seguinte, sem recomeçar pelo A. Não compense falta dobrando treino.</li><li>No máximo 2 dias seguidos.</li></ul></section>';
+    html += '<section class="wk"><h3>Organização da rotina</h3><ul class="rules"><li>Ficha atual: A e C são superiores; B e D são pernas e tronco.</li><li>Referência: 3 sessões por semana; uma quarta quando houver tempo e recuperação.</li><li>Se fizer só 3 numa semana, continue a ordem na seguinte, sem recomeçar pelo A. Não compense falta dobrando treino.</li><li>A proposta organiza até 2 dias seguidos antes de descansar; isso não é uma proibição universal.</li></ul></section>';
     html += '<section class="wk"><h3>Frequência</h3><p class="wkcount">Últimos 7 dias: <b>' + recentes(7) + '</b> treinos (meta: 3 a 4).</p><p class="wkcount">Treinos registrados aqui: <b>' + state.hist.filter(h => !h.interrompido).length + '</b>.</p><button type="button" class="btn" data-gocal>Ver calendário</button></section>';
-    const faltam = diasEntre(now, VIAGEM);
-    if (faltam > 0) html += '<section class="wk trip"><h3>Salvador em ' + faltam + (faltam > 1 ? ' dias' : ' dia') + '</h3><ul class="rules"><li>Último treino de pernas (B ou D) até 30/10.</li><li>Os 2 últimos treinos antes da viagem são leves: 2 séries por exercício, mesma carga, parando 2 a 3 repetições antes do limite.</li><li>04/11 é descanso. De 05 a 10/11 não tem treino; você volta em 11/11.</li></ul></section>';
     $('vSemanas').innerHTML = html;
   }
 
@@ -869,12 +1191,14 @@ details.how .lbl{font-weight:700}
   }
   function fitForDb(){
     let txt = JSON.stringify(state), keep = KEEP_DETAIL, mudou = false;
+    // A extensão de rotina nunca causa descarte do histórico para caber no sincronizador legado.
+    if (state.rotina && txt.length > 240000) throw new Error('Estado completo excede o limite da sincronização legada; preservado no aparelho.');
     while (txt.length > 240000 && keep > 10) { keep = Math.floor(keep / 2); compact(keep); txt = JSON.stringify(state); mudou = true; }
     while (txt.length > 240000 && state.hist.length > 60) { state.hist = state.hist.slice(Math.ceil(state.hist.length / 10)); txt = JSON.stringify(state); mudou = true; }
     if (mudou) saveLocal();
     return txt;
   }
-  function entryMeta(h){ const n = seriesOf(h); return h.interrompido ? 'Interrompido · sem séries concluídas' : h.manual ? (h.fonte ? 'do app da ' + h.fonte : 'marcado à mão') : Math.max(1, Math.round((h.end - h.start) / 60000)) + ' min, ' + n + (n === 1 ? ' série' : ' séries'); }
+  function entryMeta(h){ const n = seriesOf(h); return h.interrompido ? (temAquecimento(h) ? 'Interrompido · aquecimento sem séries de trabalho' : 'Interrompido · sem séries concluídas') : h.manual ? (h.fonte ? 'do app da ' + h.fonte : 'marcado à mão') : Math.max(1, Math.round((h.end - h.start) / 60000)) + ' min, ' + n + (n === 1 ? ' série' : ' séries'); }
   const nomeTreino = h => { const w = treinoDe(h.ficha || 1, h.wid); return w ? 'Treino ' + h.wid + ' · ' + w.nome : (h.rot || 'Outro treino'); };
   function setsList(h){
     const w = treinoDe(h.ficha || 1, h.wid);
@@ -885,7 +1209,22 @@ details.how .lbl{font-weight:700}
       if (f.dor) partes.push(f.dor === 'sim' ? 'dor ou desconforto relatado' : 'sem dor ou desconforto relatado');
       return '<li>' + esc(e ? e.nome : id) + ': ' + esc(partes.join('; ')) + '.</li>';
     }).join('');
-    const feedback = relatos ? '<p class="dnote">Seu relato:</p><ul class="feedback-history">' + relatos + '</ul>' : '';
+    const unidade = { halter:'cada halter', total:'carga total', maquina:'indicação da máquina', desconhecida:'unidade desconhecida' };
+    const aquec = Object.entries(h.aquecimento || {}).map(([id, series]) => {
+      const e = w && w.porEx[id] || X2[id];
+      return '<li>' + esc(e ? e.nome : id) + ': ' + series.map((s, i) => esc('aquecimento ' + (i + 1) + ' — ' + (s.kg === null ? 'carga não anotada' : fmt(s.kg) + ' kg') + ' × ' + (s.reps === null ? 'não anotado' : fmt(s.reps)) + (e && e.tempo ? ' s' : ' repetições') + '; descanso ' + s.rest + ' s; ' + (s.done ? 'feito' : 'não marcado como feito'))).join(' · ') + '</li>';
+    }).join('');
+    const extraSeries = Object.entries(h.sets || {}).flatMap(([id, series]) => series.map((s, i) => {
+      if (!s || (s.rir === undefined && !s.nota && !s.unidade)) return '';
+      const e = w && w.porEx[id] || X2[id], partes = [];
+      if (s.rir !== undefined) partes.push('RIR ' + s.rir);
+      if (s.unidade) partes.push(unidade[s.unidade]);
+      if (s.nota) partes.push(s.nota);
+      return '<li>' + esc((e ? e.nome : id) + ', série ' + (i + 1) + ': ' + partes.join('; ')) + '</li>';
+    })).join('');
+    const feedback = (relatos ? '<p class="dnote">Seu relato:</p><ul class="feedback-history">' + relatos + '</ul>' : '') +
+      (extraSeries ? '<p class="dnote">Detalhes das séries:</p><ul>' + extraSeries + '</ul>' : '') +
+      (aquec ? '<p class="dnote">Aquecimentos — fora do volume de trabalho:</p><ul class="aquec-history">' + aquec + '</ul>' : '');
     if (w && h.sets && Object.keys(h.sets).length) {
       // Exercícios do treino e, no fim, os que saíram da ficha depois (ex.: e1).
       const lista = w.ex.concat(Object.keys(h.sets).filter(id => !w.porEx[id] && X2[id]).map(id => X2[id]));
@@ -1072,6 +1411,34 @@ details.how .lbl{font-weight:700}
       campo('dor', 'Sentiu dor ou desconforto diferente do esforço muscular?', [['nao', 'Não'], ['sim', 'Sim']]) +
       '<p>Isso registra sua percepção e não identifica a causa de sintomas.</p></details>';
   }
+  function aquecimentoHTML(e, dis){
+    const series = doCur(e) && state.cur.aquecimento && state.cur.aquecimento[e.id] || [];
+    const campo = (s, i, key, label, valor) => '<label>' + esc(label) + '<input id="aquec-' + e.id + '-' + i + '-' + key + '" data-aquec-campo="' + key + '" data-aquec-ex="' + e.id + '" data-aquec-i="' + i + '" inputmode="' + (key === 'kg' ? 'decimal' : 'numeric') + '" value="' + esc(valor) + '"' + dis + '></label>';
+    return '<section class="aquecimento" aria-label="Séries de aquecimento de ' + esc(e.nome) + '"><h4>Séries de aquecimento</h4>' +
+      '<p>Registre o peso usado e conte o descanso. Aquecimento fica separado das séries de trabalho.</p>' +
+      series.map((s, i) => '<fieldset id="aquec-' + e.id + '-' + i + '"><legend>Aquecimento ' + (i + 1) + (s.done ? ' · feito' : '') + '</legend><div class="aquec-campos">' +
+        campo(s, i, 'kg', 'Carga (kg)', fmt(s.kg)) + campo(s, i, 'reps', e.tempo ? 'Tempo (segundos)' : 'Repetições', fmt(s.reps)) +
+        campo(s, i, 'rest', 'Descanso (segundos)', String(s.rest)) + '</div><div class="aquec-botoes">' +
+        '<button type="button" class="btn" data-aquec-feito="' + e.id + ':' + i + '" aria-pressed="' + s.done + '"' + dis + '>' + (s.done ? 'Desmarcar aquecimento' : 'Marcar aquecimento feito') + '</button>' +
+        '<button type="button" class="btn quiet" data-aquec-remover="' + e.id + ':' + i + '"' + dis + '>Remover</button></div>' +
+        '<button type="button" class="restbtn" data-rs="aquec-' + e.id + ':' + i + '" data-aquec-rest="' + e.id + ':' + i + '" data-rest-seg="' + s.rest + '"' + dis + '><span class="bar"></span>' + CLOCK + '<span class="rt">Descanso ' + mmssS(s.rest) + '</span></button></fieldset>').join('') +
+      '<button type="button" class="btn quiet" data-aquec-adicionar="' + e.id + '"' + (series.length >= 6 ? ' disabled' : dis) + '>Adicionar série de aquecimento</button></section>';
+  }
+  function seriesExtrasHTML(e, dis){
+    const disabled = !doCur(e) ? ' disabled' : dis;
+    const options = (items, value) => items.map(([v,t]) => '<option value="' + v + '"' + (String(value ?? '') === String(v) ? ' selected' : '') + '>' + esc(t) + '</option>').join('');
+    const attrs = (key, i) => ' data-serie-extra="' + key + '" data-serie-ex="' + e.id + '" data-serie-i="' + i + '"' + disabled;
+    let html = '<details class="serie-notas"><summary>RIR, unidade da carga e observações por série</summary><p>Opcional. Não informado continua desconhecido; as cargas não são convertidas.</p>';
+    if (!doCur(e)) html += '<p>Comece o treino para registrar.</p>';
+    for (let i = 0; i < S(e); i++) {
+      const s = curSet(e.id, i) || {};
+      html += '<fieldset><legend>Série de trabalho ' + (i + 1) + '</legend>' +
+        (e.tempo ? '<p>Encerre antes de perder o controle da posição; não é necessário estimar repetições restantes.</p>' : '<label>Repetições em reserva (RIR)<select' + attrs('rir', i) + '>' + options([['','Não sei / não informado'],[0,'0'],[1,'1'],[2,'2'],[3,'3'],[4,'4'],[5,'5 ou mais']], s.rir) + '</select></label>') +
+        (e.tempo || e.semPeso ? '' : '<label>O número da carga representa<select' + attrs('unidade', i) + '>' + options([['','Não informado'],['desconhecida','Unidade desconhecida'],['halter','Cada halter'],['total','Carga total'],['maquina','Indicação da máquina']], s.unidade) + '</select></label>') +
+        '<label>Observação<textarea maxlength="240" rows="2"' + attrs('nota', i) + '>' + esc(s.nota || '') + '</textarea></label></fieldset>';
+    }
+    return html + '</details>';
+  }
   function exHTML(e, idx, lock){
     const feitas = feitasEx(e), completo = feitas.length >= S(e);
     const lado = (e.lado ? (e.perna ? ' cada perna' : e.braco ? ' cada braço' : ' cada lado') : '') + (e.extra ? ', ' + e.extra : '');
@@ -1092,10 +1459,10 @@ details.how .lbl{font-weight:700}
         '<span class="abrir">Abrir</span></button></li>';
     }
     const sg = suggest(e);
-    const sobram = e.f === ATUAL && adaptacao() ? '3' : e.pernas ? '2 ou 3' : '1 ou 2';
+    const sobram = e.f === ATUAL && adaptacao() ? '3' : e.f === ATUAL || e.pernas ? '2 ou 3' : '1 ou 2';
     let info = '';
     if (sg.last) info += '<p class="last">' + esc(lastTxt(e, sg.last)) + '</p>';
-    else if (e.kg) info += '<p class="last">Primeira vez aqui: comece com ' + fmt(e.kg) + ' kg (a carga do seu app).</p>';
+    else if (e.kg) info += '<p class="last">Referência cadastrada: ' + fmt(e.kg) + ' kg. Confira sua carga atual e a tolerância de hoje.</p>';
     else if (!e.tempo && !e.semPeso) info += '<p class="last">Primeira vez: escolha uma carga em que a última repetição saia com esforço, sobrando ' + sobram + '.</p>';
     if (sg.up) info += '<span class="up">Duas sessões completas no topo. Se a técnica e a reserva foram adequadas, ' + (e.tempo ? 'avalie aumentar um pouco o tempo.' : 'teste o menor aumento de carga disponível.') + '</span>';
     const desc = e.par ? 'sem descanso: vai direto pro próximo' : 'descanso ' + descansoTxt(e.rest);
@@ -1117,7 +1484,7 @@ details.how .lbl{font-weight:700}
       '<div class="exhead"><span class="num">' + (idx + 1) + '</span><div><h3>' + esc(e.nome) + '</h3><p class="maq">Na Smart Fit: ' + esc(e.maq) + '</p></div>' +
       '<button type="button" class="minbtn" data-fechar="' + e.id + '">Minimizar</button></div>' +
       '<p class="target"><strong>' + esc(alvoCard) + '</strong><span>' + esc(desc) + '</span></p>' + aqueceHTML(e, idx) + par + info +
-      '<div class="sets">' + rows + '</div>' + feedbackHTML(e, lock) +
+      aquecimentoHTML(e, dis) + '<div class="sets">' + rows + '</div>' + seriesExtrasHTML(e, dis) + feedbackHTML(e, lock) +
       '<div class="exfoot">' +
         '<div class="videoarea">' +
           (e.vid ? '<button type="button" class="btn primary" data-video="' + e.id + '" aria-expanded="false">Ver vídeo</button><div class="video-wrap" data-video-box="' + e.id + '" hidden></div>' : '') +
@@ -1205,7 +1572,8 @@ details.how .lbl{font-weight:700}
     let t = adaptacao()
       ? '<b>Adaptação à ficha nova:</b> 2 séries em cada exercício, para o corpo se acostumar. Termine cada série com umas 3 repetições sobrando. ' +
         'Depois que você fizer ' + (faltamAdaptacao().length === 1 ? 'o ' : '') + joinPt(faltamAdaptacao()) + ' uma vez, os exercícios principais passam para 3 séries. Essa etapa não recomeça a cada semana.'
-      : '<b>Esforço:</b> termine cada série com ' + (pernas ? '2 a 3' : '1 a 2') + ' repetições sobrando. Não precisa ir até a falha.';
+      : '<b>Esforço proposto para esta ficha:</b> termine a maioria das séries com 2 a 3 repetições sobrando. Não precisa ir até a falha.';
+    if (adaptacao() && w.f === ATUAL && !state.cur) t += ' <button type="button" class="minbtn" data-adaptacao-concluida>Adaptação já concluída</button> Use se essa etapa já aconteceu e os registros deste aparelho estiverem incompletos.';
     if (pernas) t += ' As cargas antigas de perna (160 kg no leg press, 90 kg na extensora) não são meta.';
     return '<p class="aviso-treino">' + t + '</p>' +
       '<p class="seguranca">Pare o exercício se aparecer dor que desce pela perna, formigamento, dormência ou perda de força, e procure avaliação. Se o joelho doer mais no dia seguinte, inchar ou travar, diminua amplitude ou carga antes de subir.</p>';
@@ -1288,9 +1656,15 @@ details.how .lbl{font-weight:700}
     html += warmHTML(w, lock);
     html += '<ol class="exlist">' + exibidos(w).map((e, i) => exHTML(e, i, lock)).join('') + '</ol>';
     if (ativo) {
+      const seguinte = ORDEM[(ORDEM.indexOf(w.id) + 1) % ORDEM.length];
+      html += '<details class="serie-notas"><summary>Como encerrar e qual treino fazer depois</summary><label>Esta sessão foi<select data-encerramento><option value="">Pelo que foi registrado</option>' +
+        [['completo','Concluída'],['reduzido','Reduzida'],['interrompido','Interrompida']].map(([v,t]) => '<option value="' + v + '"' + (c.encerramento === v ? ' selected' : '') + '>' + t + '</option>').join('') +
+        '</select></label><label>Depois de salvar as séries de trabalho<select data-proximo-escolhido>' +
+        [[seguinte,'Continuar a fila no ' + seguinte],[w.id,'Repetir o ' + w.id + ' na próxima sessão']].map(([v,t]) => '<option value="' + v + '"' + ((c.proximo || seguinte) === v ? ' selected' : '') + '>' + t + '</option>').join('') +
+        '</select></label><p class="fine">Só as séries feitas serão contadas. Sem séries de trabalho, a fila fica onde estava. Não há séries para compensar depois.</p></details>';
       html += '<div class="finish"><button type="button" class="btn primary" data-act="finish">Finalizar treino</button><button type="button" class="btn quiet" data-act="discard">Descartar</button></div>';
     }
-    html += '<p class="note">Perdeu um dia? Não pula treino: faça o próximo da ordem. No máximo 2 dias seguidos. Não compense falta dobrando treino.</p>';
+    html += '<p class="note">Perdeu um dia? Continue a sequência, sem compensar faltas dobrando treino. A proposta organiza até dois dias seguidos antes de descansar.</p>';
     $('workout').innerHTML = html;
     progressText();
   }
@@ -1336,7 +1710,17 @@ details.how .lbl{font-weight:700}
     const dias7 = recentes(7), dias28 = recentes(28);
     let html = '<h2 class="vt" id="progressoTitle">Seu progresso</h2><p class="vsub">Atualizado com os treinos salvos neste aparelho e os backups que você restaurar.</p>';
     html += '<div class="cal-stats"><div class="stat"><b data-frequencia="7">' + dias7 + '</b><span>dias treinados nos últimos 7 dias</span></div><div class="stat"><b data-frequencia="28">' + dias28 + '</b><span>dias treinados nos últimos 28 dias</span></div></div>';
-    html += '<p class="note">Sua referência é uma rotina sustentável de 3 a 4 treinos por semana. A sequência continua de onde você parou; não precisa compensar faltas.</p>';
+    html += '<p class="note">Referência: 3 sessões por semana, com uma quarta quando houver tempo e recuperação. A sequência continua de onde você parou; não precisa compensar faltas.</p>';
+    const iniVolume = new Date(); iniVolume.setHours(0, 0, 0, 0); iniVolume.setDate(iniVolume.getDate() - 6);
+    const periodo = state.hist.filter(h => !h.interrompido && h.start >= +iniVolume && h.start <= Date.now());
+    const detalhados = periodo.filter(h => !h.manual && Object.keys(h.sets || {}).length);
+    const volume7 = detalhados.reduce((n, h) => n + Object.values(h.sets || {}).reduce((s, series) => s + series.filter(x => x && x.done).length, 0), 0);
+    const semDetalhe = periodo.length - detalhados.length;
+    const previstas = W.reduce((n, w) => n + w.ex.reduce((s, e) => s + e.s, 0), 0);
+    html += '<section class="card" aria-label="Volume por ciclo e por período"><h3>Volume de trabalho</h3><p><b data-volume-ciclo>' + previstas + '</b> séries previstas no ciclo completo A/B/C/D da ficha atual, antes de adaptações ou modo curto.</p>' +
+      '<p><b data-volume-sete>' + volume7 + '</b> séries efetivamente anotadas em detalhe nos últimos 7 dias, em todas as fichas.</p>' +
+      '<p class="fine">Um ciclo pode durar mais de sete dias. Aquecimentos ficam fora; uma série unilateral não é dobrada por fazer os dois lados. O app não atribui séries indiretas a músculos.</p>' +
+      (semDetalhe ? '<p class="fine">' + semDetalhe + ' registros manuais ou compactados sem detalhe ficam fora deste total; o volume real pode ser maior.</p>' : '') + '</section>';
     html += '<p><b>' + (state.cur ? 'Em andamento: ' : 'Próximo da sequência: ') + 'Treino ' + proximo() + '.</b></p>';
     html += '<p class="fine">A leitura abaixo usa regras de comparação, funciona offline e não altera as cargas sozinha. Mais peso ou repetições não confirma ganho de massa nem garante que uma carga seja adequada. Relatos ausentes continuam desconhecidos.</p>';
     const vistos = new Set(), lista = [];
@@ -1370,6 +1754,7 @@ details.how .lbl{font-weight:700}
     $('vSemanas').hidden = view !== 'semanas';
     $('vCal').hidden = view !== 'cal';
     $('vProgresso').hidden = view !== 'progresso';
+    $('rotinaView').hidden = view !== 'rotina';
     renderTabs();
     renderWorkout();
     renderHist();
@@ -1377,6 +1762,7 @@ details.how .lbl{font-weight:700}
     renderCal();
     renderProgresso();
     renderBackup();
+    if (view === 'rotina') renderRotina();
     updateDock();
   }
 
@@ -1417,7 +1803,8 @@ details.how .lbl{font-weight:700}
     const sets = {};
     for (const [k, arr] of Object.entries(c.sets)) if (arr.some(x => x && x.done)) sets[k] = arr;
     const feitas = countDone(c), temSeries = Object.keys(sets).length > 0;
-    const interrompido = !temSeries && Object.keys(cleanFeedback(c.feedback)).length > 0;
+    const soAquecimento = !temSeries && temAquecimento(c);
+    const interrompido = !temSeries && (Object.keys(cleanFeedback(c.feedback)).length > 0 || soAquecimento);
     const salvar = temSeries || interrompido;
     // Esqueceu aberto: salva com a duração normal do treino em vez de horas.
     const fim = esquecido(c) ? c.start + w.min * 60000 : Date.now();
@@ -1425,7 +1812,7 @@ details.how .lbl{font-weight:700}
     const plano = Object.fromEntries(exibidos(w).map(e => [e.id, S(e)]));
     const modo = c.modo || (curtaAtiva(w.id) ? 'curto' : w.f === ATUAL && adaptacao() ? 'adaptacao' : 'completo');
     if (salvar) {
-      const registro = sessionExtras({ feedback:c.feedback, plano, modo }, { id:String(c.start), wid:c.wid, ficha:c.ficha, start:c.start, end:fim, sets });
+      const registro = sessionExtras({ feedback:c.feedback, plano, modo, aquecimento:c.aquecimento, encerramento:interrompido ? 'interrompido' : c.encerramento || (feitas >= total ? 'completo' : 'reduzido'), proximo:c.proximo }, { id:String(c.start), wid:c.wid, ficha:c.ficha, start:c.start, end:fim, sets });
       if (interrompido) registro.interrompido = true;
       addEntry(registro);
     }
@@ -1437,7 +1824,8 @@ details.how .lbl{font-weight:700}
     rest = null;
     hold = null;
     const subir = w.ex.map(e => ({ e, sg:suggest(e) })).filter(x => x.sg.up);
-    let html = '<div class="summary"><h3>' + (interrompido ? 'Relato salvo · treino interrompido' : 'Treino ' + w.id + ' salvo') + '</h3><p>' + (interrompido ? 'Sem séries concluídas. Seu relato foi guardado; a sequência e a frequência não mudaram.' : min + ' min e ' + feitas + ' de ' + total + ' séries.') + '</p>';
+    let html = '<div class="summary"><h3>' + (interrompido ? (soAquecimento ? 'Aquecimento salvo · treino interrompido' : 'Relato salvo · treino interrompido') : 'Treino ' + w.id + ' salvo') + '</h3><p>' + (interrompido ? (soAquecimento ? 'Aquecimentos preservados, sem séries de trabalho. A sequência e a frequência não mudaram.' : 'Sem séries concluídas. Seu relato foi guardado; a sequência e a frequência não mudaram.') : min + ' min e ' + feitas + ' de ' + total + ' séries de trabalho.') + '</p>';
+    if (salvar) html += '<p>Próximo da sequência: <b>Treino ' + esc(proximo()) + '</b>.</p>';
     const respostas = Object.values(c.feedback || {});
     if (respostas.some(f => f.dor === 'sim')) html += '<p>Você registrou desconforto. Reveja os exercícios indicados em Progresso antes de repetir ou aumentar a carga.</p>';
     else if (respostas.some(f => f.tecnica === 'ajustar' || f.rir === 0)) html += '<p>Revise a execução e o esforço em Progresso antes de aumentar carga ou repetições.</p>';
@@ -1516,7 +1904,7 @@ details.how .lbl{font-weight:700}
     } catch (e) { fecharAudio(); }
   }
   function startRest(sec, nome, exId, i){
-    if (!sec) return;
+    if (!sec) { rest = null; updateDock(); return; }
     fecharVideos();
     somOn();
     rest = { end:Date.now() + sec * 1000, total:sec, nome, exId, i, avisou:false };
@@ -1536,7 +1924,7 @@ details.how .lbl{font-weight:700}
       } else if (b.classList.contains('on')) {
         b.classList.remove('on');
         const eb = exTela(b.dataset.rs.split(':')[0]);
-        b.querySelector('.rt').textContent = 'Descanso ' + mmssS(eb ? eb.rest : 0);
+        b.querySelector('.rt').textContent = 'Descanso ' + mmssS(b.dataset.restSeg !== undefined ? Number(b.dataset.restSeg) : eb ? eb.rest : 0);
         b.querySelector('.bar').style.width = '0';
       }
     });
@@ -1738,7 +2126,54 @@ details.how .lbl{font-weight:700}
     if (r && rest) { if (r.dataset.rest === 'skip') { rest = null; fecharAudio(); } else { rest.end += 30000; rest.total += 30; } updateDock(); return; }
   });
   $('workout').addEventListener('click', ev => {
-    const feedbackSummary = ev.target.closest('.feedback summary');
+    const adapt = ev.target.closest('[data-adaptacao-concluida]');
+    if (adapt) {
+      if (state.cur) return;
+      arm(adapt, 'Confirmar que já concluí', () => {
+        state.preferenciasTreino = { adaptacaoConcluida:true };
+        commit(); nuvemAgendar(); renderAll();
+      });
+      return;
+    }
+    const addAquec = ev.target.closest('[data-aquec-adicionar]');
+    if (addAquec) {
+      const id = addAquec.dataset.aquecAdicionar, e = exTela(id);
+      if (!e || travado(treinoTela(sel)) || !startSession(sel) || !doCur(e)) return;
+      const mapa = state.cur.aquecimento || (state.cur.aquecimento = {});
+      const lista = mapa[id] || (mapa[id] = []);
+      if (lista.length >= 6) return;
+      lista.push({ kg:null, reps:null, done:false, rest:60 });
+      abertos.add(id); commit(); redesenhar(id);
+      const campo = $('aquec-' + id + '-' + (lista.length - 1) + '-kg');
+      if (campo) campo.focus({ preventScroll:true });
+      return;
+    }
+    const aquecBotao = ev.target.closest('[data-aquec-feito],[data-aquec-remover],[data-aquec-rest]');
+    if (aquecBotao) {
+      const [id, indice] = (aquecBotao.dataset.aquecFeito || aquecBotao.dataset.aquecRemover || aquecBotao.dataset.aquecRest).split(':');
+      const i = Number(indice), e = exTela(id);
+      const lista = state.cur && state.cur.aquecimento && state.cur.aquecimento[id];
+      if (!e || !doCur(e) || !lista || !lista[i]) return;
+      const s = lista[i], chave = 'aquec-' + id;
+      if (aquecBotao.hasAttribute('data-aquec-remover')) {
+        const remover = () => {
+          if (rest && rest.exId === chave) { rest = null; fecharAudio(); }
+          lista.splice(i, 1); commit(); redesenhar(id); updateDock();
+        };
+        if (s.done) arm(aquecBotao, 'Confirmar remoção', remover); else remover();
+      } else if (aquecBotao.hasAttribute('data-aquec-rest')) {
+        if (rest && rest.exId === chave && rest.i === i && rest.end > Date.now()) { rest = null; fecharAudio(); }
+        else startRest(s.rest, 'Aquecimento · ' + e.nome, chave, i);
+        updateDock();
+      } else {
+        s.done = !s.done;
+        if (s.done) { hold = null; startRest(s.rest, 'Aquecimento · ' + e.nome, chave, i); }
+        else if (rest && rest.exId === chave && rest.i === i) { rest = null; fecharAudio(); }
+        commit(); redesenhar(id); updateDock();
+      }
+      return;
+    }
+    const feedbackSummary = ev.target.closest('.feedback summary,.serie-notas summary');
     if (feedbackSummary) {
       const card = feedbackSummary.closest('.card.ex');
       if (card) abertos.add(card.id.slice(3)); // Não minimize enquanto ele responde.
@@ -1897,6 +2332,25 @@ details.how .lbl{font-weight:700}
     }
   });
   $('workout').addEventListener('change', ev => {
+    if (ev.target.matches('[data-encerramento],[data-proximo-escolhido]')) {
+      if (!state.cur || state.cur.wid !== sel) return;
+      const key = ev.target.hasAttribute('data-encerramento') ? 'encerramento' : 'proximo';
+      if (ev.target.value) state.cur[key] = ev.target.value; else delete state.cur[key];
+      commit(); return;
+    }
+    const extra = ev.target.closest('[data-serie-extra]');
+    if (extra) {
+      const e = exTela(extra.dataset.serieEx), i = Number(extra.dataset.serieI), key = extra.dataset.serieExtra;
+      if (!e || !doCur(e) || !Number.isInteger(i) || i < 0 || i >= S(e)) return;
+      const patch = {};
+      if (key === 'rir' && !e.tempo && extra.value !== '') patch.rir = Number(extra.value);
+      else if (key === 'nota') patch.nota = extra.value;
+      else if (key === 'unidade') patch.unidade = extra.value;
+      setVal(e.id, i, serieExtras(patch, {}));
+      if (extra.value.trim() === '') delete state.cur.sets[e.id][i][key];
+      commit();
+      return;
+    }
     const input = ev.target.closest('[data-feedback]');
     if (!input || input.disabled) return;
     const e = exTela(input.dataset.feedbackEx);
@@ -1958,6 +2412,20 @@ details.how .lbl{font-weight:700}
     if (inp) inp.dataset.seguindo = inp.value;
   });
   $('workout').addEventListener('input', ev => {
+    const aq = ev.target.closest('[data-aquec-campo]');
+    if (aq) {
+      const id = aq.dataset.aquecEx, i = Number(aq.dataset.aquecI), key = aq.dataset.aquecCampo, e = exTela(id);
+      const s = state.cur && state.cur.aquecimento && state.cur.aquecimento[id] && state.cur.aquecimento[id][i];
+      if (!e || !doCur(e) || !s) return;
+      if (key === 'rest') {
+        const v = num(aq.value);
+        if (v !== null && v <= 900) s.rest = Math.round(v);
+        const btn = document.querySelector('[data-aquec-rest="' + id + ':' + i + '"]');
+        if (btn) { btn.dataset.restSeg = String(s.rest); if (!btn.classList.contains('on')) btn.querySelector('.rt').textContent = 'Descanso ' + mmssS(s.rest); }
+      } else if (key === 'kg' || key === 'reps') s[key] = num(aq.value);
+      commit();
+      return;
+    }
     const inp = ev.target.closest('.setrow input');
     if (!inp) return;
     const row = inp.closest('.setrow');
@@ -2075,7 +2543,12 @@ details.how .lbl{font-weight:700}
     r.readAsText(file);
   });
   // Junta dados já passados pelo sanitize, sem apagar histórico nem substituir um treino aberto.
-  function juntarHist(hist, cur = null){
+  function juntarHist(hist, cur = null, extras = null){
+    const antesRotina = JSON.stringify(state.rotina || null);
+    if (extras && extras.rotina) state.rotina = mergeRotina(state.rotina, extras.rotina);
+    const rotinaMudou = antesRotina !== JSON.stringify(state.rotina || null);
+    const preferenciasMudou = !!(extras && extras.preferenciasTreino && !state.preferenciasTreino);
+    if (preferenciasMudou) state.preferenciasTreino = extras.preferenciasTreino;
     const ids = new Set(state.hist.map(h => h.id));
     const novos = hist.filter(h => !ids.has(h.id) && ids.add(h.id));
     novos.forEach(h => state.hist.push(h));
@@ -2091,17 +2564,17 @@ details.how .lbl{font-weight:700}
     compact();
     commit();
     renderAll();
-    return { novos:novos.length, retomado };
+    return { novos:novos.length, retomado, rotinaMudou, preferenciasMudou };
   }
   function juntarBackup(txt, avisar){
     try {
       const dados = JSON.parse(txt);
       if (!dados || dados.v !== 1 || !Array.isArray(dados.hist)) throw new Error('backup-invalido');
       const limpo = sanitize(dados);
-      const { novos:n, retomado } = juntarHist(limpo.hist, limpo.cur);
-      if (n || retomado) nuvemAgendar();
+      const { novos:n, retomado, rotinaMudou, preferenciasMudou } = juntarHist(limpo.hist, limpo.cur, limpo);
+      if (n || retomado || rotinaMudou || preferenciasMudou) nuvemAgendar();
       const mensagem = n ? n + (n > 1 ? ' registros restaurados.' : ' registro restaurado.') : '';
-      avisar((mensagem + (retomado ? ' Treino em andamento restaurado.' : '')).trim() || 'Esse backup não tinha treinos novos.');
+      avisar((mensagem + (retomado ? ' Treino em andamento restaurado.' : '') + (rotinaMudou ? ' Rotina e medidas restauradas.' : '') + (preferenciasMudou ? ' Preferências restauradas.' : '')).trim() || 'Esse backup não tinha treinos novos.');
     } catch (e) { avisar('Esse arquivo não é um backup do app de treino.'); }
   }
   async function restaurarBackup(file){
@@ -2241,11 +2714,11 @@ details.how .lbl{font-weight:700}
       return nvMsg(e.message === 'backup-invalido' || e instanceof SyntaxError ? 'O backup do GitHub é inválido. Ele foi preservado; confira o arquivo antes de ligar.' : 'Sem internet agora. Tente de novo com sinal.');
     } finally { $('nvLigar').disabled = false; configurando = false; }
     if (existente) {
-      juntarHist(existente.hist, existente.cur);
+      juntarHist(existente.hist, existente.cur, existente);
       // Treinos deste celular que o GitHub ainda não tem (ou um envio que tinha falhado com a chave antiga):
       // envia o histórico reunido, que continua tendo tudo o que já estava no GitHub.
       const noGitHub = new Set(existente.hist.map(h => h.id));
-      const falta = !!antes.pendente || state.hist.some(h => !noGitHub.has(h.id));
+      const falta = !!antes.pendente || state.hist.some(h => !noGitHub.has(h.id)) || JSON.stringify(state.rotina || null) !== JSON.stringify(existente.rotina || null) || JSON.stringify(state.preferenciasTreino || null) !== JSON.stringify(existente.preferenciasTreino || null);
       nv.erro = ''; nv.ultimo = antes.repo === repo ? antes.ultimo || 0 : 0;
       if (!falta) {
         nv.pendente = false;
@@ -2287,6 +2760,7 @@ details.how .lbl{font-weight:700}
   }));
   window.addEventListener('online', nuvemEnviar);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') nuvemEnviar(); });
+  setupRotina();
   renderNuvem();
   nuvemEnviar();
   const instalado = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
