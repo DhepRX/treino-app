@@ -52,6 +52,10 @@ function sessao(dias, { id='a1', wid='A', ficha=2, n=3, reps=12, kg=20, feedback
     assert.equal(await status(), 'revisar');
     await estado([sessao(5), sessao(3, { feedback:{ ...adequado, rir:0 } })]);
     assert.equal(await status(), 'reserva');
+    const serieSemReserva = sessao(3);
+    serieSemReserva.sets.a1[1].rir = 1;
+    await estado([sessao(5), serieSemReserva]);
+    assert.equal(await status(), 'reserva', 'RIR baixo anotado numa série prevalece sobre o relato geral do exercício');
 
     await estado([sessao(5, { id:'c1', wid:'B', kg:100, reps:15 }), sessao(3, { id:'c1', wid:'D', kg:100, reps:15, n:2, feedback:{ ...adequado, rir:1 } })]);
     assert.equal(await status('c1'), 'reserva', 'Pernas exigem ao menos 2 repetições de reserva no relato');

@@ -140,7 +140,7 @@ const D26 = { id: 'd26', wid: 'D', start: H(17), end: H(18), sets: {
   await conferirProgressao('A', 'a1', [a20], 20, false);
   await conferirProgressao('A', 'a1', [a20, { ...a20, n:2 }], 20, false);
   await conferirProgressao('A', 'a1', [a20, a20], 20, true);
-  assert.match(await pp.textContent('#ex-e5 .last'), /sobrando 1 ou 2\./, 'Superiores voltam à reserva prevista após a adaptação');
+  assert.match(await pp.textContent('#ex-e5 .last'), /sobrando 2 ou 3\./, 'Ficha atual usa a proposta de 2–3 repetições em reserva após a adaptação');
   await conferirProgressao('A', 'a1', [a20, { ...a20, kg:[20,18,20] }], 20, false);
   const b100 = { wid:'B', kg:100, n:3, reps:15 }, d100 = { wid:'D', kg:100, n:2, reps:15 };
   await conferirProgressao('B', 'c1', [{ ...b100, kg:120 }, d100], 100, false);

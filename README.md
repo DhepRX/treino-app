@@ -49,13 +49,25 @@ A ficha tira carga direta da coluna (sem afundo com carga, abdominal com carga n
 | **D · Pernas 2 + tronco** | cadeira flexora, leg press 45°, cadeira extensora, elevação pélvica, cadeira abdutora, panturrilha no leg press, elevação lateral sentado, tríceps barra V, prancha |
 
 - **Adaptação:** até fazer A, B, C e D uma vez na ficha nova, todos os exercícios aparecem com 2 séries, terminando com umas 3 repetições sobrando. Essa etapa é inicial e não recomeça a cada semana.
-- **Esforço depois disso:** superiores com 1 a 2 repetições sobrando; pernas com 2 a 3. Não precisa ir até a falha. As cargas antigas de perna (160 kg no leg press, 90 kg na extensora) não são meta.
+- **Esforço depois disso:** referência proposta de 2 a 3 repetições sobrando, preservando a execução. Não precisa ir até a falha. As cargas antigas de perna (160 kg no leg press, 90 kg na extensora) não são meta.
 - **Subir carga:** nos superiores e nas pernas, só considere um aumento depois de duas sessões completas do mesmo exercício, na mesma carga e no topo da faixa em todas as séries previstas. Para sugerir o menor incremento disponível, o app também pede seu registro de execução controlada, ausência de desconforto e repetições sobrando nas duas sessões. Ele mantém os pesos preenchidos; a decisão continua sendo sua, com o professor. Sem essas respostas, informa o que falta. Treinos curtos e de adaptação continuam registrados, mas não geram esse aviso de progressão.
 - **Um treino por dia:** depois de salvar, o treino fica concluído e os outros travam até o dia seguinte. Finalizou sem querer? "Reabrir o treino" volta com as séries marcadas.
 - **Versão curta** (uso ocasional, cerca de 30 a 40 minutos): só os 4 primeiros exercícios, com 2 séries, quando faltar tempo ou disposição. No B e no D dá para incluir o exercício de tronco; depois continue a sequência A → B → C → D.
 - **Segurança:** pare se aparecer dor que desce pela perna, formigamento, dormência ou perda de força, e procure avaliação. Se o joelho doer mais no dia seguinte, inchar ou travar, diminua amplitude ou carga.
-- **Viagem:** último treino de pernas (B ou D) até 30/10; os 2 últimos antes de viajar são leves; 04/11 é descanso; volta em 11/11.
+- **Aquecimento com registro:** adicione uma série de aquecimento no próprio exercício para anotar peso, repetições e descanso. Marcar a série inicia o cronômetro. Esses registros ficam no histórico e no backup, separados das séries de trabalho e da análise de progressão.
+- **Encerramento:** antes de finalizar, é possível identificar a sessão como concluída, reduzida ou interrompida e escolher continuar a fila ou repetir a sessão na próxima ida. O app sempre conserva apenas as séries realmente feitas; uma sessão só com aquecimento não avança a fila.
 - Os treinos antigos (ficha 1: A Empurrar, B Puxar, C Pernas e abdômen, D Superior) continuam no calendário com os nomes da época.
+
+## Alimentação, compras e medidas
+
+A tela **Rotina** recebe um arquivo de contexto local. O código do site público não inclui os seus novos dados pessoais de alimentação ou saúde. Use **Importar contexto** nessa tela e selecione o JSON preparado para você. A importação conserva a ficha ativa, os treinos em andamento e as escolhas já salvas; importar o mesmo arquivo novamente não duplica os registros. Antes de importar, o app guarda uma cópia local do estado anterior e oferece exportação.
+
+Escolha a data e informe se o dia é de treino ou descanso para ver as refeições correspondentes. Os horários podem ser ajustados, e marcar uma refeição não registra um treino. A lista de compras usa os dias selecionados, a quantidade e a base de cada alimento; estoque informado só é descontado na mesma unidade e na mesma base. Pesos crus, prontos e drenados não são convertidos automaticamente. O comparador proteico usa os valores do rótulo, a embalagem, o frete e a data informados.
+
+Medidas sem data ficam com **data não informada**, mesmo quando o contexto foi importado hoje. As referências alimentares, estimativas do equipamento e orientações de documentos continuam identificadas pela origem; não viram prescrição nova. Porções ou equivalências pendentes precisam de confirmação.
+
+O arquivo de backup agora inclui também a rotina importada, suas marcações e medidas. Guarde-o no aparelho ou no repositório **privado** configurado. Arquivos antigos de treino continuam válidos. Não envie arquivos pessoais de contexto ou backup ao repositório público do app.
+
 
 ## 4. Seus treinos
 
