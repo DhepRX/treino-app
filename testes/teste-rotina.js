@@ -50,6 +50,15 @@ const arquivo = (obj) => ({name:'contexto-teste.json',mimeType:'application/json
     await p.fill('[data-rt-stock="leite:ml:comestivel"]','100');await p.locator('[data-rt-stock="leite:ml:comestivel"]').dispatchEvent('change');
     const [lista2] = await Promise.all([p.waitForEvent('download'),p.click('#rtExportarCompras')]);
     assert.match(await fs.readFile(await lista2.path(),'utf8'),/300 ml/);
+    await p.fill('#rtComprasInicio','2026-11-02');await p.locator('#rtComprasInicio').dispatchEvent('change');
+    await p.selectOption('[data-rt-type="2026-11-02"]','treino');
+    await p.check('[data-rt-shop-day="2026-11-02"]');
+    const [lista3] = await Promise.all([p.waitForEvent('download'),p.click('#rtExportarCompras')]);
+    const semanaNova=await fs.readFile(await lista3.path(),'utf8');
+    assert.match(semanaNova,/Dias: 2026-11-02\n/);
+    assert.match(semanaNova,/falta 300 ml/,'A semana que ficou fora da tela não é somada');
+    await p.fill('#rtComprasInicio','2026-10-26');await p.locator('#rtComprasInicio').dispatchEvent('change');
+    assert.ok(await p.isChecked('[data-rt-shop-day="2026-10-26"]'));
     await p.click('[data-rt-tab="precos"]');
     assert.equal(await p.textContent('.rt-table tbody tr:first-child td:last-child'),'R$ 15','Custo por 100 g de proteína calculado na embalagem correta');
     assert.match(await p.textContent('#rotinaConteudo'),/2026-10-27/);
@@ -64,6 +73,32 @@ const arquivo = (obj) => ({name:'contexto-teste.json',mimeType:'application/json
     await p2.setInputFiles('#bkFile',{name:'backup.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(estadoBackup))});
     await p2.waitForFunction(()=>!!JSON.parse(localStorage.getItem('treino-renan-v1')).rotina);
     assert.deepEqual(await p2.evaluate(()=>JSON.parse(localStorage.getItem('treino-renan-v1')).rotina),estadoBackup.rotina);
+    // A data automática segue o dia novo; uma data histórica escolhida é preservada.
+    await p2.clock.setFixedTime(new Date('2026-11-10T23:50:00-03:00'));
+    await p2.reload();await p2.click('[data-view="rotina"]');
+    assert.equal(await p2.inputValue('#rtDia'),'2026-11-10');
+    await p2.clock.setFixedTime(new Date('2026-11-11T00:10:00-03:00'));
+    await p2.evaluate(()=>window.dispatchEvent(new Event('pageshow')));
+    assert.equal(await p2.inputValue('#rtDia'),'2026-11-11');
+    await p2.fill('#rtDia','2026-10-26');await p2.locator('#rtDia').dispatchEvent('change');
+    await p2.clock.setFixedTime(new Date('2026-11-12T00:10:00-03:00'));
+    await p2.evaluate(()=>window.dispatchEvent(new Event('pageshow')));
+    assert.equal(await p2.inputValue('#rtDia'),'2026-10-26');
+    // Um backup existente acima do limite não perde registros ao restaurar ou recarregar.
+    const extenso=structuredClone(estadoBackup);
+    extenso.rotina.medidas=Array.from({length:1001},(_,i)=>({id:'m'+i,data:'2026-10-26',metodo:'Teste',valores:[{nome:'Peso',valor:71,unidade:'kg'}]}));
+    await p2.setInputFiles('#bkFile',{name:'backup-extenso.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(extenso))});
+    const medidas=()=>p2.evaluate(()=>JSON.parse(localStorage.getItem('treino-renan-v1')).rotina.medidas);
+    await p2.waitForFunction(()=>JSON.parse(localStorage.getItem('treino-renan-v1')).rotina.medidas.length===1002);
+    await p2.reload();await p2.click('[data-view="rotina"]');await p2.click('[data-rt-tab="medidas"]');
+    assert.ok((await medidas()).some(m=>m.id==='m1000'));
+    await p2.locator('#rtMedidaForm').evaluate(f=>{f.closest('details').open=true});
+    await p2.fill('#rtMedidaForm [name="data"]','2026-11-12');
+    await p2.fill('#rtMedidaForm [name="peso"]','71');
+    await p2.fill('#rtMedidaForm [name="metodo"]','Teste');
+    await p2.click('#rtMedidaForm button');
+    assert.match(await p2.textContent('#rotinaMsg'),/Limite de 1000 medições/);
+    assert.equal((await medidas()).length,1002,'A inclusão recusada preserva todos os dados antigos');
     const malicioso=structuredClone(dados);malicioso.rotina.refeicoes[0].titulo='<img src=x onerror="window.invadiu=true">';
     malicioso.rotina.refeicoes[0].id='malicioso';
     await p.setInputFiles('#rotinaArquivo',arquivo(malicioso));await p.click('[data-rt-tab="refeicoes"]');

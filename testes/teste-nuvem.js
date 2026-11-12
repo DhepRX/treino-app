@@ -18,7 +18,7 @@ async function api(route) {
   if (req.method() === 'GET') {
     if (!gh.arquivo) return json(404, { message: 'Not Found' });
     if ((req.headers()['accept'] || '').includes('raw')) return route.fulfill({ status: 200, contentType: 'text/plain', body: gh.arquivo });
-    return json(200, { sha: gh.sha });
+    return json(200, { sha: gh.sha, encoding:'base64', content:Buffer.from(gh.arquivo).toString('base64') });
   }
   if (req.method() === 'PUT') {
     // Envio que nunca responde: simula o iPhone fechando o app no meio.

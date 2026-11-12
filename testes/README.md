@@ -22,7 +22,7 @@ Na pasta do app (a que tem o `index.html`):
 node testes/rodar.js
 ```
 
-O mesmo comando funciona no PowerShell, Bash e terminal do macOS. Ele inicia o servidor em `http://127.0.0.1:8766/treino-app/`, executa os dezesseis roteiros em sequência e encerra o servidor. Se a porta estiver ocupada, avisa em vez de usar outro servidor. Não rode testes de rede em paralelo.
+O mesmo comando funciona no PowerShell, Bash e terminal do macOS. Ele inicia o servidor em `http://127.0.0.1:8766/treino-app/`, executa os 18 roteiros em sequência e encerra o servidor. Se a porta estiver ocupada, avisa em vez de usar outro servidor. Não rode testes de rede em paralelo.
 
 Para um roteiro isolado: abra um terminal com `node testes/servidor.js`; em outro, rode por exemplo `node testes/teste-nuvem.js`. Encerre o servidor com Ctrl+C.
 
@@ -32,8 +32,9 @@ Os prints ficam em `testes/prints/`, criada pelos próprios roteiros e ignorada 
 
 | Roteiro | O que testa |
 | --- | --- |
-| `teste-aquecimento.js` | Peso/repetições e descanso de aquecimento, persistência, sessão só com aquecimento, exclusão do volume de trabalho, backup e reabertura |
-| `teste-rotina.js` | Importação local idempotente com dados fictícios, preservação do treino e da cópia anterior, compras/estoque por base, vitamina sem duplicação, medidas sem data, custo proteico, backup e escape de texto |
+| `teste-aquecimento.js` | Duas linhas iniciais na lista de séries, adicionar/remover, editar peso/repetições, descanso, persistência, exclusão do volume de trabalho, backup e reabertura |
+| `teste-treino-bordas.js` | Séries realizadas fora do plano curto, ajuste e cancelamento de descanso e edição de cargas de aquecimento de backups anteriores |
+| `teste-rotina.js` | Importação local, compras limitadas à semana exibida, virada do dia, medições acima do limite preservadas, backup e escape de texto |
 | `teste-audio.js` | Contagem silenciosa por padrão, opção de apito e liberação do áudio; ciclo de vida do vídeo com player simulado e validação de origem/remetente. Não reproduz o controle de fone do iOS. |
 | `teste-feedback.js` | Respostas opcionais por exercício, persistência/reabertura, plano e modo da sessão, validação dos novos campos e compatibilidade do backup |
 | `teste-progresso.js` | Frequência registrada, comparação entre sessões, dados insuficientes, bloqueios por desconforto/esforço/execução e critérios de progressão sem aumentar carga automaticamente |
@@ -41,10 +42,11 @@ Os prints ficam em `testes/prints/`, criada pelos próprios roteiros e ignorada 
 | `teste-correcoes.js` | Correções da revisão de 28/09/2026: aquecimento no primeiro toque, séries do mesmo exercício em dois treinos, editar e trocar de aba, versão curta (progresso e número do card), "Minimizar todos" que não passa para o próximo treino, treino marcado à mão num dia da ficha 1, aviso de falha ao salvar, vídeo em todos os exercícios, ícones no tamanho certo, remada com halteres no lugar da remada na máquina (com o histórico antigo preservado), um treino por dia (aba concluída, outras travadas, reabrir, descartar sem perder, calendário sem segundo registro, desfazer marcação), tema claro |
 | `teste-serie.js` | Série marcada vira linha, editar, desmarcar, descanso que some, prancha pelo cronômetro |
 | `teste-peso.js` | Peso digitado na série 1 vai para as outras; série trocada na mão não muda |
-| `teste-mini.js` | Aquecimento inicial termina com 2 itens, antes das séries de trabalho, e continua concluído ao reabrir; card minimiza na última série; abrir, minimizar, corrigindo um número, trocar de aba, finalizar |
+| `teste-mini.js` | Cardio marcado fica minimizado e persiste ao recarregar; card de exercício minimiza na última série; abrir, minimizar, corrigir um número, trocar de aba, finalizar |
 | `teste-todos.js` | Minimizar todos, abrir um, próximo abre sozinho, repetições que seguem a série 1 |
 | `teste-revisao.js` | Treino esquecido aberto, relógio com horas, finalizar sem séries, resumo sem "0 kg" |
 | `teste-nuvem.js` | Backup automático no GitHub com a API **simulada**, incluindo configuração pela interface num celular novo, sem sobrescrever o backup, app fechado no meio do envio e chave nova depois de uma vencida (não usa token real) |
+| `teste-nuvem-conflito.js` | Dois aparelhos, backup divergente, troca de chave/repositório, conflito entre leitura e gravação, cópia de recuperação obrigatória antes de substituir |
 | `teste-armazenamento.js` | Falha ao gravar, aviso persistente, exportação dos dados em memória e recuperação do salvamento |
 | `teste-geral.js` | Cache offline, página que não é do app fora do cache, site que mudou de endereço, lembrete de backup, fluxo do treino, virada do dia, tema claro com o iPhone no modo escuro |
 | `teste-sinal-fraco.js` | Servidor demora 15 s: o app abre pela cópia guardada em ~3 s; com sinal bom, na hora |

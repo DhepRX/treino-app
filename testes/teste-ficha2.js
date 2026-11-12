@@ -20,7 +20,7 @@ const D26 = { id: 'd26', wid: 'D', start: H(17), end: H(18), sets: {
   await p.evaluate(d => { const st = JSON.parse(localStorage.getItem('treino-renan-v1')); st.hist.push(d); localStorage.setItem('treino-renan-v1', JSON.stringify(st)); }, D26);
   await p.reload();
   const st = () => p.evaluate(() => JSON.parse(localStorage.getItem('treino-renan-v1')));
-  const cards = () => p.$$eval('#workout .card.ex', cs => cs.map(c => c.id.slice(3) + ':' + c.querySelectorAll('.setrow:not(.head)').length).join(' '));
+  const cards = () => p.$$eval('#workout .card.ex', cs => cs.map(c => c.id.slice(3) + ':' + c.querySelectorAll('.setrow[data-ex]').length).join(' '));
   const sugestao = async id => { const v = await p.inputValue(`.setrow[data-ex="${id}"][data-i="0"] [data-f="kg"]`).catch(() => '—'); return v; };
 
   // 1. Próximo treino depois do D de 26/09.
@@ -38,14 +38,12 @@ const D26 = { id: 'd26', wid: 'D', start: H(17), end: H(18), sets: {
   console.log('2. aviso:', await p.textContent('.aviso-treino'));
   console.log('   séries por exercício (A):', await cards());
   console.log('   segurança:', (await p.textContent('.seguranca')).slice(0, 60) + '…');
-  console.log('   aquecimento:', (await p.$$eval('.card.warm li span', s => s.map(x => x.textContent))).join(' / '));
-  // Só cardio e primeiro exercício ficam no checklist inicial; os demais se preparam no próprio card.
-  assert.equal(await p.locator('.card.warm [data-warm]').count(), 2);
-  assert.equal(await p.locator('[data-warm="2"]').count(), 0);
-  assert.match(await p.textContent('#ex-a1 .aquece'), /2 a 3 séries leves/);
-  assert.match(await p.textContent('#ex-b1 .aquece'), /neste exercício.*não conta nas séries previstas/);
-  assert.equal(await p.locator('#workout .card.ex .aquece').count(), await p.locator('#workout .card.ex').count());
-  console.log('   aquecimento inicial com 2 itens; preparação junto de cada exercício');
+  assert.equal(await p.locator('.card.warm [data-warm]').count(), 1);
+  assert.match(await p.textContent('.card.warm'), /caminhada ou bike/);
+  assert.equal(await p.locator('#ex-a1 .sets [data-aquec-linha]').count(), 2);
+  assert.equal(await p.locator('#ex-b1 [data-aquec-linha]').count(), 0);
+  assert.doesNotMatch(await p.textContent('#workout'), /2 a 3 séries leves|série leve de preparação/);
+  console.log('   lembrete de cardio e duas linhas de aquecimento no primeiro exercício');
   await p.screenshot({ path: __dirname + '/prints/ficha2-A.png' });
 
   // 3. Sugestões: extensora 90 kg (C 25/09) e supino inclinado 18 kg (D 26/09).

@@ -14,12 +14,12 @@ const URL_APP = 'http://127.0.0.1:8766/treino-app/';
   const mini = s => p.evaluate(s => { const r = document.querySelector(s); return r ? r.classList.contains('mini') : null; }, s);
   const salvo = () => p.evaluate(() => JSON.parse(localStorage.getItem('treino-renan-v1')));
 
-  // 1. Aquecimento: o toque que começa o treino deixa o botão marcado na tela nova.
+  // 1. Cardio: o toque que começa o treino deixa o botão marcado na tela nova.
   await p.click('[data-tab="B"]');
   await p.click('[data-warm="0"]');
   assert.equal(await p.getAttribute('[data-warm="0"]', 'aria-pressed'), 'true');
   assert.equal((await salvo()).cur.warm['0'], true);
-  console.log('1. aquecimento marcado no primeiro toque:', await p.getAttribute('[data-warm="0"]', 'aria-pressed'));
+  console.log('1. cardio marcado no primeiro toque:', await p.getAttribute('[data-warm="0"]', 'aria-pressed'));
 
   // 2. O mesmo exercício em dois treinos (cadeira flexora no B e no D): as séries do B não aparecem no D.
   await p.fill(row('c4', 0) + ' [data-f="kg"]', '40');
@@ -53,9 +53,9 @@ const URL_APP = 'http://127.0.0.1:8766/treino-app/';
   await p.click('#dockBtns [data-rest="skip"]');
   await p.click('[data-curta="ligar"]');
   assert.match(await p.textContent('#progresso'), /1 de 8 séries feitas/);
-  // A preparação dos próximos exercícios fica nos cards, sem prender o checklist inicial.
-  assert.equal(await p.locator('.card.warm [data-warm]').count(), 2);
-  assert.match(await p.textContent('#ex-c4 .aquece'), /neste exercício.*não conta nas séries previstas/);
+  assert.equal(await p.locator('.card.warm .mt small').textContent(), 'Feito');
+  assert.equal(await p.locator('#ex-c1 .sets [data-aquec-linha]').count(), 2);
+  assert.equal(await p.locator('#ex-c4 [data-aquec-adicionar]').isEnabled(), true);
   await p.click('[data-curta="tronco"]');
   assert.equal(await p.textContent('#ex-e4 .num'), '5');
   await p.click('#ex-e4 [data-fechar="e4"]');

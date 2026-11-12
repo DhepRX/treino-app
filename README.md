@@ -54,7 +54,7 @@ A ficha tira carga direta da coluna (sem afundo com carga, abdominal com carga n
 - **Um treino por dia:** depois de salvar, o treino fica concluído e os outros travam até o dia seguinte. Finalizou sem querer? "Reabrir o treino" volta com as séries marcadas.
 - **Versão curta** (uso ocasional, cerca de 30 a 40 minutos): só os 4 primeiros exercícios, com 2 séries, quando faltar tempo ou disposição. No B e no D dá para incluir o exercício de tronco; depois continue a sequência A → B → C → D.
 - **Segurança:** pare se aparecer dor que desce pela perna, formigamento, dormência ou perda de força, e procure avaliação. Se o joelho doer mais no dia seguinte, inchar ou travar, diminua amplitude ou carga.
-- **Aquecimento com registro:** adicione uma série de aquecimento no próprio exercício para anotar peso, repetições e descanso. Marcar a série inicia o cronômetro. Esses registros ficam no histórico e no backup, separados das séries de trabalho e da análise de progressão.
+- **Aquecimento com registro:** A1 e A2 aparecem antes das séries do primeiro exercício. Use **+ Adicionar aquecimento** para acrescentar mais ou aquecer em outro exercício. Digite a carga e as repetições e toque no ✓ para iniciar o descanso. Em **Ajustes**, dá para mudar os segundos ou remover a linha. O aquecimento fica no histórico e no backup, sem contar na progressão.
 - **Encerramento:** antes de finalizar, é possível identificar a sessão como concluída, reduzida ou interrompida e escolher continuar a fila ou repetir a sessão na próxima ida. O app sempre conserva apenas as séries realmente feitas; uma sessão só com aquecimento não avança a fila.
 - Os treinos antigos (ficha 1: A Empurrar, B Puxar, C Pernas e abdômen, D Superior) continuam no calendário com os nomes da época.
 
@@ -80,7 +80,7 @@ O arquivo de backup agora inclui também a rotina importada, suas marcações e 
 - **Restaurar backup** junta os treinos do arquivo com os do celular, sem apagar nada. Também recupera o treino em andamento, com suas séries e o aquecimento marcado, se não houver outro aberto neste celular e ele ainda não tiver sido finalizado. Arquivos que não são backups do app são recusados.
 - **Backup automático no GitHub** (recomendado): em **Backup dos treinos > Backup automático no GitHub > Configurar backup automático**, siga os 3 passos uma vez.
   Depois disso, cada treino finalizado (e cada registro feito ou apagado no calendário) vai sozinho para o `backup.json` do repositório privado `treino-dados`.
-  Sem internet, o app envia quando o sinal voltar. Em outro celular, configure com a mesma chave: o histórico existente e um treino em andamento no backup são recuperados antes de habilitar novos envios, seguindo as mesmas regras da restauração por arquivo. A configuração preserva o arquivo remoto; o próximo treino finalizado envia o histórico reunido. **Restaurar do GitHub** continua disponível para repetir a recuperação.
+  Sem internet, o app envia quando o sinal voltar. Em outro celular, configure com a mesma chave para recuperar um backup compatível. Se o backup do GitHub mudar em outro aparelho, o envio pausa para preservar as duas cópias. **Baixar cópia do GitHub** salva a versão online; **Restaurar do GitHub** acrescenta registros ausentes. Se você escolher **Substituir backup do GitHub**, a versão online anterior fica guardada neste aparelho e pode ser exportada.
   O GitHub guarda cada versão no histórico do repositório. Quando a chave vencer, o app avisa; crie outra e cole em **Configurar**.
   O app só confirma a ativação depois de guardar a configuração neste aparelho. Se essa gravação falhar, mantém a configuração anterior e avisa. Ao desligar, também só confirma que apagou a chave depois de salvar essa mudança.
 - Este app e o app de dentro do Claude são separados: o que você marca em um não aparece no outro.
@@ -90,7 +90,7 @@ Se o aparelho não conseguir salvar, aparece um aviso com **Salvar backup agora*
 
 ## 5. Bom saber
 
-- **Aquecimento inicial:** marque só o cardio e as séries leves do primeiro exercício. Ao concluir esses dois itens, o aquecimento fica feito. A preparação dos outros exercícios aparece no próprio card, para fazer quando chegar a ele e conforme necessário. Ela não substitui as séries do treino.
+- **Cardio leve:** o lembrete de caminhada ou bike fica acima dos exercícios e é opcional.
 - Digite o peso e as repetições só na série 1: as séries seguintes do exercício já vêm com eles.
 - **Minimizar todos** fecha todos os exercícios numa linha cada, com quantas séries faltam (ex.: "0 de 3 séries · 3 × 8–12 · 18 kg"). Abra só o que vai fazer; quando terminar, o próximo abre sozinho. Cada exercício também tem seu botão **Minimizar**.
 - Ao marcar uma série, ela vira uma linha (ex.: "18 kg × 8"). Toque em **editar** para corrigir, ou no ✓ para desmarcar.

@@ -128,8 +128,6 @@ h1{font-size:1.75rem;font-weight:800;font-stretch:78%;margin:8px 0 2px;line-heig
 .target{margin:10px 0 0;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}
 .target strong{font-size:1.15rem;font-weight:800;font-stretch:85%}
 .target span{color:var(--muted);font-size:.92rem}
-.aquece{margin:8px 0 0;display:flex;align-items:flex-start;gap:6px;padding:6px 10px;border-radius:10px;background:var(--soft);font-size:.88rem;font-weight:600;line-height:1.35}
-.aquece svg{flex:none;width:15px;height:15px;margin-top:1px;color:var(--mk)}
 .pair{margin:8px 0 0;font-size:.9rem;background:var(--soft);border-radius:8px;padding:6px 10px}
 .last{margin:6px 0 0;font-size:.92rem;color:var(--muted)}
 .up{display:inline-block;margin-top:6px;background:var(--tag);color:var(--tag-ink);font-weight:800;border-radius:6px;padding:3px 8px;font-size:.9rem}
@@ -139,17 +137,24 @@ h1{font-size:1.75rem;font-weight:800;font-stretch:78%;margin:8px 0 2px;line-heig
 .feedback label{display:grid;gap:4px;margin:10px 0;font-size:.9rem;font-weight:650}
 .feedback select{width:100%;min-height:44px;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px}
 .feedback select:disabled{opacity:.55}
-.serie-notas input,.serie-notas textarea,.aquecimento input{width:100%;min-height:44px;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px}
-.serie-notas fieldset,.aquecimento fieldset{min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px;margin:10px 0}
+.serie-notas input,.serie-notas textarea,.aquec-ajustes input{width:100%;min-height:44px;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px}
+.serie-notas fieldset{min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px;margin:10px 0}
 .serie-notas{margin-top:12px;border-top:1px solid var(--line);padding-top:4px}
 .serie-notas summary{min-height:44px;cursor:pointer;font-weight:700;padding:10px 0}
 .serie-notas label{display:grid;gap:4px;margin:10px 0;font-size:.9rem;font-weight:650}
 .serie-notas select{width:100%;min-height:44px;font:inherit;font-size:16px;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px}
-.serie-notas legend,.aquecimento legend{font-size:.9rem;font-weight:700}
-.aquecimento{margin:14px 0;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
-.aquecimento h4{margin:0 0 8px}.aquecimento p{font-size:.86rem;color:var(--muted);margin:6px 0 10px}
-.aquec-campos{display:grid;grid-template-columns:1fr 1fr;gap:8px}.aquec-campos label{display:grid;gap:4px;font-size:.86rem}
-.aquec-botoes{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.aquec-botoes .btn{min-height:44px}.aquecimento .restbtn{margin-top:8px;width:100%}
+.serie-notas legend{font-size:.9rem;font-weight:700}
+.setrow.aquec-linha .sn{background:var(--soft);color:var(--ink);border-radius:6px;padding:4px 0}
+.aquec-controles{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:0 6px}
+.aquec-controles .restbtn{min-height:44px;min-width:0}
+.aquec-ajustes{grid-column:2;font-size:.85rem}
+.aquec-ajustes[open]{grid-column:1/-1}
+.aquec-ajustes summary{min-height:44px;padding:12px 6px;color:var(--muted);font-weight:700;cursor:pointer}
+.aquec-config{display:flex;flex-wrap:wrap;align-items:end;gap:8px;padding:0 6px 8px}
+.aquec-config label{display:grid;gap:4px;min-width:0}
+.aquec-config input{max-width:8rem}
+.aquec-config .btn{min-height:44px}
+.aquec-adicionar{justify-self:start;margin-bottom:4px;min-height:44px;font-size:.9rem}
 
 .sets{margin-top:10px;display:grid;gap:6px}
 .setrow{display:grid;grid-template-columns:2.2rem 1fr 1fr 48px;gap:8px;align-items:center}
@@ -157,7 +162,7 @@ h1{font-size:1.75rem;font-weight:800;font-stretch:78%;margin:8px 0 2px;line-heig
 .setrow.sp{grid-template-columns:2.2rem 1fr 48px}
 .setrow.head{font-size:.8rem;color:var(--muted);font-weight:600}
 .sn{font-weight:800;text-align:center;color:var(--muted)}
-.setrow input{width:100%;min-height:44px;border:1px solid var(--line);border-radius:9px;background:var(--bg);padding:0 10px;font-size:1.05rem;font-variant-numeric:tabular-nums;text-align:center}
+.setrow input{width:100%;min-width:0;min-height:44px;border:1px solid var(--line);border-radius:9px;background:var(--bg);padding:0 10px;font-size:1.05rem;font-variant-numeric:tabular-nums;text-align:center}
 .setrow input:disabled{opacity:.55}
 .done{width:48px;height:44px;border-radius:10px;border:1.5px solid var(--line);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted)}
 .done svg{width:22px;height:22px}
@@ -394,6 +399,12 @@ details.how .lbl{font-weight:700}
       <h3>Backup automático no GitHub</h3>
       <p class="nvstatus" id="nvStatus"></p>
       <div class="bkrow"><button type="button" class="btn" id="nvRestaurar" hidden>Restaurar do GitHub</button></div>
+      <div id="nvConflito" hidden>
+        <p>O backup do GitHub é diferente do que este aparelho conhecia. O envio automático está pausado. Baixe a cópia online e confira seus registros. Restaurar acrescenta registros ausentes, mas mantém as versões que já estão neste aparelho.</p>
+        <div class="bkrow"><button type="button" class="btn" id="nvBaixarRemoto">Baixar cópia do GitHub</button><button type="button" class="btn quiet" id="nvSubstituir">Substituir backup do GitHub</button></div>
+        <p>Substituir usa os dados deste aparelho e exige dois toques. Antes, o app guarda a cópia online anterior neste aparelho para recuperação.</p>
+      </div>
+      <div class="bkrow"><button type="button" class="btn quiet" id="nvCopiaAnterior" hidden>Salvar cópia online anterior</button></div>
       <details class="how" id="nvConfig">
         <summary>Configurar backup automático</summary>
         <ol>
@@ -610,7 +621,8 @@ details.how .lbl{font-weight:700}
   const parDe = e => e.par ? treinoDe(e.f, e.w).porEx[e.par] : null;
   const LS = 'treino-renan-v1';
   const MAX_HIST = 1200, KEEP_DETAIL = 60;
-  const WARM_KEYS = ['0', '1']; // cardio e preparação do primeiro exercício
+  const CARDIO = '0'; // As chaves antigas 1 e 2 continuam aceitas nos backups.
+  const DESCANSO_AQUECIMENTO = 60, MAX_AQUECIMENTOS = 6;
   const pad2 = n => String(n).padStart(2, '0');
   const ymd = d => d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
   const dm = d => pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1);
@@ -671,9 +683,9 @@ details.how .lbl{font-weight:700}
     if (source.aquecimento && typeof source.aquecimento === 'object' && !Array.isArray(source.aquecimento)) {
       for (const [id, series] of Object.entries(source.aquecimento)) {
         if (!CONHECIDOS.has(id) || !Array.isArray(series)) continue;
-        aquecimento[id] = series.slice(0, 6).filter(s => s && typeof s === 'object' && !Array.isArray(s)).map(s => ({
+        aquecimento[id] = series.slice(0, MAX_AQUECIMENTOS).filter(s => s && typeof s === 'object' && !Array.isArray(s)).map(s => ({
           kg:num(s.kg), reps:num(s.reps), done:s.done === true,
-          rest:Number.isFinite(Number(s.rest)) && Number(s.rest) >= 0 && Number(s.rest) <= 900 ? Math.round(Number(s.rest)) : 60,
+          rest:s.rest !== null && s.rest !== '' && Number.isFinite(Number(s.rest)) && Number(s.rest) >= 0 && Number(s.rest) <= 900 ? Math.round(Number(s.rest)) : DESCANSO_AQUECIMENTO,
         }));
       }
     }
@@ -686,7 +698,8 @@ details.how .lbl{font-weight:700}
     if (['halter','total','maquina','desconhecida'].includes(source.unidade)) target.unidade = source.unidade;
     return target;
   }
-  const temAquecimento = c => Object.values(c.aquecimento || {}).some(series => series.some(s => s && (s.done || s.kg !== null || s.reps !== null)));
+  const aquecimentoRegistrado = s => !!s && (s.done || s.kg != null || s.reps != null);
+  const temAquecimento = c => Object.values(c.aquecimento || {}).some(series => series.some(aquecimentoRegistrado));
   function sanitize(d){
     const out = { v:1, cur:null, hist:[], upd:Number(d && d.upd) || 0 };
     const rotina = cleanRotina(d && d.rotina);
@@ -741,9 +754,10 @@ details.how .lbl{font-weight:700}
   }
   function rtTime(v){ return typeof v === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(v) ? v : ''; }
   function rtStamp(v){ return typeof v === 'number' && Number.isFinite(v) && v >= 0 ? v : 0; }
-  function rtArray(v, max, clean){
+  function rtArray(v, clean){
     const out = [], ids = new Set();
-    for (const x of (Array.isArray(v) ? v : []).slice(0, max)) {
+    // Ler/restaurar nunca corta registros válidos. Limites são verificados antes de acrescentar.
+    for (const x of (Array.isArray(v) ? v : [])) {
       if (!x || typeof x !== 'object' || Array.isArray(x)) continue;
       const item = clean(x); if (!item || (item.id && ids.has(item.id))) continue;
       if (item.id) ids.add(item.id); out.push(item);
@@ -754,26 +768,26 @@ details.how .lbl{font-weight:700}
     if (!v || typeof v !== 'object' || Array.isArray(v) || v.v !== 1) return null;
     const basic = x => ({ id:rtId(x.id), fonte:rtId(x.fonte), nota:rtText(x.nota), status:rtText(x.status, 120) });
     const out = { v:1, atualizado:rtStamp(v.atualizado) };
-    out.fontes = rtArray(v.fontes, 80, x => rtId(x.id) ? { id:rtId(x.id), titulo:rtText(x.titulo, 160), data:rtDate(x.data), nota:rtText(x.nota) } : null);
-    out.referencias = rtArray(v.referencias, 60, x => rtId(x.id) ? Object.assign(basic(x), { titulo:rtText(x.titulo, 160), valor:rtNum(x.valor), unidade:rtText(x.unidade, 40) }) : null);
-    out.refeicoes = rtArray(v.refeicoes, 160, x => {
+    out.fontes = rtArray(v.fontes, x => rtId(x.id) ? { id:rtId(x.id), titulo:rtText(x.titulo, 160), data:rtDate(x.data), nota:rtText(x.nota) } : null);
+    out.referencias = rtArray(v.referencias, x => rtId(x.id) ? Object.assign(basic(x), { titulo:rtText(x.titulo, 160), valor:rtNum(x.valor), unidade:rtText(x.unidade, 40) }) : null);
+    out.refeicoes = rtArray(v.refeicoes, x => {
       if (!rtId(x.id) || !Number.isInteger(x.dia) || x.dia < 0 || x.dia > 6 || !['treino','descanso','ambos'].includes(x.tipo)) return null;
       return { id:rtId(x.id), dia:x.dia, tipo:x.tipo, titulo:rtText(x.titulo, 160), horario:rtTime(x.horario),
-        itens:rtArray(x.itens, 40, z => rtId(z.id) && ['g','ml','un'].includes(z.unidade) ? Object.assign(basic(z), { nome:rtText(z.nome, 160), quantidade:rtNum(z.quantidade), unidade:z.unidade, base:['cru','pronto','comestivel','nao-informado'].includes(z.base) ? z.base : 'nao-informado' }) : null),
+        itens:rtArray(x.itens, z => rtId(z.id) && ['g','ml','un'].includes(z.unidade) ? Object.assign(basic(z), { nome:rtText(z.nome, 160), quantidade:rtNum(z.quantidade), unidade:z.unidade, base:['cru','pronto','comestivel','nao-informado'].includes(z.base) ? z.base : 'nao-informado' }) : null),
         preparo:rtText(x.preparo, 3000), nota:rtText(x.nota, 2000), fonte:rtId(x.fonte) };
     });
-    out.medidas = rtArray(v.medidas, 1000, x => rtId(x.id) ? { id:rtId(x.id), data:rtDate(x.data), horario:rtText(x.horario, 60), metodo:rtText(x.metodo, 200), condicoes:rtText(x.condicoes, 600), nota:rtText(x.nota, 1500), fonte:rtId(x.fonte), valores:rtArray(x.valores, 30, z => rtText(z.nome, 100) ? { nome:rtText(z.nome, 100), valor:rtNum(z.valor), unidade:rtText(z.unidade, 40) } : null) } : null);
-    out.precos = rtArray(v.precos, 300, x => rtId(x.id) ? { id:rtId(x.id), nome:rtText(x.nome, 160), preco:rtNum(x.preco), peso:rtNum(x.peso), porcao:rtNum(x.porcao), proteina:rtNum(x.proteina), frete:rtNum(x.frete), data:rtDate(x.data), unidade:['g','lata'].includes(x.unidade) ? x.unidade : 'g', base:rtText(x.base, 120), nota:rtText(x.nota), status:rtText(x.status, 120) } : null);
-    out.pendencias = rtArray(v.pendencias, 100, x => rtId(x.id) ? { id:rtId(x.id), texto:rtText(x.texto, 1000), resolvida:x.resolvida === true, nota:rtText(x.nota), atualizado:rtStamp(x.atualizado) } : null);
-    out.orientacoes = rtArray(v.orientacoes, 150, x => rtId(x.id) ? Object.assign(basic(x), { titulo:rtText(x.titulo, 160), texto:rtText(x.texto, 5000), data:rtDate(x.data) }) : null);
-    out.marcacoes = rtArray(v.marcacoes, 6000, x => rtId(x.id) && rtId(x.refeicaoId) && rtDate(x.dia) ? { id:rtId(x.id), refeicaoId:rtId(x.refeicaoId), dia:rtDate(x.dia), feito:x.feito === true, atualizado:rtStamp(x.atualizado) } : null);
-    out.sintomas = rtArray(v.sintomas, 1000, x => rtId(x.id) && rtDate(x.data) ? { id:rtId(x.id), data:rtDate(x.data), quando:rtText(x.quando, 80), texto:rtText(x.texto, 1500), atualizado:rtStamp(x.atualizado) } : null);
-    out.estoque = rtArray(v.estoque, 300, x => rtId(x.id) ? { id:rtId(x.id), quantidade:rtNum(x.quantidade) } : null);
-    out.preparo = rtArray(v.preparo, 100, x => rtId(x.id) ? { id:rtId(x.id), feito:x.feito === true } : null);
+    out.medidas = rtArray(v.medidas, x => rtId(x.id) ? { id:rtId(x.id), data:rtDate(x.data), horario:rtText(x.horario, 60), metodo:rtText(x.metodo, 200), condicoes:rtText(x.condicoes, 600), nota:rtText(x.nota, 1500), fonte:rtId(x.fonte), valores:rtArray(x.valores, z => rtText(z.nome, 100) ? { nome:rtText(z.nome, 100), valor:rtNum(z.valor), unidade:rtText(z.unidade, 40) } : null) } : null);
+    out.precos = rtArray(v.precos, x => rtId(x.id) ? { id:rtId(x.id), nome:rtText(x.nome, 160), preco:rtNum(x.preco), peso:rtNum(x.peso), porcao:rtNum(x.porcao), proteina:rtNum(x.proteina), frete:rtNum(x.frete), data:rtDate(x.data), unidade:['g','lata'].includes(x.unidade) ? x.unidade : 'g', base:rtText(x.base, 120), nota:rtText(x.nota), status:rtText(x.status, 120) } : null);
+    out.pendencias = rtArray(v.pendencias, x => rtId(x.id) ? { id:rtId(x.id), texto:rtText(x.texto, 1000), resolvida:x.resolvida === true, nota:rtText(x.nota), atualizado:rtStamp(x.atualizado) } : null);
+    out.orientacoes = rtArray(v.orientacoes, x => rtId(x.id) ? Object.assign(basic(x), { titulo:rtText(x.titulo, 160), texto:rtText(x.texto, 5000), data:rtDate(x.data) }) : null);
+    out.marcacoes = rtArray(v.marcacoes, x => rtId(x.id) && rtId(x.refeicaoId) && rtDate(x.dia) ? { id:rtId(x.id), refeicaoId:rtId(x.refeicaoId), dia:rtDate(x.dia), feito:x.feito === true, atualizado:rtStamp(x.atualizado) } : null);
+    out.sintomas = rtArray(v.sintomas, x => rtId(x.id) && rtDate(x.data) ? { id:rtId(x.id), data:rtDate(x.data), quando:rtText(x.quando, 80), texto:rtText(x.texto, 1500), atualizado:rtStamp(x.atualizado) } : null);
+    out.estoque = rtArray(v.estoque, x => rtId(x.id) ? { id:rtId(x.id), quantidade:rtNum(x.quantidade) } : null);
+    out.preparo = rtArray(v.preparo, x => rtId(x.id) ? { id:rtId(x.id), feito:x.feito === true } : null);
     const p = v.preferencias && typeof v.preferencias === 'object' ? v.preferencias : {};
     out.preferencias = {
-      tipos:rtArray(p.tipos, 500, x => rtDate(x.dia) && ['treino','descanso'].includes(x.tipo) ? { id:rtDate(x.dia), dia:rtDate(x.dia), tipo:x.tipo } : null),
-      comprasDatas:(Array.isArray(p.comprasDatas) ? [...new Set(p.comprasDatas.map(rtDate).filter(Boolean))] : []).slice(0, 31)
+      tipos:rtArray(p.tipos, x => rtDate(x.dia) && ['treino','descanso'].includes(x.tipo) ? { id:rtDate(x.dia), dia:rtDate(x.dia), tipo:x.tipo } : null),
+      comprasDatas:Array.isArray(p.comprasDatas) ? [...new Set(p.comprasDatas.map(rtDate).filter(Boolean))] : []
     };
     return out;
   }
@@ -789,7 +803,13 @@ details.how .lbl{font-weight:700}
     return cleanRotina(out);
   }
   function rtUI(){
-    return setupRotina._ui || (setupRotina._ui = { dia:ymd(new Date()), aba:'refeicoes', comprasInicio:ymd(new Date()), mensagem:'' });
+    return setupRotina._ui || (setupRotina._ui = { dia:ymd(new Date()), diaManual:false, aba:'refeicoes', comprasInicio:ymd(new Date()), comprasManual:false, mensagem:'' });
+  }
+  function rtViraDia(anterior, hoje){
+    const ui = setupRotina._ui;
+    if (!ui) return;
+    if (!ui.diaManual && ui.dia === anterior) ui.dia = hoje;
+    if (!ui.comprasManual && ui.comprasInicio === anterior) ui.comprasInicio = hoje;
   }
   function rtData(){ return state.rotina || null; }
   function rtSource(id){
@@ -797,15 +817,31 @@ details.how .lbl{font-weight:700}
     return f ? esc(f.titulo) + (f.data ? ' · ' + esc(f.data) : ' · data não informada') : 'Origem não informada';
   }
   function rtMsg(s){ rtUI().mensagem = s; if ($('rotinaMsg')) $('rotinaMsg').textContent = s; }
-  function rtSave(redesenhar = false){
-    state.rotina.atualizado = Date.now(); commit(); nuvemAgendar();
+  function rtLimite(anterior, proxima){
+    const listas = [
+      ['fontes',80,'fontes'],['referencias',60,'referências'],['refeicoes',160,'refeições'],
+      ['medidas',1000,'medições'],['precos',300,'cotações'],['pendencias',100,'pendências'],
+      ['orientacoes',150,'orientações'],['marcacoes',6000,'marcações'],['sintomas',1000,'relatos'],
+      ['estoque',300,'itens de estoque'],['preparo',100,'itens de preparo']
+    ].map(([key,max,nome]) => [anterior?.[key],proxima[key],max,nome]);
+    listas.push([anterior?.preferencias?.tipos,proxima.preferencias.tipos,500,'dias de rotina']);
+    for (const m of proxima.refeicoes) listas.push([anterior?.refeicoes?.find(x=>x.id===m.id)?.itens,m.itens,40,'itens em uma refeição']);
+    for (const m of proxima.medidas) listas.push([anterior?.medidas?.find(x=>x.id===m.id)?.valores,m.valores,30,'valores em uma medição']);
+    const excedida = listas.find(([antes,depois,max]) => depois.length > Math.max(max,antes?.length || 0));
+    return excedida ? 'Limite de ' + excedida[2] + ' ' + excedida[3] + ' atingido. Não acrescentei os novos registros. Os dados anteriores continuam disponíveis para exportação.' : '';
+  }
+  function rtSave(redesenhar, proxima){
+    const limite = rtLimite(state.rotina, proxima);
+    if (limite) { rtMsg(limite); return false; }
+    proxima.atualizado = Date.now(); state.rotina = proxima; commit(); nuvemAgendar();
     if (redesenhar) renderRotina();
+    return true;
   }
   function rtType(dia){ return rtData().preferencias.tipos.find(x => x.dia === dia)?.tipo || ''; }
   function rtSetType(dia, tipo){
-    const r = rtData(), xs = r.preferencias.tipos.filter(x => x.dia !== dia);
+    const r = cleanRotina(rtData()), xs = r.preferencias.tipos.filter(x => x.dia !== dia);
     if (['treino','descanso'].includes(tipo)) xs.push({ id:dia, dia, tipo });
-    r.preferencias.tipos = xs; rtSave(true);
+    r.preferencias.tipos = xs; if (!rtSave(true, r)) renderRotina();
   }
   function rtMeals(dia){
     const tipo = rtType(dia), dow = new Date(dia + 'T12:00:00').getDay();
@@ -813,9 +849,9 @@ details.how .lbl{font-weight:700}
   }
   function rtAmount(n, unit){ return n === null ? 'Quantidade a confirmar' : fmt(n) + ' ' + unit; }
   function rtBase(s){ return ({cru:'peso cru',pronto:'após preparo',comestivel:'parte comestível','nao-informado':'base a confirmar'})[s] || s; }
-  function rtDone(refeicaoId, dia){ return rtData().marcacoes.find(x => x.refeicaoId === refeicaoId && x.dia === dia)?.feito === true; }
-  function rtMark(refeicaoId, dia, feito){
-    const r = rtData(), id = dia + ':' + refeicaoId;
+  function rtDone(refeicaoId, dia, r = rtData()){ return r.marcacoes.find(x => x.refeicaoId === refeicaoId && x.dia === dia)?.feito === true; }
+  function rtMark(refeicaoId, dia, feito, r){
+    const id = dia + ':' + refeicaoId;
     r.marcacoes = r.marcacoes.filter(x => x.id !== id);
     r.marcacoes.push({ id, refeicaoId, dia, feito, atualizado:Date.now() });
   }
@@ -841,9 +877,14 @@ details.how .lbl{font-weight:700}
     if (r.referencias.length) html += '<details class="rt-section"><summary>Referências e limites</summary>' + r.referencias.map(x => '<p><b>' + esc(x.titulo) + ':</b> ' + (x.valor === null ? 'A confirmar' : esc(rtAmount(x.valor,x.unidade))) + (x.status ? ' · ' + esc(x.status) : '') + '<br><small>' + esc(x.nota) + '</small></p>').join('') + '</details>';
     return html;
   }
+  function rtShoppingDays(){
+    const inicio = new Date(rtUI().comprasInicio + 'T12:00:00');
+    return Array.from({length:7}, (_,i) => { const d = new Date(inicio); d.setDate(inicio.getDate()+i); return ymd(d); });
+  }
   function rtShopping(){
     const r = rtData(), rows = new Map(), incompletos = [];
-    for (const dia of r.preferencias.comprasDatas) {
+    const dias = rtShoppingDays().filter(dia => r.preferencias.comprasDatas.includes(dia));
+    for (const dia of dias) {
       if (!rtType(dia)) { incompletos.push(dia); continue; }
       for (const m of rtMeals(dia)) for (const item of m.itens) {
         const key = item.id + ':' + item.unidade + ':' + item.base;
@@ -856,7 +897,7 @@ details.how .lbl{font-weight:700}
       const estoque = r.estoque.find(z => z.id === x.id)?.quantidade ?? null;
       return Object.assign(x, { estoque, falta:x.total === null ? null : Math.max(0,x.total-(estoque ?? 0)) });
     }).sort((a,b) => a.nome.localeCompare(b.nome,'pt-BR'));
-    return { rows:out, incompletos };
+    return { rows:out, incompletos, dias };
   }
   function rtShoppingHTML(){
     const ui = rtUI(), r = rtData(), inicio = new Date(ui.comprasInicio + 'T12:00:00');
@@ -915,7 +956,7 @@ details.how .lbl{font-weight:700}
   }
   function rtShoppingText(){
     const r=rtShopping();
-    return 'Lista de compras · '+new Date().toLocaleDateString('pt-BR')+'\nDias: '+rtData().preferencias.comprasDatas.join(', ')+'\n\n'+r.rows.map(x=>x.nome+' — falta '+rtAmount(x.falta,x.unidade)+' ('+rtBase(x.base)+'); previsto '+rtAmount(x.total,x.unidade)+'; estoque '+rtAmount(x.estoque,x.unidade)+(x.desconhecido?' + quantidade pendente':'')).join('\n')+(r.incompletos.length?'\n\nDias não calculados (tipo a escolher): '+r.incompletos.join(', '):'')+'\n\nNão há conversão automática entre cru, pronto e drenado. Confira quantidades pendentes e a refrigeração/transporte dos perecíveis.';
+    return 'Lista de compras · '+new Date().toLocaleDateString('pt-BR')+'\nDias: '+r.dias.join(', ')+'\n\n'+r.rows.map(x=>x.nome+' — falta '+rtAmount(x.falta,x.unidade)+' ('+rtBase(x.base)+'); previsto '+rtAmount(x.total,x.unidade)+'; estoque '+rtAmount(x.estoque,x.unidade)+(x.desconhecido?' + quantidade pendente':'')).join('\n')+(r.incompletos.length?'\n\nDias não calculados (tipo a escolher): '+r.incompletos.join(', '):'')+'\n\nNão há conversão automática entre cru, pronto e drenado. Confira quantidades pendentes e a refrigeração/transporte dos perecíveis.';
   }
   async function importarRotina(file){
     try {
@@ -924,10 +965,12 @@ details.how .lbl{font-weight:700}
       if (parsed.tipo!=='contexto-rotina'||parsed.versao!==1) throw new Error('arquivo');
       const imported=cleanRotina(parsed.rotina);
       if (!imported || (!imported.refeicoes.length&&!imported.medidas.length&&!imported.orientacoes.length&&!imported.precos.length)) throw new Error('arquivo');
+      const proxima=mergeRotina(state.rotina,imported), limite=rtLimite(state.rotina,proxima);
+      if (limite) return rtMsg(limite);
       // Estado do app apenas; a chave do GitHub vive em outra entrada e não é copiada.
       try { localStorage.setItem('treino-renan-pre-contexto', JSON.stringify(state)); }
       catch { return rtMsg('Não consegui guardar a cópia anterior. Salve um backup completo e libere espaço antes de importar. Nada foi importado.'); }
-      state.rotina=mergeRotina(state.rotina,imported);rtSave(true);
+      rtSave(true,proxima);
       rtMsg(typeof falhaLocal !== 'undefined' && falhaLocal ? 'Contexto disponível nesta tela, mas não foi possível salvar no aparelho. Exporte o backup completo antes de fechar.' : 'Contexto importado. Ficha e treinos preservados. A cópia anterior está disponível para exportação.');
     } catch { rtMsg('Não reconheci esse contexto. Use um arquivo JSON de rotina versão 1; nenhum dado foi importado.'); }
   }
@@ -950,33 +993,34 @@ details.how .lbl{font-weight:700}
       }
     });
     view.addEventListener('change',ev=>{
-      const el=ev.target,r=rtData();if(!r)return;
-      if(el.id==='rtDia'){if(rtDate(el.value)){rtUI().dia=el.value;renderRotina();}return;}
-      if(el.id==='rtComprasInicio'){if(rtDate(el.value)){rtUI().comprasInicio=el.value;renderRotina();}return;}
+      const el=ev.target,r=cleanRotina(rtData());if(!r)return;
+      const salvar = (redesenhar = false) => { if (!rtSave(redesenhar,r)) renderRotina(); };
+      if(el.id==='rtDia'){if(rtDate(el.value)){rtUI().dia=el.value;rtUI().diaManual=el.value!==ymd(new Date());renderRotina();}return;}
+      if(el.id==='rtComprasInicio'){if(rtDate(el.value)){rtUI().comprasInicio=el.value;rtUI().comprasManual=el.value!==ymd(new Date());renderRotina();}return;}
       if(el.dataset.rtType){rtSetType(el.dataset.rtType,el.value);return;}
-      if(el.dataset.rtTime){const m=r.refeicoes.find(x=>x.id===el.dataset.rtTime);if(m){m.horario=rtTime(el.value);rtSave();}return;}
-      if(el.dataset.rtMeal){const m=r.refeicoes.find(x=>x.id===el.dataset.rtMeal);if(m){rtMark(m.id,rtUI().dia,el.checked);for(const x of m.itens)rtMark(m.id+':item:'+x.id,rtUI().dia,el.checked);rtSave(true);}return;}
-      if(el.dataset.rtItem){rtMark(el.dataset.rtItem,rtUI().dia,el.checked);const m=rtMeals(rtUI().dia).find(x=>el.dataset.rtItem.startsWith(x.id+':item:'));if(m)rtMark(m.id,rtUI().dia,m.itens.every(x=>rtDone(m.id+':item:'+x.id,rtUI().dia)));rtSave(true);return;}
-      if(el.dataset.rtShopDay){r.preferencias.comprasDatas=r.preferencias.comprasDatas.filter(x=>x!==el.dataset.rtShopDay);if(el.checked)r.preferencias.comprasDatas.push(el.dataset.rtShopDay);rtSave(true);return;}
-      if(el.dataset.rtStock){r.estoque=r.estoque.filter(x=>x.id!==el.dataset.rtStock);r.estoque.push({id:el.dataset.rtStock,quantidade:el.value.trim()===''?null:num(el.value)});rtSave(true);return;}
-      if(el.dataset.rtPending){const p=r.pendencias.find(x=>x.id===el.dataset.rtPending);if(p){p.resolvida=el.checked;p.atualizado=Date.now();rtSave();}return;}
-      if(el.dataset.rtPendingNote){const p=r.pendencias.find(x=>x.id===el.dataset.rtPendingNote);if(p){p.nota=rtText(el.value);p.atualizado=Date.now();rtSave();}return;}
+      if(el.dataset.rtTime){const m=r.refeicoes.find(x=>x.id===el.dataset.rtTime);if(m){m.horario=rtTime(el.value);salvar();}return;}
+      if(el.dataset.rtMeal){const m=r.refeicoes.find(x=>x.id===el.dataset.rtMeal);if(m){rtMark(m.id,rtUI().dia,el.checked,r);for(const x of m.itens)rtMark(m.id+':item:'+x.id,rtUI().dia,el.checked,r);salvar(true);}return;}
+      if(el.dataset.rtItem){rtMark(el.dataset.rtItem,rtUI().dia,el.checked,r);const m=rtMeals(rtUI().dia).find(x=>el.dataset.rtItem.startsWith(x.id+':item:'));if(m)rtMark(m.id,rtUI().dia,m.itens.every(x=>rtDone(m.id+':item:'+x.id,rtUI().dia,r)),r);salvar(true);return;}
+      if(el.dataset.rtShopDay){r.preferencias.comprasDatas=r.preferencias.comprasDatas.filter(x=>x!==el.dataset.rtShopDay);if(el.checked)r.preferencias.comprasDatas.push(el.dataset.rtShopDay);salvar(true);return;}
+      if(el.dataset.rtStock){r.estoque=r.estoque.filter(x=>x.id!==el.dataset.rtStock);r.estoque.push({id:el.dataset.rtStock,quantidade:el.value.trim()===''?null:num(el.value)});salvar(true);return;}
+      if(el.dataset.rtPending){const p=r.pendencias.find(x=>x.id===el.dataset.rtPending);if(p){p.resolvida=el.checked;p.atualizado=Date.now();salvar();}return;}
+      if(el.dataset.rtPendingNote){const p=r.pendencias.find(x=>x.id===el.dataset.rtPendingNote);if(p){p.nota=rtText(el.value);p.atualizado=Date.now();salvar();}return;}
     });
     view.addEventListener('submit',ev=>{
-      ev.preventDefault();const form=ev.target,r=rtData();if(!r)return;
+      ev.preventDefault();const form=ev.target,r=cleanRotina(rtData());if(!r)return;
       const value=k=>form.elements[k].value.trim(), id=prefix=>prefix+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);
       if(form.id==='rtPrecoForm'){
         const x={id:id('cotacao'),nome:rtText(value('nome'),160),preco:rtInputNumber(form,'preco'),frete:rtInputNumber(form,'frete'),peso:rtInputNumber(form,'peso'),porcao:rtInputNumber(form,'porcao'),proteina:rtInputNumber(form,'proteina'),data:rtDate(value('data')),unidade:value('unidade'),base:rtText(value('base'),120),nota:rtText(value('nota')),status:'Cotação informada no aparelho'};
         if(!x.nome||!x.data||rtCost(x)===null)return rtMsg('Confira preço, frete, embalagem, porção, proteína e data.');
-        r.precos.push(x);rtSave(true);rtMsg('Cotação salva com a data informada.');
+        r.precos.push(x);if(rtSave(true,r))rtMsg('Cotação salva com a data informada.');
       }else if(form.id==='rtMedidaForm'){
         const peso=rtInputNumber(form,'peso'),cintura=rtInputNumber(form,'cintura'),data=rtDate(value('data'));
         if(!data||(!peso&&!cintura))return rtMsg('Informe a data real e ao menos uma medida.');
         const valores=[];if(peso!==null)valores.push({nome:'Peso',valor:peso,unidade:'kg'});if(cintura!==null)valores.push({nome:'Cintura',valor:cintura,unidade:'cm'});
-        r.medidas.push({id:id('medida'),data,horario:rtTime(value('horario')),metodo:rtText(value('metodo'),200),condicoes:rtText(value('condicoes'),600),valores,nota:'Medição informada no aparelho',fonte:''});rtSave(true);rtMsg('Medida registrada com a data informada.');
+        r.medidas.push({id:id('medida'),data,horario:rtTime(value('horario')),metodo:rtText(value('metodo'),200),condicoes:rtText(value('condicoes'),600),valores,nota:'Medição informada no aparelho',fonte:''});if(rtSave(true,r))rtMsg('Medida registrada com a data informada.');
       }else if(form.id==='rtSintomaForm'){
         const data=rtDate(value('data')),texto=rtText(value('texto'),1500);if(!data||!texto)return rtMsg('Informe a data e o relato.');
-        r.sintomas.push({id:id('relato'),data,quando:rtText(value('quando'),80),texto,atualizado:Date.now()});rtSave(true);rtMsg('Relato salvo no seu histórico privado.');
+        r.sintomas.push({id:id('relato'),data,quando:rtText(value('quando'),80),texto,atualizado:Date.now()});if(rtSave(true,r))rtMsg('Relato salvo no seu histórico privado.');
       }
     });
   }
@@ -1212,7 +1256,8 @@ details.how .lbl{font-weight:700}
     const unidade = { halter:'cada halter', total:'carga total', maquina:'indicação da máquina', desconhecida:'unidade desconhecida' };
     const aquec = Object.entries(h.aquecimento || {}).map(([id, series]) => {
       const e = w && w.porEx[id] || X2[id];
-      return '<li>' + esc(e ? e.nome : id) + ': ' + series.map((s, i) => esc('aquecimento ' + (i + 1) + ' — ' + (s.kg === null ? 'carga não anotada' : fmt(s.kg) + ' kg') + ' × ' + (s.reps === null ? 'não anotado' : fmt(s.reps)) + (e && e.tempo ? ' s' : ' repetições') + '; descanso ' + s.rest + ' s; ' + (s.done ? 'feito' : 'não marcado como feito'))).join(' · ') + '</li>';
+      const itens = series.flatMap((s, i) => aquecimentoRegistrado(s) ? [esc('aquecimento ' + (i + 1) + ' — ' + (s.kg === null ? 'carga não anotada' : fmt(s.kg) + ' kg') + ' × ' + (s.reps === null ? 'não anotado' : fmt(s.reps)) + (e && e.tempo ? ' s' : ' repetições') + '; descanso ' + s.rest + ' s; ' + (s.done ? 'feito' : 'não marcado como feito'))] : []);
+      return itens.length ? '<li>' + esc(e ? e.nome : id) + ': ' + itens.join(' · ') + '</li>' : '';
     }).join('');
     const extraSeries = Object.entries(h.sets || {}).flatMap(([id, series]) => series.map((s, i) => {
       if (!s || (s.rir === undefined && !s.nota && !s.unidade)) return '';
@@ -1352,52 +1397,53 @@ details.how .lbl{font-weight:700}
     return c.sets[exId][i] || null;
   }
 
-  function restRowHTML(e, i, dis, feita){
+  function restRowHTML(e, i, dis, feita, aquec = null){
     const f = feita ? ' feita' : '';
-    if (e.par) return '<p class="restnote' + f + '" data-rn="' + e.id + ':' + i + '">Sem descanso: vai pro ' + esc(e.parCurto || parDe(e).nome.toLowerCase()) + '</p>';
-    return '<button type="button" class="restbtn' + f + '" data-rs="' + e.id + ':' + i + '"' + dis + '><span class="bar"></span>' + CLOCK + '<span class="rt">Descanso ' + mmssS(e.rest) + '</span></button>';
+    if (!aquec && e.par) return '<p class="restnote' + f + '" data-rn="' + e.id + ':' + i + '">Sem descanso: vai pro ' + esc(e.parCurto || parDe(e).nome.toLowerCase()) + '</p>';
+    const id = e.id + ':' + i, sec = aquec ? aquec.rest : e.rest;
+    const attrs = aquec ? ' data-aquec-rest="' + id + '" data-rest-seg="' + sec + '"' : '';
+    return '<button type="button" class="restbtn' + f + '" data-rs="' + (aquec ? 'aquec-' : '') + id + '"' + attrs + dis + '><span class="bar"></span>' + CLOCK + '<span class="rt">Descanso ' + mmssS(sec) + '</span></button>';
   }
 
   // Uma série. Feita, vira uma linha fina ("18 kg × 8"); "editar" abre os campos de novo.
-  function setRowHTML(e, i, sg, dis){
-    const cs = curSet(e.id, i), done = !!(cs && cs.done);
-    const attrs = '" data-ex="' + e.id + '" data-i="' + i + '"><span class="sn">' + (i + 1) + '</span>';
-    const btnDone = '<button type="button" class="done" data-done aria-pressed="' + done + '" aria-label="Série ' + (i + 1) + ' feita"' + dis + '>' + CHECK + '</button>';
-    if (done && !seriesAbertas.has(e.id + ':' + i)) {
-      const txt = e.tempo ? fmt(cs.reps || 0) + ' s' : (cs.kg !== null && cs.kg !== undefined ? fmt(cs.kg) + ' kg × ' : '') + fmt(cs.reps || 0);
+  function setRowHTML(e, i, sg, dis, aquec = null){
+    const cs = aquec || curSet(e.id, i), done = !!(cs && cs.done);
+    const id = e.id + ':' + i, n = i + 1;
+    const label = (aquec ? 'Aquecimento ' : 'Série ') + n;
+    const attrs = aquec
+      ? ' aquec-linha" data-aquec-linha="' + id + '"><span class="sn" title="' + label + '">A' + n + '</span>'
+      : '" data-ex="' + e.id + '" data-i="' + i + '"><span class="sn">' + n + '</span>';
+    const doneAttr = aquec ? 'data-aquec-feito="' + id + '"' : 'data-done';
+    const btnDone = '<button type="button" class="done" ' + doneAttr + ' aria-pressed="' + done + '" aria-label="' + label + (aquec ? ' feito' : ' feita') + '"' + dis + '>' + CHECK + '</button>';
+    if (done && !seriesAbertas.has((aquec ? 'aquec-' : '') + id)) {
+      const peso = cs.kg != null ? fmt(cs.kg) + ' kg' : '';
+      const reps = cs.reps != null ? fmt(cs.reps) + (e.tempo ? ' s' : '') : '';
+      const txt = aquec ? [peso, reps].filter(Boolean).join(' × ') || 'Feito' : e.tempo ? fmt(cs.reps || 0) + ' s' : (peso ? peso + ' × ' : '') + fmt(cs.reps || 0);
+      const editAttr = aquec ? 'data-aquec-editar="' + id + '"' : 'data-editar-serie';
       return '<div class="setrow mini ok' + attrs +
-        '<button type="button" class="setmini" data-editar-serie aria-label="Série ' + (i + 1) + ': ' + esc(txt) + '. Editar"' + dis + '><span>' + esc(txt) + '</span><small>editar</small></button>' + btnDone + '</div>';
+        '<button type="button" class="setmini" ' + editAttr + ' aria-label="' + label + ': ' + esc(txt) + '. Editar"' + dis + '><span>' + esc(txt) + '</span><small>editar</small></button>' + btnDone + '</div>';
     }
+    const campo = (key, modo, placeholder, value, nome) => '<input ' +
+      (aquec ? 'id="aquec-' + e.id + '-' + i + '-' + key + '" data-aquec-campo="' + key + '" data-aquec-ex="' + e.id + '" data-aquec-i="' + i + '"' : 'data-f="' + key + '"') +
+      ' inputmode="' + modo + '" placeholder="' + placeholder + '" value="' + value + '" aria-label="' + label + ', ' + nome + '"' + dis + '>';
+    const repsVal = fmt(cs && cs.reps);
     if (e.tempo) {
-      const secs = cs && cs.reps !== null && cs.reps !== undefined ? fmt(cs.reps) : '';
       return '<div class="setrow time' + (done ? ' ok' : '') + attrs +
-        '<input data-f="reps" inputmode="numeric" placeholder="' + (sg.secs || faixa(e)) + '" value="' + secs + '" aria-label="Série ' + (i + 1) + ', segundos"' + dis + '>' +
-        '<button type="button" class="hold" data-hold' + dis + '>Iniciar</button>' + btnDone + '</div>';
+        campo('reps', 'numeric', aquec ? 's' : (sg.secs || faixa(e)), repsVal, 'segundos') +
+        (aquec ? '<span></span>' : '<button type="button" class="hold" data-hold' + dis + '>Iniciar</button>') + btnDone + '</div>';
     }
-    const kgVal = cs && cs.kg !== null && cs.kg !== undefined ? fmt(cs.kg) : (sg.kg ? fmt(sg.kg) : '');
-    const repsVal = cs && cs.reps !== null && cs.reps !== undefined ? fmt(cs.reps) : '';
+    const kgVal = cs && cs.kg != null ? fmt(cs.kg) : (!aquec && sg.kg ? fmt(sg.kg) : '');
+    const rep = campo('reps', 'numeric', aquec ? 'reps' : faixa(e), repsVal, 'repetições');
     if (e.semPeso) {
-      return '<div class="setrow sp' + (done ? ' ok' : '') + attrs +
-        '<input data-f="reps" inputmode="numeric" placeholder="' + faixa(e) + '" value="' + repsVal + '" aria-label="Série ' + (i + 1) + ', repetições"' + dis + '>' + btnDone + '</div>';
+      return '<div class="setrow sp' + (done ? ' ok' : '') + attrs + rep + btnDone + '</div>';
     }
     return '<div class="setrow' + (done ? ' ok' : '') + attrs +
-      '<input data-f="kg" inputmode="decimal" placeholder="kg" value="' + kgVal + '" aria-label="Série ' + (i + 1) + ', carga em kg"' + dis + '>' +
-      '<input data-f="reps" inputmode="numeric" placeholder="' + faixa(e) + '" value="' + repsVal + '" aria-label="Série ' + (i + 1) + ', repetições"' + dis + '>' + btnDone + '</div>';
+      campo('kg', 'decimal', 'kg', kgVal, 'carga em kg') + rep + btnDone + '</div>';
   }
 
-  // A preparação de cada exercício aparece nele; o checklist inicial termina antes das séries do treino.
-  const nomeCurto = e => { const n = e.nome.split(',')[0]; return n.charAt(0).toLowerCase() + n.slice(1); };
-  function aqueceHTML(e, idx){
-    const t = idx === 0
-      ? 'Antes: 2 a 3 séries leves e progressivas para aquecer. Elas não contam nas séries do treino.'
-      : e.tempo || e.semPeso
-        ? 'Se precisar, ensaie o movimento de forma leve antes das séries abaixo. Essa preparação não conta nas séries previstas.'
-        : 'Antes das séries abaixo: se precisar, faça 1 série leve de preparação neste exercício. Ela não conta nas séries previstas.';
-    return t ? '<p class="aquece">' + FLAME + '<span>' + esc(t) + '</span></p>' : '';
-  }
   // Séries feitas deste exercício no treino em andamento.
   const doCur = e => !!(state.cur && state.cur.wid === e.w && state.cur.ficha === e.f);
-  function feitasEx(e){ return doCur(e) ? (state.cur.sets[e.id] || []).filter(x => x && x.done) : []; }
+  function feitasEx(e){ return doCur(e) ? (state.cur.sets[e.id] || []).slice(0, S(e)).filter(x => x && x.done) : []; }
   function feedbackHTML(e, lock){
     const ativo = doCur(e), f = ativo && state.cur.feedback && state.cur.feedback[e.id] || {};
     const dis = lock || !ativo ? ' disabled' : '';
@@ -1411,18 +1457,30 @@ details.how .lbl{font-weight:700}
       campo('dor', 'Sentiu dor ou desconforto diferente do esforço muscular?', [['nao', 'Não'], ['sim', 'Sim']]) +
       '<p>Isso registra sua percepção e não identifica a causa de sintomas.</p></details>';
   }
+  const novoAquecimento = () => ({ kg:null, reps:null, done:false, rest:DESCANSO_AQUECIMENTO });
+  function aquecimentosEx(e){
+    const salvos = doCur(e) ? state.cur.aquecimento?.[e.id] : undefined;
+    // As duas linhas iniciais são sugestões vazias. Só ganham dados ao interagir.
+    // Um array explícito, inclusive vazio, prevalece em treinos reabertos/importados.
+    return salvos ?? (treinoDe(e.f, e.w).ex[0].id === e.id ? [novoAquecimento(), novoAquecimento()] : []);
+  }
+  function editarAquecimentos(e){
+    if (travado(treinoTela(sel)) || !startSession(sel) || !doCur(e)) return null;
+    const mapa = state.cur.aquecimento || (state.cur.aquecimento = {});
+    return mapa[e.id] ?? (mapa[e.id] = aquecimentosEx(e));
+  }
   function aquecimentoHTML(e, dis){
-    const series = doCur(e) && state.cur.aquecimento && state.cur.aquecimento[e.id] || [];
-    const campo = (s, i, key, label, valor) => '<label>' + esc(label) + '<input id="aquec-' + e.id + '-' + i + '-' + key + '" data-aquec-campo="' + key + '" data-aquec-ex="' + e.id + '" data-aquec-i="' + i + '" inputmode="' + (key === 'kg' ? 'decimal' : 'numeric') + '" value="' + esc(valor) + '"' + dis + '></label>';
-    return '<section class="aquecimento" aria-label="Séries de aquecimento de ' + esc(e.nome) + '"><h4>Séries de aquecimento</h4>' +
-      '<p>Registre o peso usado e conte o descanso. Aquecimento fica separado das séries de trabalho.</p>' +
-      series.map((s, i) => '<fieldset id="aquec-' + e.id + '-' + i + '"><legend>Aquecimento ' + (i + 1) + (s.done ? ' · feito' : '') + '</legend><div class="aquec-campos">' +
-        campo(s, i, 'kg', 'Carga (kg)', fmt(s.kg)) + campo(s, i, 'reps', e.tempo ? 'Tempo (segundos)' : 'Repetições', fmt(s.reps)) +
-        campo(s, i, 'rest', 'Descanso (segundos)', String(s.rest)) + '</div><div class="aquec-botoes">' +
-        '<button type="button" class="btn" data-aquec-feito="' + e.id + ':' + i + '" aria-pressed="' + s.done + '"' + dis + '>' + (s.done ? 'Desmarcar aquecimento' : 'Marcar aquecimento feito') + '</button>' +
-        '<button type="button" class="btn quiet" data-aquec-remover="' + e.id + ':' + i + '"' + dis + '>Remover</button></div>' +
-        '<button type="button" class="restbtn" data-rs="aquec-' + e.id + ':' + i + '" data-aquec-rest="' + e.id + ':' + i + '" data-rest-seg="' + s.rest + '"' + dis + '><span class="bar"></span>' + CLOCK + '<span class="rt">Descanso ' + mmssS(s.rest) + '</span></button></fieldset>').join('') +
-      '<button type="button" class="btn quiet" data-aquec-adicionar="' + e.id + '"' + (series.length >= 6 ? ' disabled' : dis) + '>Adicionar série de aquecimento</button></section>';
+    const series = dis ? [] : aquecimentosEx(e);
+    return series.map((s, i) => {
+      const id = e.id + ':' + i;
+      return setRowHTML(e, i, null, dis, s) + '<div class="aquec-controles">' +
+        restRowHTML(e, i, dis, s.done, s) +
+        '<details class="aquec-ajustes" data-aquec-ajustes="' + id + '"><summary aria-label="Ajustes do aquecimento ' + (i + 1) + '">Ajustes</summary><div class="aquec-config">' +
+        '<label>Descanso (s)<input id="aquec-' + e.id + '-' + i + '-rest" data-aquec-campo="rest" data-aquec-ex="' + e.id + '" data-aquec-i="' + i + '" type="number" inputmode="numeric" min="0" max="900" step="1" value="' + s.rest + '"></label>' +
+        (e.tempo || e.semPeso ? '<label>Carga registrada (kg, opcional)<input id="aquec-' + e.id + '-' + i + '-kg" data-aquec-campo="kg" data-aquec-ex="' + e.id + '" data-aquec-i="' + i + '" inputmode="decimal" value="' + fmt(s.kg) + '"></label>' : '') +
+        '<button type="button" class="btn quiet" data-aquec-remover="' + id + '" aria-label="Remover aquecimento ' + (i + 1) + '">Remover</button></div></details></div>';
+    }).join('') +
+      '<button type="button" class="btn quiet aquec-adicionar" data-aquec-adicionar="' + e.id + '"' + (series.length >= MAX_AQUECIMENTOS ? ' disabled' : dis) + '>+ Adicionar aquecimento</button>';
   }
   function seriesExtrasHTML(e, dis){
     const disabled = !doCur(e) ? ' disabled' : dis;
@@ -1475,6 +1533,7 @@ details.how .lbl{font-weight:700}
       rows += '<div class="setrow head"><span>Série</span><span>Carga (kg)</span><span>Repetições</span><span></span></div>';
     }
     const dis = lock ? ' disabled' : '';
+    rows += aquecimentoHTML(e, dis);
     for (let i = 0; i < S(e); i++) {
       const cs = curSet(e.id, i);
       rows += setRowHTML(e, i, sg, dis) + restRowHTML(e, i, dis, !!(cs && cs.done));
@@ -1483,8 +1542,8 @@ details.how .lbl{font-weight:700}
     return '<li class="card ex" id="ex-' + e.id + '">' +
       '<div class="exhead"><span class="num">' + (idx + 1) + '</span><div><h3>' + esc(e.nome) + '</h3><p class="maq">Na Smart Fit: ' + esc(e.maq) + '</p></div>' +
       '<button type="button" class="minbtn" data-fechar="' + e.id + '">Minimizar</button></div>' +
-      '<p class="target"><strong>' + esc(alvoCard) + '</strong><span>' + esc(desc) + '</span></p>' + aqueceHTML(e, idx) + par + info +
-      aquecimentoHTML(e, dis) + '<div class="sets">' + rows + '</div>' + seriesExtrasHTML(e, dis) + feedbackHTML(e, lock) +
+      '<p class="target"><strong>' + esc(alvoCard) + '</strong><span>' + esc(desc) + '</span></p>' + par + info +
+      '<div class="sets">' + rows + '</div>' + seriesExtrasHTML(e, dis) + feedbackHTML(e, lock) +
       '<div class="exfoot">' +
         '<div class="videoarea">' +
           (e.vid ? '<button type="button" class="btn primary" data-video="' + e.id + '" aria-expanded="false">Ver vídeo</button><div class="video-wrap" data-video-box="' + e.id + '" hidden></div>' : '') +
@@ -1550,20 +1609,14 @@ details.how .lbl{font-weight:700}
   }
 
   function warmHTML(w, lock){
-    const first = w.ex[0];
-    const itens = [
-      '5 a 8 minutos leves de caminhada ou bike.',
-      'No primeiro exercício, ' + nomeCurto(first) + ', faça 2 a 3 séries leves e progressivas de aquecimento antes das séries do treino. Elas não contam nas séries previstas.',
-    ];
-    const warm = state.cur && state.cur.wid === w.id ? state.cur.warm : {};
-    const completo = itens.every((t, i) => warm[i]);
+    const texto = '5 a 8 minutos leves de caminhada ou bike.';
+    const completo = !!(state.cur?.wid === w.id && state.cur.warm[CARDIO]);
     if ((completo && !abertos.has('warm')) || (!completo && fechados.has('warm'))) {
-      const n = itens.filter((t, i) => warm[i]).length;
       return '<article class="card warm mini"><button type="button" class="minirow" data-abrir="warm" aria-expanded="false">' +
-        '<span class="num' + (completo ? '' : ' pend') + '">' + (completo ? CHECK : FLAME) + '</span><span class="mt"><b>Aquecimento inicial</b><small>' + (completo ? 'Feito' : n + ' de ' + itens.length + ' feitos') + '</small></span><span class="abrir">Abrir</span></button></article>';
+        '<span class="num' + (completo ? '' : ' pend') + '">' + (completo ? CHECK : FLAME) + '</span><span class="mt"><b>Cardio leve</b><small>' + (completo ? 'Feito' : 'Opcional') + '</small></span><span class="abrir">Abrir</span></button></article>';
     }
-    return '<article class="card warm"><div class="whead2"><h3>Aquecimento inicial</h3><button type="button" class="minbtn" data-fechar="warm">Minimizar</button></div><ul>' + itens.map((t, i) =>
-      '<li><button type="button" class="done chk" data-warm="' + i + '" aria-pressed="' + !!warm[i] + '" aria-label="' + esc(t) + '"' + (lock ? ' disabled' : '') + '>' + CHECK + '</button><span>' + esc(t) + '</span></li>').join('') + '</ul></article>';
+    return '<article class="card warm"><div class="whead2"><h3>Cardio leve</h3><button type="button" class="minbtn" data-fechar="warm">Minimizar</button></div><ul>' +
+      '<li><button type="button" class="done chk" data-warm="' + CARDIO + '" aria-pressed="' + completo + '" aria-label="Cardio leve feito: ' + texto + '"' + (lock ? ' disabled' : '') + '>' + CHECK + '</button><span>' + texto + '</span></li></ul></article>';
   }
 
   // Avisos da ficha nova: adaptação ou esforço, e segurança.
@@ -1768,11 +1821,15 @@ details.how .lbl{font-weight:700}
 
   function progressText(){
     const p = $('progresso');
-    if (p && state.cur) p.textContent = 'Em andamento desde ' + new Date(state.cur.start).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }) + '. ' + countDone(state.cur) + ' de ' + totalSets(treinoTela(state.cur.wid)) + ' séries feitas.';
+    if (p && state.cur) {
+      const feitas = countDone(state.cur), extras = seriesOf(state.cur) - feitas;
+      p.textContent = 'Em andamento desde ' + new Date(state.cur.start).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }) + '. ' + feitas + ' de ' + totalSets(treinoTela(state.cur.wid)) + ' séries feitas.' +
+        (extras > 0 ? ' Mais ' + extras + (extras === 1 ? ' série já feita fora do plano atual.' : ' séries já feitas fora do plano atual.') : '');
+    }
   }
   const totalSets = w => exibidos(w).reduce((a, e) => a + S(e), 0);
   // Séries feitas dos exercícios na tela (na versão curta, só os que aparecem), até as séries que valem hoje.
-  const countDone = c => exibidos(treinoDe(c.ficha, c.wid)).reduce((a, e) => a + Math.min(S(e), (c.sets[e.id] || []).filter(x => x && x.done).length), 0);
+  const countDone = c => exibidos(treinoDe(c.ficha, c.wid)).reduce((a, e) => a + (c.sets[e.id] || []).slice(0, S(e)).filter(x => x && x.done).length, 0);
 
   // ---------------- sessão ----------------
   function startSession(wid){
@@ -1802,7 +1859,7 @@ details.how .lbl{font-weight:700}
     const w = treinoDe(c.ficha, c.wid), total = totalSets(w);
     const sets = {};
     for (const [k, arr] of Object.entries(c.sets)) if (arr.some(x => x && x.done)) sets[k] = arr;
-    const feitas = countDone(c), temSeries = Object.keys(sets).length > 0;
+    const noPlano = countDone(c), feitas = seriesOf(c), temSeries = Object.keys(sets).length > 0;
     const soAquecimento = !temSeries && temAquecimento(c);
     const interrompido = !temSeries && (Object.keys(cleanFeedback(c.feedback)).length > 0 || soAquecimento);
     const salvar = temSeries || interrompido;
@@ -1812,7 +1869,7 @@ details.how .lbl{font-weight:700}
     const plano = Object.fromEntries(exibidos(w).map(e => [e.id, S(e)]));
     const modo = c.modo || (curtaAtiva(w.id) ? 'curto' : w.f === ATUAL && adaptacao() ? 'adaptacao' : 'completo');
     if (salvar) {
-      const registro = sessionExtras({ feedback:c.feedback, plano, modo, aquecimento:c.aquecimento, encerramento:interrompido ? 'interrompido' : c.encerramento || (feitas >= total ? 'completo' : 'reduzido'), proximo:c.proximo }, { id:String(c.start), wid:c.wid, ficha:c.ficha, start:c.start, end:fim, sets });
+      const registro = sessionExtras({ feedback:c.feedback, plano, modo, aquecimento:c.aquecimento, encerramento:interrompido ? 'interrompido' : c.encerramento || (noPlano >= total ? 'completo' : 'reduzido'), proximo:c.proximo }, { id:String(c.start), wid:c.wid, ficha:c.ficha, start:c.start, end:fim, sets });
       if (interrompido) registro.interrompido = true;
       addEntry(registro);
     }
@@ -1824,7 +1881,9 @@ details.how .lbl{font-weight:700}
     rest = null;
     hold = null;
     const subir = w.ex.map(e => ({ e, sg:suggest(e) })).filter(x => x.sg.up);
-    let html = '<div class="summary"><h3>' + (interrompido ? (soAquecimento ? 'Aquecimento salvo · treino interrompido' : 'Relato salvo · treino interrompido') : 'Treino ' + w.id + ' salvo') + '</h3><p>' + (interrompido ? (soAquecimento ? 'Aquecimentos preservados, sem séries de trabalho. A sequência e a frequência não mudaram.' : 'Sem séries concluídas. Seu relato foi guardado; a sequência e a frequência não mudaram.') : min + ' min e ' + feitas + ' de ' + total + ' séries de trabalho.') + '</p>';
+    const resumoSeries = feitas === noPlano ? feitas + ' de ' + total + ' séries de trabalho.' :
+      feitas + (feitas === 1 ? ' série de trabalho no total. ' : ' séries de trabalho no total. ') + noPlano + ' de ' + total + ' no plano atual.';
+    let html = '<div class="summary"><h3>' + (interrompido ? (soAquecimento ? 'Aquecimento salvo · treino interrompido' : 'Relato salvo · treino interrompido') : 'Treino ' + w.id + ' salvo') + '</h3><p>' + (interrompido ? (soAquecimento ? 'Aquecimentos preservados, sem séries de trabalho. A sequência e a frequência não mudaram.' : 'Sem séries concluídas. Seu relato foi guardado; a sequência e a frequência não mudaram.') : min + ' min e ' + resumoSeries) + '</p>';
     if (salvar) html += '<p>Próximo da sequência: <b>Treino ' + esc(proximo()) + '</b>.</p>';
     const respostas = Object.values(c.feedback || {});
     if (respostas.some(f => f.dor === 'sim')) html += '<p>Você registrou desconforto. Reveja os exercícios indicados em Progresso antes de repetir ou aumentar a carga.</p>';
@@ -1904,7 +1963,7 @@ details.how .lbl{font-weight:700}
     } catch (e) { fecharAudio(); }
   }
   function startRest(sec, nome, exId, i){
-    if (!sec) { rest = null; updateDock(); return; }
+    if (!sec) { rest = null; fecharAudio(); updateDock(); return; }
     fecharVideos();
     somOn();
     rest = { end:Date.now() + sec * 1000, total:sec, nome, exId, i, avisou:false };
@@ -2020,6 +2079,7 @@ details.how .lbl{font-weight:700}
     const digitando = document.activeElement && document.activeElement.closest && document.activeElement.closest('.setrow');
     if (digitando) return;
     if (calSel === diaTela) { const n = new Date(); calSel = hoje; calY = n.getFullYear(); calM = n.getMonth(); regOpen = false; }
+    rtViraDia(diaTela, hoje);
     diaTela = hoje;
     lastSummary = null;
     if (!state.cur) sel = todayInfo().wid;
@@ -2053,19 +2113,22 @@ details.how .lbl{font-weight:700}
     return novo;
   }
   // Redesenha uma série (e esconde o descanso dela quando já foi feita).
-  function trocarSerie(exId, i){
-    const e = exTela(exId), row = document.querySelector('.setrow[data-ex="' + exId + '"][data-i="' + i + '"]');
-    if (!row) return null;
+  const seletorSerie = (exId, i, aquec) => aquec ? '.setrow[data-aquec-linha="' + exId + ':' + i + '"]' : '.setrow[data-ex="' + exId + '"][data-i="' + i + '"]';
+  function trocarSerie(exId, i, aquec = false){
+    const e = exTela(exId), row = document.querySelector(seletorSerie(exId, i, aquec));
+    const s = aquec && e ? aquecimentosEx(e)[i] : null;
+    if (!row || !e || (aquec && !s)) return null;
     const tmp = document.createElement('div');
-    tmp.innerHTML = setRowHTML(e, i, suggest(e), '');
+    tmp.innerHTML = setRowHTML(e, i, aquec ? null : suggest(e), '', s);
     const novo = tmp.firstElementChild;
     row.replaceWith(novo);
-    const cs = curSet(exId, i), resto = document.querySelector('[data-rs="' + exId + ':' + i + '"], [data-rn="' + exId + ':' + i + '"]');
+    const cs = s || curSet(exId, i), key = (aquec ? 'aquec-' : '') + exId + ':' + i;
+    const resto = document.querySelector('[data-rs="' + key + '"], [data-rn="' + key + '"]');
     if (resto) resto.classList.toggle('feita', !!(cs && cs.done));
     return novo;
   }
   function estaCompleto(id){
-    if (id === 'warm') return !!(state.cur && WARM_KEYS.every(x => state.cur.warm[x]));
+    if (id === 'warm') return !!state.cur?.warm[CARDIO];
     const e = exTela(id);
     return !!e && feitasEx(e).length >= S(e);
   }
@@ -2138,38 +2201,45 @@ details.how .lbl{font-weight:700}
     const addAquec = ev.target.closest('[data-aquec-adicionar]');
     if (addAquec) {
       const id = addAquec.dataset.aquecAdicionar, e = exTela(id);
-      if (!e || travado(treinoTela(sel)) || !startSession(sel) || !doCur(e)) return;
-      const mapa = state.cur.aquecimento || (state.cur.aquecimento = {});
-      const lista = mapa[id] || (mapa[id] = []);
-      if (lista.length >= 6) return;
-      lista.push({ kg:null, reps:null, done:false, rest:60 });
-      abertos.add(id); commit(); redesenhar(id);
-      const campo = $('aquec-' + id + '-' + (lista.length - 1) + '-kg');
+      const lista = e && editarAquecimentos(e);
+      if (!lista || lista.length >= MAX_AQUECIMENTOS) return;
+      lista.push(novoAquecimento());
+      abrir(id); commit(); redesenhar(id); updateDock();
+      const campo = document.querySelector(seletorSerie(id, lista.length - 1, true) + ' input');
       if (campo) campo.focus({ preventScroll:true });
       return;
     }
-    const aquecBotao = ev.target.closest('[data-aquec-feito],[data-aquec-remover],[data-aquec-rest]');
+    const aquecBotao = ev.target.closest('[data-aquec-feito],[data-aquec-remover],[data-aquec-rest],[data-aquec-editar]');
     if (aquecBotao) {
-      const [id, indice] = (aquecBotao.dataset.aquecFeito || aquecBotao.dataset.aquecRemover || aquecBotao.dataset.aquecRest).split(':');
+      const [id, indice] = (aquecBotao.dataset.aquecFeito || aquecBotao.dataset.aquecRemover || aquecBotao.dataset.aquecRest || aquecBotao.dataset.aquecEditar).split(':');
       const i = Number(indice), e = exTela(id);
-      const lista = state.cur && state.cur.aquecimento && state.cur.aquecimento[id];
-      if (!e || !doCur(e) || !lista || !lista[i]) return;
+      const lista = e && editarAquecimentos(e);
+      if (!lista?.[i]) return;
       const s = lista[i], chave = 'aquec-' + id;
       if (aquecBotao.hasAttribute('data-aquec-remover')) {
         const remover = () => {
-          if (rest && rest.exId === chave) { rest = null; fecharAudio(); }
+          if (rest?.exId === chave && rest.i === i) { rest = null; fecharAudio(); }
+          else if (rest?.exId === chave && rest.i > i) rest.i--;
+          for (const k of seriesAbertas) if (k.startsWith(chave + ':')) seriesAbertas.delete(k);
           lista.splice(i, 1); commit(); redesenhar(id); updateDock();
         };
         if (s.done) arm(aquecBotao, 'Confirmar remoção', remover); else remover();
+      } else if (aquecBotao.hasAttribute('data-aquec-editar')) {
+        seriesAbertas.add(chave + ':' + i);
+        const aberta = trocarSerie(id, i, true);
+        if (aberta) aberta.querySelector('input')?.focus();
       } else if (aquecBotao.hasAttribute('data-aquec-rest')) {
         if (rest && rest.exId === chave && rest.i === i && rest.end > Date.now()) { rest = null; fecharAudio(); }
         else startRest(s.rest, 'Aquecimento · ' + e.nome, chave, i);
         updateDock();
       } else {
         s.done = !s.done;
+        seriesAbertas.delete(chave + ':' + i);
         if (s.done) { hold = null; startRest(s.rest, 'Aquecimento · ' + e.nome, chave, i); }
         else if (rest && rest.exId === chave && rest.i === i) { rest = null; fecharAudio(); }
-        commit(); redesenhar(id); updateDock();
+        commit();
+        trocarSerie(id, i, true)?.querySelector('[data-aquec-feito]')?.focus({ preventScroll:true });
+        updateDock();
       }
       return;
     }
@@ -2238,7 +2308,7 @@ details.how .lbl{font-weight:700}
       const wbNow = document.querySelector('#workout [data-warm="' + k + '"]') || wb;
       wbNow.setAttribute('aria-pressed', String(!!state.cur.warm[k]));
       commit();
-      if (WARM_KEYS.every(x => state.cur.warm[x])) fecharDepois('warm');
+      if (state.cur.warm[CARDIO]) fecharDepois('warm');
       return;
     }
     const rb = ev.target.closest('[data-rs]');
@@ -2294,6 +2364,7 @@ details.how .lbl{font-weight:700}
       const novo = !(curSet(exId, i) && curSet(exId, i).done);
       if (!state.cur) { startSession(sel); }
       if (!state.cur || state.cur.wid !== e.w) return;
+      if (!novo && rest?.exId === exId && rest.i === i) { rest = null; fecharAudio(); updateDock(); }
       const rowNow = document.querySelector('.setrow[data-ex="' + exId + '"][data-i="' + i + '"]');
       if (rowNow.classList.contains('mini')) {
         // Desmarcar uma série que já virou linha: volta com os campos preenchidos.
@@ -2321,7 +2392,7 @@ details.how .lbl{font-weight:700}
       seriesAbertas.delete(exId + ':' + i);
       trocarSerie(exId, i);
       if (novo) {
-        const quantos = (state.cur.sets[exId] || []).filter(x => x && x.done).length;
+        const quantos = feitasEx(e).length;
         if (!e.par) startRest(e.rest, e.nome, exId, i);
         else if (parDe(e)) say('Agora ' + parDe(e).nome.toLowerCase() + ', sem pausa.');
         if (quantos >= S(e)) { say(e.nome + ' concluído.'); fecharDepois(exId); }
@@ -2332,6 +2403,12 @@ details.how .lbl{font-weight:700}
     }
   });
   $('workout').addEventListener('change', ev => {
+    const descansoAquec = ev.target.closest('[data-aquec-campo="rest"]');
+    if (descansoAquec) {
+      const s = state.cur?.aquecimento?.[descansoAquec.dataset.aquecEx]?.[descansoAquec.dataset.aquecI];
+      if (s) descansoAquec.value = String(s.rest);
+      return;
+    }
     if (ev.target.matches('[data-encerramento],[data-proximo-escolhido]')) {
       if (!state.cur || state.cur.wid !== sel) return;
       const key = ev.target.hasAttribute('data-encerramento') ? 'encerramento' : 'proximo';
@@ -2397,33 +2474,48 @@ details.how .lbl{font-weight:700}
   // Procura a linha de novo, porque a tela pode ter sido redesenhada (trocar de aba, minimizar).
   $('workout').addEventListener('focusout', ev => {
     const row = ev.target.closest && ev.target.closest('.setrow');
-    if (!row || !seriesAbertas.has(row.dataset.ex + ':' + row.dataset.i)) return;
-    const exId = row.dataset.ex, i = Number(row.dataset.i);
+    if (!row) return;
+    const aquec = row.hasAttribute('data-aquec-linha');
+    const [exId, idx] = aquec ? row.dataset.aquecLinha.split(':') : [row.dataset.ex, row.dataset.i];
+    const i = Number(idx), key = (aquec ? 'aquec-' : '') + exId + ':' + i;
+    if (!seriesAbertas.has(key)) return;
     setTimeout(() => {
-      const atual = document.querySelector('#workout .setrow[data-ex="' + exId + '"][data-i="' + i + '"]');
-      if (atual && atual.contains(document.activeElement)) return;
-      seriesAbertas.delete(exId + ':' + i);
-      const cs = curSet(exId, i);
-      if (atual && cs && cs.done) trocarSerie(exId, i);
+      const atual = document.querySelector(seletorSerie(exId, i, aquec));
+      if (atual?.contains(document.activeElement) || !seriesAbertas.delete(key)) return;
+      const cs = aquec ? state.cur?.aquecimento?.[exId]?.[i] : curSet(exId, i);
+      if (atual && cs?.done) trocarSerie(exId, i, aquec);
     }, 250);
   });
   $('workout').addEventListener('focusin', ev => {
-    const inp = ev.target.closest('.setrow input');
+    const inp = ev.target.closest('.setrow input[data-f]');
     if (inp) inp.dataset.seguindo = inp.value;
   });
   $('workout').addEventListener('input', ev => {
     const aq = ev.target.closest('[data-aquec-campo]');
     if (aq) {
       const id = aq.dataset.aquecEx, i = Number(aq.dataset.aquecI), key = aq.dataset.aquecCampo, e = exTela(id);
-      const s = state.cur && state.cur.aquecimento && state.cur.aquecimento[id] && state.cur.aquecimento[id][i];
-      if (!e || !doCur(e) || !s) return;
+      const valor = aq.value, focado = document.activeElement === aq;
+      const s = e && editarAquecimentos(e)?.[i];
+      if (!s) return;
+      if (!aq.isConnected) {
+        const atual = $(aq.id);
+        if (atual) {
+          const detalhes = atual.closest('details');
+          if (detalhes) detalhes.open = true;
+          atual.value = valor;
+          if (focado) atual.focus({ preventScroll:true });
+        }
+      }
       if (key === 'rest') {
-        const v = num(aq.value);
-        if (v !== null && v <= 900) s.rest = Math.round(v);
+        const v = num(valor);
+        if (Number.isInteger(v) && v <= 900) s.rest = v;
         const btn = document.querySelector('[data-aquec-rest="' + id + ':' + i + '"]');
         if (btn) { btn.dataset.restSeg = String(s.rest); if (!btn.classList.contains('on')) btn.querySelector('.rt').textContent = 'Descanso ' + mmssS(s.rest); }
-      } else if (key === 'kg' || key === 'reps') s[key] = num(aq.value);
+      } else if (key === 'kg' || key === 'reps') s[key] = num(valor);
       commit();
+      // A carga opcional dos exercícios sem peso/por tempo fica nos Ajustes;
+      // sua edição também precisa atualizar uma linha já compactada.
+      if (document.querySelector(seletorSerie(id, i, true))?.classList.contains('mini')) trocarSerie(id, i, true);
       return;
     }
     const inp = ev.target.closest('.setrow input');
@@ -2595,8 +2687,9 @@ details.how .lbl{font-weight:700}
   // em backup.json num repositório privado do GitHub. O histórico do GitHub guarda cada versão.
   // Sem internet, tenta de novo quando o app volta para a tela ou o sinal volta.
   const LS_NV = 'treino-renan-nuvem';
+  const LS_NV_ANTERIOR = 'treino-renan-nuvem-anterior';
   const ARQ_NV = 'backup.json';
-  let nv = {}, enviando = false, configurando = false, mudancas = 0;
+  let nv = {}, enviando = false, configurando = false, restaurando = false, mudancas = 0;
   try { nv = JSON.parse(localStorage.getItem(LS_NV)) || {}; } catch (e) {}
   function gravarNv(){
     try { localStorage.setItem(LS_NV, JSON.stringify(nv)); return true; }
@@ -2612,9 +2705,9 @@ details.how .lbl{font-weight:700}
     nvMsg('Não consegui guardar a configuração neste aparelho. A configuração anterior foi mantida. Tente novamente.');
     return false;
   }
-  function gh(caminho, opts = {}){
-    const headers = Object.assign({ Authorization:'Bearer ' + nv.token, Accept:'application/vnd.github+json' }, opts.headers || {});
-    return fetch('https://api.github.com/repos/' + nv.repo + caminho, Object.assign({}, opts, { headers, cache:'no-store' }));
+  function gh(caminho, opts = {}, conf = nv){
+    const headers = Object.assign({ Authorization:'Bearer ' + conf.token, Accept:'application/vnd.github+json' }, opts.headers || {});
+    return fetch('https://api.github.com/repos/' + conf.repo + caminho, Object.assign({}, opts, { headers, cache:'no-store' }));
   }
   function erroGh(status){
     if (status === 401) return 'A chave não vale mais (venceu ou foi apagada). Crie outra em Configurar.';
@@ -2623,6 +2716,45 @@ details.how .lbl{font-weight:700}
     return 'O GitHub não aceitou agora (erro ' + status + '). O app tenta de novo depois.';
   }
   const SEM_REDE = 'Sem internet agora. O app envia sozinho quando o sinal voltar.';
+  const CONFLITO_NV = 'O backup do GitHub mudou. Envio automático pausado para preservar as duas cópias.';
+  const ocupadoNv = () => enviando || configurando || restaurando;
+  function conflitoNv(){
+    nv.conflito = true; nv.pendente = true; nv.erro = CONFLITO_NV;
+    gravarNv(); renderNuvem();
+  }
+  function falhaNv(e){
+    if (e?.status === 409 || e?.message === 'conflito') return conflitoNv();
+    nv.erro = e?.message === 'backup-invalido' || e instanceof SyntaxError ? 'O backup do GitHub é inválido. O arquivo foi preservado.' :
+      e?.message === 'copia-falhou' ? 'Não consegui guardar a cópia anterior neste aparelho. O backup do GitHub foi preservado.' :
+      e?.message === 'confirmacao-falhou' ? 'O GitHub recebeu o backup, mas não consegui guardar a confirmação neste aparelho. Confira as cópias antes de reenviar.' :
+      e?.message === 'config-falhou' ? 'Não consegui guardar a pendência neste aparelho. Tente novamente após liberar espaço.' :
+      e?.status ? erroGh(e.status) : SEM_REDE;
+    gravarNv();
+  }
+  // SHA e conteúdo vêm da mesma versão; arquivos grandes usam o blob desse SHA.
+  async function lerRemotoNv(conf, conteudo = true){
+    const r = await gh('/contents/' + ARQ_NV, { headers:{ Accept:'application/vnd.github.object+json' } }, conf);
+    if (r.status === 404) return { sha:null, texto:null };
+    if (!r.ok) throw { status:r.status };
+    const item = await r.json();
+    if (!item || typeof item.sha !== 'string' || !item.sha) throw new Error('backup-invalido');
+    if (!conteudo) return { sha:item.sha };
+    let blob = item;
+    if (item.encoding !== 'base64') {
+      const resp = await gh('/git/blobs/' + encodeURIComponent(item.sha), {}, conf);
+      if (!resp.ok) throw { status:resp.status };
+      blob = await resp.json();
+      if (blob.sha !== item.sha) throw new Error('backup-invalido');
+    }
+    if (blob.encoding !== 'base64' || typeof blob.content !== 'string') throw new Error('backup-invalido');
+    const texto = new TextDecoder('utf-8', { fatal:true }).decode(Uint8Array.from(atob(blob.content.replace(/\s/g, '')), c => c.charCodeAt(0)));
+    return { sha:item.sha, texto };
+  }
+  function dadosNv(copia){
+    const dados = JSON.parse(copia.texto);
+    if (!dados || dados.v !== 1 || !Array.isArray(dados.hist)) throw new Error('backup-invalido');
+    return dados;
+  }
   const base64 = txt => {
     const b = new TextEncoder().encode(txt);
     let s = '';
@@ -2643,6 +2775,9 @@ details.how .lbl{font-weight:700}
     $('nuvem').classList.toggle('falha', on && !!nv.erro);
     $('nvRestaurar').hidden = !on;
     $('nvDesligar').hidden = !on;
+    $('nvConflito').hidden = !on || !nv.conflito;
+    $('nvCopiaAnterior').hidden = !copiaAnteriorNv();
+    for (const id of ['nvRestaurar','nvBaixarRemoto','nvSubstituir','nvLigar']) $(id).disabled = ocupadoNv();
     $('nvToken').placeholder = on ? 'Chave salva (…' + nv.token.slice(-4) + '). Cole outra para trocar.' : 'github_pat_…';
   }
   function nuvemAgendar(){
@@ -2651,104 +2786,169 @@ details.how .lbl{font-weight:700}
     nv.pendente = true; gravarNv(); renderNuvem();
     setTimeout(nuvemEnviar, 1500);
   }
+  function copiaAnteriorNv(){
+    try { return JSON.parse(localStorage.getItem(LS_NV_ANTERIOR)); }
+    catch (e) { return null; }
+  }
+  async function gravarRemotoNv(conf, sha){
+    if (nv !== conf) return;
+    const envio = mudancas, agora = new Date();
+    const resp = await gh('/contents/' + ARQ_NV, {
+      method:'PUT',
+      headers:{ 'Content-Type':'application/json' },
+      body:JSON.stringify({ message:'Backup ' + dm(agora) + ' ' + agora.toTimeString().slice(0, 5) + ' (' + state.hist.length + ' registros)', content:base64(JSON.stringify(state)), sha:sha ?? undefined })
+    }, conf);
+    if (nv !== conf) return;
+    if (!resp.ok) throw { status:resp.status };
+    const novoSha = (await resp.json()).content?.sha;
+    if (nv !== conf) return;
+    if (typeof novoSha !== 'string' || !novoSha) throw new Error('confirmacao-falhou');
+    const antes = { ...nv };
+    nv.sha = novoSha; nv.ultimo = Date.now(); nv.erro = ''; nv.conflito = false;
+    nv.pendente = mudancas !== envio;
+    if (!gravarNv()) { Object.assign(nv, antes); throw new Error('confirmacao-falhou'); }
+    marcarBackup();
+  }
   async function nuvemEnviar(){
-    if (!nvLigado() || !nv.pendente || enviando || configurando) return;
+    if (!nvLigado() || !nv.pendente || nv.conflito || ocupadoNv()) return;
     enviando = true;
-    // "pendente" só sai do aparelho quando o GitHub confirma: se o iPhone fechar o app
-    // no meio do envio, ele tenta de novo ao abrir.
-    const conf = nv, envio = mudancas;
+    const conf = nv;
+    renderNuvem();
     try {
-      const atual = await gh('/contents/' + ARQ_NV);
-      let sha;
-      if (atual.ok) sha = (await atual.json()).sha;
-      else if (atual.status !== 404) throw { status:atual.status };
-      const agora = new Date();
-      const resp = await gh('/contents/' + ARQ_NV, {
-        method:'PUT',
-        headers:{ 'Content-Type':'application/json' },
-        body:JSON.stringify({ message:'Backup ' + dm(agora) + ' ' + agora.toTimeString().slice(0, 5) + ' (' + state.hist.length + ' registros)', content:base64(JSON.stringify(state)), sha })
-      });
-      if (!resp.ok) throw { status:resp.status };
-      if (nv !== conf) return; // desligou ou trocou a configuração durante o envio
-      nv.ultimo = Date.now(); nv.erro = '';
-      if (mudancas === envio) nv.pendente = false; // se mudou durante o envio, manda de novo
-      gravarNv();
-      marcarBackup();
-    } catch (e) {
+      if (!gravarNv()) throw new Error('config-falhou');
+      const { sha } = await lerRemotoNv(conf, false);
       if (nv !== conf) return;
-      nv.erro = e && e.status ? erroGh(e.status) : SEM_REDE;
-      gravarNv();
-    } finally {
+      if (sha !== conf.sha) return conflitoNv();
+      await gravarRemotoNv(conf, sha);
+    } catch (e) { if (nv === conf) falhaNv(e); }
+    finally {
       enviando = false;
       renderNuvem();
-      if (nv.pendente && !nv.erro) setTimeout(nuvemEnviar, 1500); // mudou durante o envio
+      if (nv.pendente && !nv.erro && !nv.conflito) setTimeout(nuvemEnviar, 1500);
     }
   }
+  function igualNv(a, b){
+    if (a === b) return true;
+    if (!a || !b || typeof a !== 'object' || typeof b !== 'object' || Array.isArray(a) !== Array.isArray(b)) return false;
+    const chaves = Object.keys(a);
+    return chaves.length === Object.keys(b).length && chaves.every(k => Object.hasOwn(b, k) && igualNv(a[k], b[k]));
+  }
   async function nuvemLigar(){
-    if (enviando || $('nvLigar').disabled) return;
+    if (ocupadoNv()) return;
     const repo = $('nvRepo').value.trim().replace(/^https?:\/\/github\.com\//, '').replace(/\/+$/, '');
     const token = $('nvToken').value.trim() || nv.token || '';
     if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) return nvMsg('Escreva o repositório assim: usuario/nome (ex.: DhepRX/treino-dados).');
     if (!token) return nvMsg('Cole a chave de acesso.');
     const antes = nv;
-    $('nvLigar').disabled = true; configurando = true;
-    nv = Object.assign({}, nv, { repo, token });
+    const mesma = antes.repo?.toLowerCase() === repo.toLowerCase();
+    const conf = mesma ? { ...antes, repo, token } : { repo, token };
+    configurando = true;
+    renderNuvem();
     nvMsg('Testando…');
-    let existente = null;
+    let existente = null, copia;
     try {
-      const r = await gh('');
-      if (!r.ok) { nv = antes; return nvMsg(r.status === 401 ? 'Essa chave não funcionou. Confira se copiou ela inteira.' : erroGh(r.status)); }
-      if (!(await r.json()).private) { nv = antes; return nvMsg('Esse repositório é público: qualquer um veria seus treinos. Use um privado.'); }
-      // Recupera o histórico antes de habilitar envios num aparelho novo.
-      // Configurar nunca substitui um backup já existente.
-      const backup = await gh('/contents/' + ARQ_NV, { headers:{ Accept:'application/vnd.github.raw+json' } });
-      if (backup.ok) {
-        const dados = await backup.json();
-        if (!dados || dados.v !== 1 || !Array.isArray(dados.hist)) throw new Error('backup-invalido');
-        existente = sanitize(dados);
-      } else if (backup.status !== 404) {
-        nv = antes; return nvMsg(erroGh(backup.status));
-      }
+      const r = await gh('', {}, conf);
+      if (!r.ok) return nvMsg(r.status === 401 ? 'Essa chave não funcionou. Confira se copiou ela inteira.' : erroGh(r.status));
+      if (!(await r.json()).private) return nvMsg('Esse repositório é público: qualquer um veria seus treinos. Use um privado.');
+      copia = await lerRemotoNv(conf);
+      if (copia.sha !== null) existente = sanitize(dadosNv(copia));
     } catch (e) {
-      nv = antes;
-      return nvMsg(e.message === 'backup-invalido' || e instanceof SyntaxError ? 'O backup do GitHub é inválido. Ele foi preservado; confira o arquivo antes de ligar.' : 'Sem internet agora. Tente de novo com sinal.');
-    } finally { $('nvLigar').disabled = false; configurando = false; }
-    if (existente) {
-      juntarHist(existente.hist, existente.cur, existente);
-      // Treinos deste celular que o GitHub ainda não tem (ou um envio que tinha falhado com a chave antiga):
-      // envia o histórico reunido, que continua tendo tudo o que já estava no GitHub.
-      const noGitHub = new Set(existente.hist.map(h => h.id));
-      const falta = !!antes.pendente || state.hist.some(h => !noGitHub.has(h.id)) || JSON.stringify(state.rotina || null) !== JSON.stringify(existente.rotina || null) || JSON.stringify(state.preferenciasTreino || null) !== JSON.stringify(existente.preferenciasTreino || null);
-      nv.erro = ''; nv.ultimo = antes.repo === repo ? antes.ultimo || 0 : 0;
-      if (!falta) {
-        nv.pendente = false;
-        if (!confirmarConfigNv(antes)) return;
-        renderNuvem();
-        return nvMsg('Backup ligado. Histórico recuperado do GitHub; o arquivo foi preservado.');
-      }
-      mudancas++;
-      nv.pendente = true;
+      return nvMsg(e.message === 'backup-invalido' || e instanceof SyntaxError ? 'O backup do GitHub é inválido. Ele foi preservado; confira o arquivo antes de ligar.' : e.status ? erroGh(e.status) : 'Sem internet agora. Tente de novo com sinal.');
+    } finally { configurando = false; renderNuvem(); }
+    if (nv !== antes) return;
+    nv = conf;
+    const temBase = mesma && Object.hasOwn(antes, 'sha');
+    if (temBase && (antes.conflito || antes.sha !== copia.sha)) {
+      nv.conflito = true; nv.pendente = true; nv.erro = CONFLITO_NV;
       if (!confirmarConfigNv(antes)) return;
-      await nuvemEnviar();
-      return nvMsg(nv.erro ? nv.erro : 'Backup ligado. Histórico do GitHub juntado com o deste celular e enviado.');
+      renderNuvem();
+      return nvMsg(CONFLITO_NV);
     }
-    nv.pendente = true; nv.erro = '';
+    // Sem uma base conhecida, aceitar a cópia só quando os dados locais cabem
+    // nela. Ausência no remoto pode ser exclusão feita em outro aparelho.
+    if (existente && !temBase) {
+      const remotos = new Map(existente.hist.map(h => [h.id,h]));
+      const difere = state.hist.some(h => !igualNv(h, remotos.get(h.id))) ||
+        !!(state.rotina && !igualNv(mergeRotina(state.rotina, existente.rotina), existente.rotina)) ||
+        !!(state.preferenciasTreino && !igualNv(state.preferenciasTreino, existente.preferenciasTreino)) ||
+        !!(state.cur && existente.cur && !igualNv(state.cur, existente.cur)) ||
+        !!(mesma && antes.pendente);
+      nv.pendente = difere; nv.conflito = difere; nv.erro = difere ? CONFLITO_NV : '';
+      if (!difere) nv.sha = copia.sha;
+      if (!confirmarConfigNv(antes)) return;
+      if (!difere) juntarHist(existente.hist, existente.cur, existente);
+      renderNuvem();
+      return nvMsg(difere ? CONFLITO_NV : 'Backup ligado. Histórico recuperado do GitHub; o arquivo foi preservado.');
+    }
+    nv.sha = copia.sha;
+    nv.pendente = copia.sha === null || !!(mesma && antes.pendente);
+    nv.conflito = false; nv.erro = '';
     if (!confirmarConfigNv(antes)) return;
+    renderNuvem();
+    if (!nv.pendente) return nvMsg('Backup ligado. A cópia no GitHub foi preservada.');
     await nuvemEnviar();
-    nvMsg(nv.erro ? nv.erro : 'Pronto: backup automático ligado e primeiro envio feito.');
+    if (nv === conf) nvMsg(nv.erro || (existente ? 'Backup ligado. Backup pendente enviado.' : 'Pronto: backup automático ligado e primeiro envio feito.'));
   }
   async function nuvemRestaurar(){
+    if (!nvLigado() || ocupadoNv()) return;
+    const conf = nv;
+    restaurando = true; renderNuvem();
     nvMsg('Buscando o backup no GitHub…');
     $('nvConfig').open = true;
     try {
-      const r = await gh('/contents/' + ARQ_NV, { headers:{ Accept:'application/vnd.github.raw+json' } });
-      if (!r.ok) return nvMsg(r.status === 404 ? 'Ainda não tem backup no GitHub.' : erroGh(r.status));
-      juntarBackup(await r.text(), nvMsg);
-    } catch (e) { nvMsg('Sem internet agora. Tente de novo com sinal.'); }
+      const copia = await lerRemotoNv(conf);
+      if (nv !== conf) return;
+      if (copia.sha !== conf.sha) conflitoNv();
+      if (copia.sha === null) return nvMsg('Ainda não tem backup no GitHub.');
+      juntarBackup(copia.texto, t => nvMsg(t + (nv.conflito ? ' O envio continua pausado.' : '')));
+    } catch (e) {
+      if (nv === conf) nvMsg(e.status ? erroGh(e.status) : 'Não consegui ler o backup do GitHub. Tente novamente.');
+    } finally { restaurando = false; renderNuvem(); }
+  }
+  async function baixarRemotoNv(){
+    if (!nvLigado() || ocupadoNv()) return;
+    const conf = nv;
+    restaurando = true; renderNuvem(); $('nvConfig').open = true;
+    try {
+      const copia = await lerRemotoNv(conf);
+      if (nv !== conf) return;
+      if (copia.texto === null) return nvMsg('Ainda não tem backup no GitHub.');
+      rtDownload(copia.texto, 'treino-backup-github-' + ymd(new Date()) + '.json', 'application/json');
+      nvMsg('Cópia do GitHub pronta para salvar.');
+    } catch (e) { if (nv === conf) nvMsg(e.status ? erroGh(e.status) : 'Não consegui baixar a cópia do GitHub.'); }
+    finally { restaurando = false; renderNuvem(); }
+  }
+  async function substituirRemotoNv(){
+    if (!nvLigado() || !nv.conflito || ocupadoNv()) return;
+    const conf = nv;
+    enviando = true; renderNuvem(); $('nvConfig').open = true;
+    try {
+      const copia = await lerRemotoNv(conf);
+      if (nv !== conf) return;
+      if (copia.sha !== null) {
+        const data = dadosNv(copia);
+        try { localStorage.setItem(LS_NV_ANTERIOR, JSON.stringify({ repo:conf.repo, sha:copia.sha, data })); }
+        catch (e) { throw new Error('copia-falhou'); }
+      }
+      if (!gravarNv()) throw new Error('config-falhou');
+      await gravarRemotoNv(conf, copia.sha);
+      if (nv === conf) nvMsg(copia.sha === null ? 'Backup criado no GitHub.' : 'Backup atualizado. A cópia online anterior pode ser salva neste aparelho.');
+    } catch (e) {
+      if (nv === conf) { falhaNv(e); nvMsg(nv.erro); }
+    } finally {
+      enviando = false; renderNuvem();
+      if (nv.pendente && !nv.conflito && !nv.erro) setTimeout(nuvemEnviar, 1500);
+    }
   }
   $('nvRepo').value = nv.repo || 'DhepRX/treino-dados';
   $('nvLigar').addEventListener('click', nuvemLigar);
   $('nvRestaurar').addEventListener('click', nuvemRestaurar);
+  $('nvBaixarRemoto').addEventListener('click', baixarRemotoNv);
+  $('nvSubstituir').addEventListener('click', ev => arm(ev.currentTarget, 'Toque de novo para substituir', substituirRemotoNv));
+  $('nvCopiaAnterior').addEventListener('click', () => {
+    const copia = copiaAnteriorNv();
+    if (copia?.data) rtDownload(JSON.stringify(copia.data), 'treino-backup-github-anterior.json', 'application/json');
+  });
   $('nvDesligar').addEventListener('click', ev => arm(ev.currentTarget, 'Toque de novo para desligar', () => {
     const antes = nv;
     nv = {};

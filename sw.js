@@ -1,6 +1,6 @@
 // Guarda o app no celular para abrir sem internet.
 // Ao publicar uma versão nova, troque o número da VERSAO.
-const VERSAO = 'treino-renan-v26';
+const VERSAO = 'treino-renan-v27';
 const ARQUIVOS = ['./', './index.html', './manifest.webmanifest', './icon-180.png?v=2', './icon-192.png?v=2', './icon-512.png?v=2'];
 // Com sinal fraco (academia), espera a internet no máximo isso antes de abrir a cópia guardada.
 const ESPERA_MS = 3000;
@@ -17,7 +17,7 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(chaves => Promise.all(chaves.filter(k => k !== VERSAO).map(k => caches.delete(k))))
+      .then(chaves => Promise.all(chaves.filter(k => /^treino-renan-v\d+$/.test(k) && k !== VERSAO).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });

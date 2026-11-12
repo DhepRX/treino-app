@@ -21,7 +21,7 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
 ## Regras que não podem quebrar
 
 1. **Caminhos relativos** (`./sw.js`, `icon-192.png`). O site roda na subpasta `/treino-app/`.
-2. **Ao publicar qualquer mudança, troque `VERSAO` em `sw.js`** (hoje `treino-renan-v26`) para o celular pegar a versão nova.
+2. **Ao publicar qualquer mudança, troque `VERSAO` em `sw.js`** (neste código, `treino-renan-v27`) para o celular pegar a versão nova.
 3. **Não mude o formato dos dados salvos sem migração.** Os treinos ficam só no celular (`localStorage`); perder o formato é perder o histórico.
 4. **Não renomeie os `id` dos exercícios** (`a1`…`d6`, `e1`…`e7`): eles são as chaves do histórico e da sugestão de carga. Para trocar um exercício, mude `nome`, `maq`, `como` etc. e mantenha o `id`. Movimento novo ou com carga que não dá para comparar (máquina → halteres ou polia) ganha id novo (próximo: `e8`). O que sai dos treinos continua em `X2` (ou em `W1`), porque `CONHECIDOS` e o histórico dependem dele: `e1` (remada na máquina) saiu em 28/09/2026 e foi trocada pela `e5`; `a3` e `b4` (voador) saíram do C e foram trocados pelas `e6` e `e7` (polia), porque a Smart Fit do dono não tem o voador.
 5. Sem bibliotecas externas além da fonte Archivo do Google Fonts. Sem framework nem dependências npm no app. Playwright é permitido somente para testes; veja `testes/README.md`.
@@ -49,8 +49,9 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
 - `treino-renan-pre-contexto`: cópia do estado anterior à última importação de rotina, sem a chave do GitHub. Se essa cópia não puder ser gravada, a importação é recusada.
 - `treino-renan-backup`: data (ms) do último backup, manual ou automático.
 - `treino-renan-curta`: versão curta do treino em andamento `{ start, tronco }` (fica fora dos dados do treino).
-- `treino-renan-nuvem`: backup automático `{ repo, token, pendente, ultimo, erro }`. Grava `backup.json` num repositório **privado** via GitHub Contents API (`PUT /repos/{repo}/contents/backup.json`), com uma chave fine-grained. O token fica só no aparelho; nunca coloque token no código.
-  `pendente` só vira `false` quando o GitHub confirma o envio. Ao configurar num celular com `backup.json` já no GitHub, o app junta o histórico e recupera `cur` se não houver treino local aberto nem registro concluído com o mesmo `start` ou `id === String(cur.start)`. Só envia se este celular tiver treinos que o GitHub não tem ou um envio pendente anterior; recuperar `cur` na configuração não gera um envio.
+- `treino-renan-nuvem`: backup automático `{ repo, token, pendente, ultimo, erro, sha?, conflito? }`. Grava `backup.json` num repositório **privado** via GitHub Contents API. A chave fica só no aparelho.
+  `sha` é a versão remota confirmada, ou `null` se ainda não havia arquivo ao configurar. Sem SHA conhecido, com SHA divergente ou com resposta 409, o envio fica pausado, com pendência preservada. Configurar num celular com dados compatíveis recupera o histórico e `cur` sem enviar. Restaurar acrescenta dados conforme as regras da restauração local e não resolve divergência de versões.
+  `treino-renan-nuvem-anterior` guarda a cópia remota, sem chave, antes de uma substituição explícita. Se a cópia não puder ser gravada, não substitui. A escrita continua condicionada ao SHA da cópia guardada.
   `gravarNv()` informa se conseguiu persistir a configuração. `confirmarConfigNv()` preserva a configuração anterior em falha; ligar/trocar chave não inicia um envio nem afirma sucesso sem salvar chave e pendência. Desligar também mantém a configuração anterior e avisa se a gravação falhar.
 
 ## Onde mexer no `index.html`
@@ -67,14 +68,14 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
 - **Sugestão de carga:** `suggest()` mantém a carga preenchida. `analisarExercicio()` usa duas sessões do mesmo exercício na mesma ficha, completas conforme plano/tabela de origem, no topo da faixa e com a mesma carga em todas as séries. O aviso exige feedback explícito adequado nas duas sessões (execução controlada, sem desconforto, reserva de pelo menos 2 repetições na ficha 2; o legado da ficha 1 mantém seu critério). A referência de 2–3 é proposta de esforço, sem reescrever relatos antigos. Sessões curtas/de adaptação não geram progressão; no legado sem modo/plano, a comparação usa a tabela de origem. Nunca aumenta números automaticamente nem interpreta ausência de resposta como ausência de sintomas.
 - **Acompanhamento:** `renderProgresso()` mostra frequência real e comparação dos registros disponíveis, atualizada ao salvar/restaurar. É uma análise local por regras, sem serviço de IA, diagnóstico ou acesso à conversa. Registros manuais contam na frequência, não como séries detalhadas. `feedbackHTML()` recebe as respostas opcionais nos cards; ficam no estado e backup privados, nunca no código público.
 - **Avisos da ficha 2:** `avisosHTML()` (adaptação ou esforço, cargas antigas de perna, segurança).
-- **Aquecimento:** `warmHTML()` tem apenas 2 itens iniciais: cardio leve e 2 a 3 séries leves do 1º exercício. `WARM_KEYS` define as marcações que concluem esse checklist. A preparação dos demais aparece em `aqueceHTML()` no próprio card, conforme necessário, e não bloqueia a conclusão do aquecimento inicial. Ela vem antes das séries previstas e não conta como uma delas. A chave antiga `warm['2']` é preservada ao importar, mas não entra no checklist atual.
-  `aquecimentoHTML()` acrescenta registros reais de peso/repetições/descanso por exercício, com IDs DOM `aquec-*`. O botão de concluído usa `startRest()` e o mesmo dock, sem criar áudio se os apitos estiverem desligados. Dados e cronômetros de trabalho usam chaves separadas.
+- **Aquecimento:** `warmHTML()` mostra só o lembrete de cardio (`warm['0']`). As chaves antigas `warm['1']` e `warm['2']` continuam aceitas nos backups.
+  `aquecimentoHTML()` usa a mesma lista e o mesmo `setRowHTML()` das séries de trabalho. As linhas A1 e A2 do primeiro exercício são sugestões vazias até a interação; uma lista salva, inclusive vazia, tem prioridade. Os outros exercícios têm a opção de adicionar. Os ajustes de cada linha permitem editar o descanso e remover. O botão de concluído usa `startRest()` e o mesmo dock, com chaves separadas das séries de trabalho.
 - **Rotina:** `setupRotina()` liga a importação e formulários; `renderRotina()` desenha a tela. Quantidades desconhecidas são `null`, não zero. Compras somam alimento/unidade/base, descontando somente estoque compatível; a vitamina fracionada tem apenas um total diário. A data da importação não é data da medição. Cotações sempre mantêm a base e a data informadas.
 - **Sincronização legada:** se a rotina ampliar o estado além do limite de `fitForDb()`, ele preserva o histórico local e interrompe a tentativa legada; não compacta/apaga histórico para abrir espaço à extensão. O backup completo em arquivo e no repositório privado continua disponível.
 - **Séries do treino em andamento:** `curSet()` só devolve séries quando o treino em andamento é o da tela (os ids se repetem entre os treinos da ficha 2).
 - **Peso e repetições digitados uma vez:** `segue()` copia o valor para as séries seguintes; `anterior()` repete o valor da série anterior ao marcar.
 - **Séries e cards minimizados:** `setRowHTML()` desenha uma série (feita vira linha "18 kg × 8 · editar"); `trocarSerie()` redesenha só ela.
-  `exHTML()` / `warmHTML()` viram uma linha quando o exercício/aquecimento está completo; `fecharDepois()` minimiza e rola para o próximo;
+  `exHTML()` / `warmHTML()` viram uma linha quando o exercício/cardio está completo; `fecharDepois()` minimiza e rola para o próximo;
   `abertos` (completos abertos na mão), `fechados` (minimizados antes de terminar, via "Minimizar todos" ou "Minimizar") e `seriesAbertas` ficam só em memória;
   ao terminar um exercício, o próximo por fazer que estava em `fechados` abre sozinho.
 - **Um treino por dia** (pedido do dono): `treinoHoje()` acha o treino salvo hoje. Sem treino em andamento, a aba dele mostra `concluidoHTML()` e as outras `jaTreinouHTML()`; todas ficam travadas (`travado()`) até o dia seguinte. `reabrir()` volta o treino salvo para `cur` (cópia das séries); ao finalizar, `addEntry()` substitui o salvo pelo mesmo `id`, e descartar não apaga o salvo. No calendário, dia com treino (`diaOcupado()`) não mostra "Registrar treino"; dias antigos com dois treinos mostram um aviso para apagar o que sobrou.
@@ -94,7 +95,7 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
 
 ## Como testar
 
-Rode `node testes/rodar.js` após preparar o Playwright conforme `testes/README.md`. O comando inicia e encerra o servidor e executa os dezesseis roteiros sequencialmente, também no PowerShell. Os testes devem falhar com saída diferente de zero quando uma asserção falhar. Chromium com tela de iPhone não substitui validação no Safari e na PWA instalada.
+Rode `node testes/rodar.js` após preparar o Playwright conforme `testes/README.md`. O comando inicia e encerra o servidor e executa os 18 roteiros sequencialmente, também no PowerShell. Os testes devem falhar com saída diferente de zero quando uma asserção falhar. Chromium com tela de iPhone não substitui validação no Safari e na PWA instalada.
 
 Alternativa manual para Bash:
 
