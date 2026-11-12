@@ -21,7 +21,7 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
 ## Regras que não podem quebrar
 
 1. **Caminhos relativos** (`./sw.js`, `icon-192.png`). O site roda na subpasta `/treino-app/`.
-2. **Ao publicar qualquer mudança, troque `VERSAO` em `sw.js`** (neste código, `treino-renan-v27`) para o celular pegar a versão nova.
+2. **Ao publicar qualquer mudança, troque `VERSAO` em `sw.js`** (neste código, `treino-renan-v28`) para o celular pegar a versão nova.
 3. **Não mude o formato dos dados salvos sem migração.** Os treinos ficam só no celular (`localStorage`); perder o formato é perder o histórico.
 4. **Não renomeie os `id` dos exercícios** (`a1`…`d6`, `e1`…`e7`): eles são as chaves do histórico e da sugestão de carga. Para trocar um exercício, mude `nome`, `maq`, `como` etc. e mantenha o `id`. Movimento novo ou com carga que não dá para comparar (máquina → halteres ou polia) ganha id novo (próximo: `e8`). O que sai dos treinos continua em `X2` (ou em `W1`), porque `CONHECIDOS` e o histórico dependem dele: `e1` (remada na máquina) saiu em 28/09/2026 e foi trocada pela `e5`; `a3` e `b4` (voador) saíram do C e foram trocados pelas `e6` e `e7` (polia), porque a Smart Fit do dono não tem o voador.
 5. Sem bibliotecas externas além da fonte Archivo do Google Fonts. Sem framework nem dependências npm no app. Playwright é permitido somente para testes; veja `testes/README.md`.
@@ -42,6 +42,7 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
   - Tudo que entra passa por `sanitize()`. Ao ler, o app chama `sanitize(JSON.parse(...))`.
   - Na primeira abertura, carrega `SEED` (treinos até 26/09/2026).
   - `cur` e `hist` podem conter `aquecimento:{[exId]:[{kg,reps,done,rest}]}` (até seis por exercício). `rest` é o descanso em segundos. Não entra em séries de trabalho, frequência, adaptação ou progressão. Uma sessão só com aquecimento fica interrompida e não avança a fila.
+  - `ordemConcluidos` opcional guarda os IDs na ordem de conclusão. Afeta só a posição dos cards na tela e continua válido ao recarregar ou reabrir o treino.
   - Séries de trabalho aceitam `rir`, `nota` e `unidade` opcionais (`halter`, `total`, `maquina`, `desconhecida`); valores ausentes continuam desconhecidos e cargas não são convertidas.
   - `preferenciasTreino.adaptacaoConcluida` só é gravado quando o usuário confirma que já fez a adaptação; a data atual não confirma essa etapa.
   - `encerramento` opcional distingue `completo`/`reduzido`/`interrompido`; `proximo` opcional guarda a escolha explícita de continuar a fila ou repetir a sessão. A contagem sempre vem das séries executadas. Uma sessão reduzida/interrompida não satisfaz o critério de duas sessões completas para progressão.
@@ -69,13 +70,13 @@ O dono usa o app na academia, pelo celular. Textos da interface em **português 
 - **Acompanhamento:** `renderProgresso()` mostra frequência real e comparação dos registros disponíveis, atualizada ao salvar/restaurar. É uma análise local por regras, sem serviço de IA, diagnóstico ou acesso à conversa. Registros manuais contam na frequência, não como séries detalhadas. `feedbackHTML()` recebe as respostas opcionais nos cards; ficam no estado e backup privados, nunca no código público.
 - **Avisos da ficha 2:** `avisosHTML()` (adaptação ou esforço, cargas antigas de perna, segurança).
 - **Aquecimento:** `warmHTML()` mostra só o lembrete de cardio (`warm['0']`). As chaves antigas `warm['1']` e `warm['2']` continuam aceitas nos backups.
-  `aquecimentoHTML()` usa a mesma lista e o mesmo `setRowHTML()` das séries de trabalho. As linhas A1 e A2 do primeiro exercício são sugestões vazias até a interação; uma lista salva, inclusive vazia, tem prioridade. Os outros exercícios têm a opção de adicionar. Os ajustes de cada linha permitem editar o descanso e remover. O botão de concluído usa `startRest()` e o mesmo dock, com chaves separadas das séries de trabalho.
+  O aquecimento usa os mesmos `setRowHTML()`, `restRowHTML()` e cronômetros das séries de trabalho. As linhas A1 e A2 do primeiro exercício são sugestões vazias até a interação; uma lista salva, inclusive vazia, tem prioridade. Os ajustes para editar o descanso e remover ficam abaixo da lista. Dados e cronômetros têm chaves separadas das séries de trabalho.
 - **Rotina:** `setupRotina()` liga a importação e formulários; `renderRotina()` desenha a tela. Quantidades desconhecidas são `null`, não zero. Compras somam alimento/unidade/base, descontando somente estoque compatível; a vitamina fracionada tem apenas um total diário. A data da importação não é data da medição. Cotações sempre mantêm a base e a data informadas.
 - **Sincronização legada:** se a rotina ampliar o estado além do limite de `fitForDb()`, ele preserva o histórico local e interrompe a tentativa legada; não compacta/apaga histórico para abrir espaço à extensão. O backup completo em arquivo e no repositório privado continua disponível.
 - **Séries do treino em andamento:** `curSet()` só devolve séries quando o treino em andamento é o da tela (os ids se repetem entre os treinos da ficha 2).
 - **Peso e repetições digitados uma vez:** `segue()` copia o valor para as séries seguintes; `anterior()` repete o valor da série anterior ao marcar.
 - **Séries e cards minimizados:** `setRowHTML()` desenha uma série (feita vira linha "18 kg × 8 · editar"); `trocarSerie()` redesenha só ela.
-  `exHTML()` / `warmHTML()` viram uma linha quando o exercício/cardio está completo; `fecharDepois()` minimiza e rola para o próximo;
+  `exHTML()` / `warmHTML()` viram uma linha quando o exercício/cardio está completo; `fecharDepois()` minimiza, move o exercício para o fim e mostra o próximo pendente. Desmarcar uma série devolve o exercício à posição entre os pendentes.
   `abertos` (completos abertos na mão), `fechados` (minimizados antes de terminar, via "Minimizar todos" ou "Minimizar") e `seriesAbertas` ficam só em memória;
   ao terminar um exercício, o próximo por fazer que estava em `fechados` abre sozinho.
 - **Um treino por dia** (pedido do dono): `treinoHoje()` acha o treino salvo hoje. Sem treino em andamento, a aba dele mostra `concluidoHTML()` e as outras `jaTreinouHTML()`; todas ficam travadas (`travado()`) até o dia seguinte. `reabrir()` volta o treino salvo para `cur` (cópia das séries); ao finalizar, `addEntry()` substitui o salvo pelo mesmo `id`, e descartar não apaga o salvo. No calendário, dia com treino (`diaOcupado()`) não mostra "Registrar treino"; dias antigos com dois treinos mostram um aviso para apagar o que sobrou.
