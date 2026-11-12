@@ -19,8 +19,23 @@ const OUT = __dirname + '/prints';
     if (m.type() === 'error') erros.push('console: ' + m.text() + ' ' + JSON.stringify(m.location().url));
   });
 
+  // Instalação numa origem compartilhada, com cache de outro app e uma versão antiga.
+  await ctx.addInitScript(() => {
+    if (location.hostname !== '127.0.0.1') return;
+    const reg = navigator.serviceWorker.register.bind(navigator.serviceWorker);
+    navigator.serviceWorker.register = async (...args) => {
+      if (!sessionStorage.getItem('caches-semeados')) {
+        await Promise.all([caches.open('outro-app-cache'), caches.open('treino-renan-v0')]);
+        sessionStorage.setItem('caches-semeados','1');
+      }
+      return reg(...args);
+    };
+  });
   await page.goto(URL_APP, { waitUntil: 'load' });
   await page.evaluate(() => navigator.serviceWorker.ready);
+  await page.waitForFunction(() => !!navigator.serviceWorker.controller);
+  assert.ok(await page.evaluate(() => caches.has('outro-app-cache')));
+  assert.equal(await page.evaluate(() => caches.has('treino-renan-v0')), false);
   await page.reload({ waitUntil: 'load' });
   console.log('SW controlando:', await page.evaluate(() => !!navigator.serviceWorker.controller));
   console.log('caches:', await page.evaluate(async () => {

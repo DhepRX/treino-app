@@ -15,17 +15,18 @@ const URL_APP = 'http://127.0.0.1:8766/treino-app/';
   const marcar = (id, i) => p.click(`.setrow[data-ex="${id}"][data-i="${i}"] [data-done]`);
 
   await p.click('[data-tab="C"]');
-  // O aquecimento inicial termina antes de qualquer série de trabalho.
-  assert.equal(await p.locator('.card.warm [data-warm]').count(), 2);
-  for (const i of [0, 1]) await p.click(`[data-warm="${i}"]`);
+  // O cardio termina sem marcar séries do exercício.
+  assert.equal(await p.locator('.card.warm [data-warm]').count(), 1);
+  await p.click('[data-warm="0"]');
   await p.waitForTimeout(900);
   assert.equal(await p.locator('.card.warm.mini').count(), 1);
   assert.equal(await p.textContent('.card.warm .mt small'), 'Feito');
   assert.match(await p.textContent('#progresso'), /0 de \d+ séries feitas/);
-  assert.match(await p.textContent('#ex-d2 .aquece'), /neste exercício.*não conta nas séries previstas/);
+  assert.equal(await p.locator('#ex-d1 .sets [data-aquec-linha]').count(), 2);
+  assert.equal(await p.locator('#ex-d2 [data-aquec-linha]').count(), 0);
   await p.reload();
-  assert.equal(await p.locator('.card.warm.mini').count(), 1, 'Aquecimento continua concluído ao reabrir, sem depender dos outros exercícios');
-  console.log('aquecimento minimizado:', await p.evaluate(() => document.querySelector('.card.warm').classList.contains('mini')));
+  assert.equal(await p.locator('.card.warm.mini').count(), 1, 'Cardio continua concluído ao recarregar');
+  console.log('cardio minimizado:', await p.evaluate(() => document.querySelector('.card.warm').classList.contains('mini')));
 
   // Supino: peso 22 na série 1, marca as 3.
   await p.click('.setrow[data-ex="d1"][data-i="0"] [data-f="kg"]'); await p.keyboard.type('22');
