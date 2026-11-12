@@ -137,24 +137,23 @@ h1{font-size:1.75rem;font-weight:800;font-stretch:78%;margin:8px 0 2px;line-heig
 .feedback label{display:grid;gap:4px;margin:10px 0;font-size:.9rem;font-weight:650}
 .feedback select{width:100%;min-height:44px;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px}
 .feedback select:disabled{opacity:.55}
-.serie-notas input,.serie-notas textarea,.aquec-ajustes input{width:100%;min-height:44px;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px}
+.serie-notas input,.serie-notas textarea,.aquec-opcoes input{width:100%;min-height:44px;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px}
 .serie-notas fieldset{min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px;margin:10px 0}
 .serie-notas{margin-top:12px;border-top:1px solid var(--line);padding-top:4px}
 .serie-notas summary{min-height:44px;cursor:pointer;font-weight:700;padding:10px 0}
 .serie-notas label{display:grid;gap:4px;margin:10px 0;font-size:.9rem;font-weight:650}
 .serie-notas select{width:100%;min-height:44px;font:inherit;font-size:16px;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px}
 .serie-notas legend{font-size:.9rem;font-weight:700}
-.setrow.aquec-linha .sn{background:var(--soft);color:var(--ink);border-radius:6px;padding:4px 0}
-.aquec-controles{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:0 6px}
-.aquec-controles .restbtn{min-height:44px;min-width:0}
-.aquec-ajustes{grid-column:2;font-size:.85rem}
-.aquec-ajustes[open]{grid-column:1/-1}
-.aquec-ajustes summary{min-height:44px;padding:12px 6px;color:var(--muted);font-weight:700;cursor:pointer}
-.aquec-config{display:flex;flex-wrap:wrap;align-items:end;gap:8px;padding:0 6px 8px}
+.aquec-acoes{display:flex;flex-wrap:wrap;align-items:start;gap:4px 12px;margin-top:8px}
+.aquec-opcoes{flex:1;min-width:min(100%,10rem);font-size:.85rem}
+.aquec-opcoes[open]{flex-basis:100%}
+.aquec-opcoes summary{min-height:44px;padding:12px 0;color:var(--muted);font-weight:700;cursor:pointer}
+.aquec-config{display:flex;flex-wrap:wrap;align-items:end;gap:8px;min-width:0;margin:0 0 8px;padding:8px;border:1px solid var(--line);border-radius:9px}
+.aquec-config legend{padding:0 4px;font-weight:700}
 .aquec-config label{display:grid;gap:4px;min-width:0}
 .aquec-config input{max-width:8rem}
 .aquec-config .btn{min-height:44px}
-.aquec-adicionar{justify-self:start;margin-bottom:4px;min-height:44px;font-size:.9rem}
+.aquec-adicionar{min-height:44px;font-size:.85rem}
 
 .sets{margin-top:10px;display:grid;gap:6px}
 .setrow{display:grid;grid-template-columns:2.2rem 1fr 1fr 48px;gap:8px;align-items:center}
@@ -671,6 +670,10 @@ details.how .lbl{font-weight:700}
   function sessionExtras(source, target){
     if (['completo','reduzido','interrompido'].includes(source.encerramento)) target.encerramento = source.encerramento;
     if (ORDEM.includes(source.proximo)) target.proximo = source.proximo;
+    if (Array.isArray(source.ordemConcluidos)) {
+      const ordem = [...new Set(source.ordemConcluidos.filter(id => CONHECIDOS.has(id)))];
+      if (ordem.length) target.ordemConcluidos = ordem;
+    }
     const feedback = cleanFeedback(source.feedback);
     if (Object.keys(feedback).length) target.feedback = feedback;
     const plano = {};
@@ -1411,7 +1414,7 @@ details.how .lbl{font-weight:700}
     const id = e.id + ':' + i, n = i + 1;
     const label = (aquec ? 'Aquecimento ' : 'Série ') + n;
     const attrs = aquec
-      ? ' aquec-linha" data-aquec-linha="' + id + '"><span class="sn" title="' + label + '">A' + n + '</span>'
+      ? '" data-aquec-linha="' + id + '"><span class="sn" title="' + label + '">A' + n + '</span>'
       : '" data-ex="' + e.id + '" data-i="' + i + '"><span class="sn">' + n + '</span>';
     const doneAttr = aquec ? 'data-aquec-feito="' + id + '"' : 'data-done';
     const btnDone = '<button type="button" class="done" ' + doneAttr + ' aria-pressed="' + done + '" aria-label="' + label + (aquec ? ' feito' : ' feita') + '"' + dis + '>' + CHECK + '</button>';
@@ -1430,7 +1433,7 @@ details.how .lbl{font-weight:700}
     if (e.tempo) {
       return '<div class="setrow time' + (done ? ' ok' : '') + attrs +
         campo('reps', 'numeric', aquec ? 's' : (sg.secs || faixa(e)), repsVal, 'segundos') +
-        (aquec ? '<span></span>' : '<button type="button" class="hold" data-hold' + dis + '>Iniciar</button>') + btnDone + '</div>';
+        '<button type="button" class="hold" data-hold' + dis + '>Iniciar</button>' + btnDone + '</div>';
     }
     const kgVal = cs && cs.kg != null ? fmt(cs.kg) : (!aquec && sg.kg ? fmt(sg.kg) : '');
     const rep = campo('reps', 'numeric', aquec ? 'reps' : faixa(e), repsVal, 'repetições');
@@ -1444,6 +1447,25 @@ details.how .lbl{font-weight:700}
   // Séries feitas deste exercício no treino em andamento.
   const doCur = e => !!(state.cur && state.cur.wid === e.w && state.cur.ficha === e.f);
   function feitasEx(e){ return doCur(e) ? (state.cur.sets[e.id] || []).slice(0, S(e)).filter(x => x && x.done) : []; }
+  const exConcluido = e => feitasEx(e).length >= S(e);
+  function ordemExercicios(w, concluiu = exConcluido){
+    const ordem = state.cur?.wid === w.id ? state.cur.ordemConcluidos || [] : [];
+    const ranking = new Map(ordem.map((id, i) => [id, i]));
+    return exibidos(w).map((e, i) => ({ e, i, feito:concluiu(e) }))
+      .sort((a,b) => Number(a.feito) - Number(b.feito) ||
+        (a.feito ? (ranking.get(a.e.id) ?? -1) - (ranking.get(b.e.id) ?? -1) : 0) || a.i - b.i);
+  }
+  function atualizarOrdemConcluidos(ultimo = null){
+    const c = state.cur;
+    if (!c || c.wid !== sel) return;
+    const lista = exibidos(treinoTela(sel)), visiveis = new Set(lista.map(e => e.id));
+    const feitos = new Set(lista.filter(exConcluido).map(e => e.id));
+    const ordem = (c.ordemConcluidos || []).filter(id => !visiveis.has(id) || feitos.has(id));
+    for (const id of feitos) if (id !== ultimo && !ordem.includes(id)) ordem.push(id);
+    if (feitos.has(ultimo) && !ordem.includes(ultimo)) ordem.push(ultimo);
+    if (ordem.length) c.ordemConcluidos = ordem;
+    else delete c.ordemConcluidos;
+  }
   function feedbackHTML(e, lock){
     const ativo = doCur(e), f = ativo && state.cur.feedback && state.cur.feedback[e.id] || {};
     const dis = lock || !ativo ? ' disabled' : '';
@@ -1469,18 +1491,16 @@ details.how .lbl{font-weight:700}
     const mapa = state.cur.aquecimento || (state.cur.aquecimento = {});
     return mapa[e.id] ?? (mapa[e.id] = aquecimentosEx(e));
   }
-  function aquecimentoHTML(e, dis){
-    const series = dis ? [] : aquecimentosEx(e);
-    return series.map((s, i) => {
+  function aquecimentoOpcoesHTML(e, series, dis){
+    const ajustes = series.map((s, i) => {
       const id = e.id + ':' + i;
-      return setRowHTML(e, i, null, dis, s) + '<div class="aquec-controles">' +
-        restRowHTML(e, i, dis, s.done, s) +
-        '<details class="aquec-ajustes" data-aquec-ajustes="' + id + '"><summary aria-label="Ajustes do aquecimento ' + (i + 1) + '">Ajustes</summary><div class="aquec-config">' +
+      return '<fieldset class="aquec-config" data-aquec-ajustes="' + id + '"><legend>A' + (i + 1) + '</legend>' +
         '<label>Descanso (s)<input id="aquec-' + e.id + '-' + i + '-rest" data-aquec-campo="rest" data-aquec-ex="' + e.id + '" data-aquec-i="' + i + '" type="number" inputmode="numeric" min="0" max="900" step="1" value="' + s.rest + '"></label>' +
         (e.tempo || e.semPeso ? '<label>Carga registrada (kg, opcional)<input id="aquec-' + e.id + '-' + i + '-kg" data-aquec-campo="kg" data-aquec-ex="' + e.id + '" data-aquec-i="' + i + '" inputmode="decimal" value="' + fmt(s.kg) + '"></label>' : '') +
-        '<button type="button" class="btn quiet" data-aquec-remover="' + id + '" aria-label="Remover aquecimento ' + (i + 1) + '">Remover</button></div></details></div>';
-    }).join('') +
-      '<button type="button" class="btn quiet aquec-adicionar" data-aquec-adicionar="' + e.id + '"' + (series.length >= MAX_AQUECIMENTOS ? ' disabled' : dis) + '>+ Adicionar aquecimento</button>';
+        '<button type="button" class="btn quiet" data-aquec-remover="' + id + '">Remover A' + (i + 1) + '</button></fieldset>';
+    }).join('');
+    return '<div class="aquec-acoes"><button type="button" class="btn quiet aquec-adicionar" data-aquec-adicionar="' + e.id + '"' + (series.length >= MAX_AQUECIMENTOS ? ' disabled' : dis) + '>+ Aquecimento</button>' +
+      (ajustes ? '<details class="aquec-opcoes" data-aquec-opcoes><summary>Ajustes do aquecimento</summary>' + ajustes + '</details>' : '') + '</div>';
   }
   function seriesExtrasHTML(e, dis){
     const disabled = !doCur(e) ? ' disabled' : dis;
@@ -1499,6 +1519,7 @@ details.how .lbl{font-weight:700}
   }
   function exHTML(e, idx, lock){
     const feitas = feitasEx(e), completo = feitas.length >= S(e);
+    const marca = completo ? ' data-concluido' : '';
     const lado = (e.lado ? (e.perna ? ' cada perna' : e.braco ? ' cada braço' : ' cada lado') : '') + (e.extra ? ', ' + e.extra : '');
     const alvo = S(e) + ' × ' + faixa(e) + (e.tempo ? ' s' : '') + lado;
     // No card, por extenso: "2 séries de 8–12 repetições" (o "2 × 8–12" confundia séries com repetições).
@@ -1512,7 +1533,7 @@ details.how .lbl{font-weight:700}
         const kg = prox ? prox.kg : suggest(e).kg;
         resumo = feitas.length + ' de ' + S(e) + ' séries · ' + alvo + (kg && !e.tempo && !e.semPeso ? ' · ' + fmt(kg) + ' kg' : '');
       }
-      return '<li class="card ex mini" id="ex-' + e.id + '"><button type="button" class="minirow" data-abrir="' + e.id + '" aria-expanded="false">' +
+      return '<li class="card ex mini" id="ex-' + e.id + '"' + marca + '><button type="button" class="minirow" data-abrir="' + e.id + '" aria-expanded="false">' +
         '<span class="num' + (completo ? '' : ' pend') + '">' + (completo ? CHECK : idx + 1) + '</span><span class="mt"><b>' + esc(e.nome) + '</b><small>' + esc(resumo) + '</small></span>' +
         '<span class="abrir">Abrir</span></button></li>';
     }
@@ -1533,17 +1554,18 @@ details.how .lbl{font-weight:700}
       rows += '<div class="setrow head"><span>Série</span><span>Carga (kg)</span><span>Repetições</span><span></span></div>';
     }
     const dis = lock ? ' disabled' : '';
-    rows += aquecimentoHTML(e, dis);
+    const aquecimentos = lock ? [] : aquecimentosEx(e);
+    aquecimentos.forEach((s, i) => { rows += setRowHTML(e, i, null, dis, s) + restRowHTML(e, i, dis, s.done, s); });
     for (let i = 0; i < S(e); i++) {
       const cs = curSet(e.id, i);
       rows += setRowHTML(e, i, sg, dis) + restRowHTML(e, i, dis, !!(cs && cs.done));
     }
     const par = e.par ? '<p class="pair">Faça junto com o <b>' + esc(parDe(e).nome.toLowerCase()) + '</b>: uma série de cada, sem pausa, e descanse depois do tríceps.</p>' : '';
-    return '<li class="card ex" id="ex-' + e.id + '">' +
+    return '<li class="card ex" id="ex-' + e.id + '"' + marca + '>' +
       '<div class="exhead"><span class="num">' + (idx + 1) + '</span><div><h3>' + esc(e.nome) + '</h3><p class="maq">Na Smart Fit: ' + esc(e.maq) + '</p></div>' +
       '<button type="button" class="minbtn" data-fechar="' + e.id + '">Minimizar</button></div>' +
       '<p class="target"><strong>' + esc(alvoCard) + '</strong><span>' + esc(desc) + '</span></p>' + par + info +
-      '<div class="sets">' + rows + '</div>' + seriesExtrasHTML(e, dis) + feedbackHTML(e, lock) +
+      '<div class="sets">' + rows + '</div>' + aquecimentoOpcoesHTML(e, aquecimentos, dis) + seriesExtrasHTML(e, dis) + feedbackHTML(e, lock) +
       '<div class="exfoot">' +
         '<div class="videoarea">' +
           (e.vid ? '<button type="button" class="btn primary" data-video="' + e.id + '" aria-expanded="false">Ver vídeo</button><div class="video-wrap" data-video-box="' + e.id + '" hidden></div>' : '') +
@@ -1707,7 +1729,7 @@ details.how .lbl{font-weight:700}
     if (lastSummary && lastSummary.wid === w.id && !c) html += lastSummary.html;
     html += '<div class="listbar"><button type="button" class="minbtn" data-todos="fechar">Minimizar todos</button><button type="button" class="minbtn" data-todos="abrir">Abrir todos</button></div>';
     html += warmHTML(w, lock);
-    html += '<ol class="exlist">' + exibidos(w).map((e, i) => exHTML(e, i, lock)).join('') + '</ol>';
+    html += '<ol class="exlist">' + ordemExercicios(w).map(({e,i}) => exHTML(e, i, lock)).join('') + '</ol>';
     if (ativo) {
       const seguinte = ORDEM[(ORDEM.indexOf(w.id) + 1) % ORDEM.length];
       html += '<details class="serie-notas"><summary>Como encerrar e qual treino fazer depois</summary><label>Esta sessão foi<select data-encerramento><option value="">Pelo que foi registrado</option>' +
@@ -1869,7 +1891,7 @@ details.how .lbl{font-weight:700}
     const plano = Object.fromEntries(exibidos(w).map(e => [e.id, S(e)]));
     const modo = c.modo || (curtaAtiva(w.id) ? 'curto' : w.f === ATUAL && adaptacao() ? 'adaptacao' : 'completo');
     if (salvar) {
-      const registro = sessionExtras({ feedback:c.feedback, plano, modo, aquecimento:c.aquecimento, encerramento:interrompido ? 'interrompido' : c.encerramento || (noPlano >= total ? 'completo' : 'reduzido'), proximo:c.proximo }, { id:String(c.start), wid:c.wid, ficha:c.ficha, start:c.start, end:fim, sets });
+      const registro = sessionExtras({ feedback:c.feedback, plano, modo, aquecimento:c.aquecimento, ordemConcluidos:c.ordemConcluidos, encerramento:interrompido ? 'interrompido' : c.encerramento || (noPlano >= total ? 'completo' : 'reduzido'), proximo:c.proximo }, { id:String(c.start), wid:c.wid, ficha:c.ficha, start:c.start, end:fim, sets });
       if (interrompido) registro.interrompido = true;
       addEntry(registro);
     }
@@ -1988,16 +2010,28 @@ details.how .lbl{font-weight:700}
       }
     });
   }
+  function limparHold(){
+    if (hold) {
+      const old = document.querySelector(seletorSerie(hold.exId, hold.i, hold.aquec) + ' [data-hold]');
+      if (old) { old.textContent = 'Iniciar'; old.classList.remove('on'); }
+      hold = null;
+    }
+  }
+  function iniciarHold(exId, i, alvo, aquec = false){
+    limparHold();
+    hold = { exId, i, aquec, start:Date.now(), alvo, avisou:false };
+    fecharVideos(); somOn(); rest = null; updateDock();
+  }
   function paintHold(){
     if (!hold) return;
-    const b = state.cur && state.cur.wid === sel && document.querySelector('.setrow[data-ex="' + hold.exId + '"][data-i="' + hold.i + '"] [data-hold]');
+    const b = state.cur && state.cur.wid === sel && document.querySelector(seletorSerie(hold.exId, hold.i, hold.aquec) + ' [data-hold]');
     const s = Math.floor((Date.now() - hold.start) / 1000);
     if (b) {
       b.classList.add('on');
       const texto = 'Parar ' + mmssS(s);
       if (b.textContent !== texto) b.textContent = texto;
     }
-    if (!hold.avisou && s >= hold.alvo) {
+    if (!hold.avisou && hold.alvo !== null && s >= hold.alvo) {
       hold.avisou = true;
       try { navigator.vibrate && navigator.vibrate([200, 100, 200]); } catch (e) {}
       beep();
@@ -2110,7 +2144,15 @@ details.how .lbl{font-weight:700}
     tmp.innerHTML = id === 'warm' ? warmHTML(w, outro) : exHTML(w.porEx[id], exibidos(w).indexOf(w.porEx[id]), outro);
     const novo = tmp.firstElementChild;
     card.replaceWith(novo);
+    if (id !== 'warm' && card.hasAttribute('data-concluido') !== novo.hasAttribute('data-concluido')) posicionarExercicio(novo);
     return novo;
+  }
+  function posicionarExercicio(card){
+    const lista = card.parentElement;
+    const ordem = ordemExercicios(treinoTela(sel), e => $('ex-' + e.id)?.hasAttribute('data-concluido'));
+    const idx = ordem.findIndex(({e}) => 'ex-' + e.id === card.id);
+    const seguinte = idx >= 0 && ordem[idx + 1] ? $('ex-' + ordem[idx + 1].e.id) : null;
+    if (card.nextElementSibling !== seguinte) lista.insertBefore(card, seguinte);
   }
   // Redesenha uma série (e esconde o descanso dela quando já foi feita).
   const seletorSerie = (exId, i, aquec) => aquec ? '.setrow[data-aquec-linha="' + exId + ':' + i + '"]' : '.setrow[data-ex="' + exId + '"][data-i="' + i + '"]';
@@ -2130,17 +2172,39 @@ details.how .lbl{font-weight:700}
   function estaCompleto(id){
     if (id === 'warm') return !!state.cur?.warm[CARDIO];
     const e = exTela(id);
-    return !!e && feitasEx(e).length >= S(e);
+    return !!e && exConcluido(e);
   }
   function abrir(id){ fechados.delete(id); abertos.add(id); }
   function minimizar(id){ abertos.delete(id); fechados.add(id); }
-  // Depois da última série, espera um instante para você ver o ✓, minimiza e mostra o próximo.
+  function mostrarCard(card){
+    const suave = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    card?.scrollIntoView({ block:'start', behavior:suave ? 'smooth' : 'auto' });
+  }
+  function mostrarProximo(id){
+    const ids = exibidos(treinoTela(sel)).map(x => x.id);
+    const k = ids.indexOf(id);
+    const prox = ids.slice(k + 1).concat(ids.slice(0, Math.max(0,k))).find(x => !estaCompleto(x));
+    if (prox && fechados.has(prox)) { abrir(prox); redesenhar(prox); }
+    mostrarCard(prox ? $('ex-' + prox) : document.querySelector('#workout .finish'));
+  }
+  function devolverPendente(e){
+    const card = $('ex-' + e.id);
+    atualizarOrdemConcluidos();
+    if (!card?.hasAttribute('data-concluido') || exConcluido(e)) return;
+    abrir(e.id);
+    const novo = redesenhar(e.id);
+    novo?.querySelector('.minbtn')?.focus({ preventScroll:true });
+    mostrarCard(novo);
+  }
+  // Depois da última série, dá tempo de ver o ✓ e leva o card concluído ao fim.
   function fecharDepois(id){
     abertos.delete(id);
+    const sessao = state.cur, aba = sel;
     setTimeout(() => {
+      if (state.cur !== sessao || sel !== aba || view !== 'treino') return;
       const card = id === 'warm' ? document.querySelector('#workout .card.warm') : $('ex-' + id);
       if (!card || card.classList.contains('mini') || abertos.has(id) || !estaCompleto(id)) return;
-      if (card.querySelector('.feedback[open]')) return; // O relato continua aberto mesmo após marcar a última série.
+      if (card.querySelector('.feedback[open],.serie-notas[open],.aquec-opcoes[open]')) return;
       // Está corrigindo um número: fecha quando sair do campo.
       if (card.contains(document.activeElement) && document.activeElement.matches('input,select,textarea')) {
         card.addEventListener('focusout', () => fecharDepois(id), { once:true });
@@ -2148,12 +2212,8 @@ details.how .lbl{font-weight:700}
       }
       const novo = redesenhar(id);
       if (novo && novo.classList.contains('mini')) {
-        // Se o próximo exercício por fazer estava minimizado, abre ele.
-        const ids = exibidos(treinoTela(sel)).map(x => x.id), k = id === 'warm' ? -1 : ids.indexOf(id);
-        const prox = ids.slice(k + 1).find(x => !estaCompleto(x));
-        if (prox && fechados.has(prox)) { fechados.delete(prox); redesenhar(prox); }
-        const suave = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-        novo.scrollIntoView({ block:'start', behavior:suave ? 'smooth' : 'auto' });
+        // Não rouba a tela se o usuário já estiver digitando em outro card.
+        if (!document.activeElement?.closest('.card.ex')) mostrarProximo(id);
       }
     }, 700);
   }
@@ -2209,6 +2269,20 @@ details.how .lbl{font-weight:700}
       if (campo) campo.focus({ preventScroll:true });
       return;
     }
+    const hbAquec = ev.target.closest('[data-aquec-linha] [data-hold]');
+    if (hbAquec) {
+      const [id, indice] = hbAquec.closest('[data-aquec-linha]').dataset.aquecLinha.split(':');
+      const i = Number(indice), e = exTela(id), s = e && editarAquecimentos(e)?.[i];
+      if (!s) return;
+      if (hold?.aquec && hold.exId === id && hold.i === i) {
+        s.reps = Math.max(1, Math.round((Date.now() - hold.start) / 1000));
+        s.done = true; hold = null;
+        seriesAbertas.delete('aquec-' + id + ':' + i);
+        commit(); trocarSerie(id, i, true);
+        startRest(s.rest, 'Aquecimento · ' + e.nome, 'aquec-' + id, i);
+      } else iniciarHold(id, i, null, true);
+      return;
+    }
     const aquecBotao = ev.target.closest('[data-aquec-feito],[data-aquec-remover],[data-aquec-rest],[data-aquec-editar]');
     if (aquecBotao) {
       const [id, indice] = (aquecBotao.dataset.aquecFeito || aquecBotao.dataset.aquecRemover || aquecBotao.dataset.aquecRest || aquecBotao.dataset.aquecEditar).split(':');
@@ -2220,6 +2294,10 @@ details.how .lbl{font-weight:700}
         const remover = () => {
           if (rest?.exId === chave && rest.i === i) { rest = null; fecharAudio(); }
           else if (rest?.exId === chave && rest.i > i) rest.i--;
+          if (hold?.aquec && hold.exId === id) {
+            if (hold.i === i) { hold = null; fecharAudio(); }
+            else if (hold.i > i) hold.i--;
+          }
           for (const k of seriesAbertas) if (k.startsWith(chave + ':')) seriesAbertas.delete(k);
           lista.splice(i, 1); commit(); redesenhar(id); updateDock();
         };
@@ -2235,7 +2313,10 @@ details.how .lbl{font-weight:700}
       } else {
         s.done = !s.done;
         seriesAbertas.delete(chave + ':' + i);
-        if (s.done) { hold = null; startRest(s.rest, 'Aquecimento · ' + e.nome, chave, i); }
+        if (s.done && hold?.aquec && hold.exId === id && hold.i === i && s.reps === null) {
+          s.reps = Math.max(1, Math.round((Date.now() - hold.start) / 1000));
+        }
+        if (s.done) { limparHold(); startRest(s.rest, 'Aquecimento · ' + e.nome, chave, i); }
         else if (rest && rest.exId === chave && rest.i === i) { rest = null; fecharAudio(); }
         commit();
         trocarSerie(id, i, true)?.querySelector('[data-aquec-feito]')?.focus({ preventScroll:true });
@@ -2256,7 +2337,15 @@ details.how .lbl{font-weight:700}
     const ab = ev.target.closest('[data-abrir]');
     if (ab) { abrir(ab.dataset.abrir); const c = redesenhar(ab.dataset.abrir); if (c) { const f = c.querySelector('.minbtn'); if (f) f.focus({ preventScroll:true }); } return; }
     const fe = ev.target.closest('[data-fechar]');
-    if (fe) { minimizar(fe.dataset.fechar); const c = redesenhar(fe.dataset.fechar); if (c) c.querySelector('.minirow').focus({ preventScroll:true }); return; }
+    if (fe) {
+      const id = fe.dataset.fechar, card = fe.closest('.card');
+      const mover = id !== 'warm' && estaCompleto(id) && !card.hasAttribute('data-concluido');
+      minimizar(id);
+      const c = redesenhar(id);
+      if (mover) mostrarProximo(id);
+      else c?.querySelector('.minirow')?.focus({ preventScroll:true });
+      return;
+    }
     const vc = ev.target.closest('[data-curta]');
     if (vc) {
       const acao = vc.dataset.curta;
@@ -2264,6 +2353,7 @@ details.how .lbl{font-weight:700}
       else if (acao === 'tronco' && curta) gravarCurta({ start:curta.start, tronco:!curta.tronco });
       else if (acao === 'sair') gravarCurta(null);
       registrarPlanoAtual();
+      atualizarOrdemConcluidos();
       commit();
       renderWorkout();
       return;
@@ -2329,7 +2419,7 @@ details.how .lbl{font-weight:700}
       if (!state.cur && !startSession(sel)) return;
       if (!state.cur || state.cur.wid !== e.w) return;
       const q = '.setrow[data-ex="' + exId + '"][data-i="' + i + '"]';
-      if (hold && hold.exId === exId && hold.i === i) {
+      if (hold && !hold.aquec && hold.exId === exId && hold.i === i) {
         const secs = Math.max(1, Math.round((Date.now() - hold.start) / 1000));
         hold = null;
         const r = document.querySelector(q);
@@ -2337,23 +2427,14 @@ details.how .lbl{font-weight:700}
         const btn = r.querySelector('[data-hold]');
         btn.textContent = 'Iniciar'; btn.classList.remove('on');
         setVal(exId, i, { reps:secs, done:true });
+        atualizarOrdemConcluidos(exId);
         commit();
         startRest(e.rest, e.nome, exId, i);
         progressText();
         seriesAbertas.delete(exId + ':' + i);
         trocarSerie(exId, i);
         if (feitasEx(e).length >= S(e)) fecharDepois(exId);
-      } else {
-        if (hold) {
-          const old = document.querySelector('.setrow[data-ex="' + hold.exId + '"][data-i="' + hold.i + '"] [data-hold]');
-          if (old) { old.textContent = 'Iniciar'; old.classList.remove('on'); }
-        }
-        hold = { exId, i, start:Date.now(), alvo:suggest(e).secs || e.r[0], avisou:false };
-        fecharVideos();
-        somOn();
-        rest = null;
-        updateDock();
-      }
+      } else iniciarHold(exId, i, suggest(e).secs || e.r[0]);
       return;
     }
     const db = ev.target.closest('[data-done]');
@@ -2370,13 +2451,14 @@ details.how .lbl{font-weight:700}
         // Desmarcar uma série que já virou linha: volta com os campos preenchidos.
         setVal(exId, i, { done:false });
         trocarSerie(exId, i);
+        devolverPendente(e);
         commit();
         progressText();
         return;
       }
       const kgIn = rowNow.querySelector('[data-f="kg"]');
       const repIn = rowNow.querySelector('[data-f="reps"]');
-      if (hold && hold.exId === exId && hold.i === i) {
+      if (hold && !hold.aquec && hold.exId === exId && hold.i === i) {
         const secs = Math.max(1, Math.round((Date.now() - hold.start) / 1000));
         hold = null;
         if (!repIn.value) repIn.value = String(secs);
@@ -2395,13 +2477,18 @@ details.how .lbl{font-weight:700}
         const quantos = feitasEx(e).length;
         if (!e.par) startRest(e.rest, e.nome, exId, i);
         else if (parDe(e)) say('Agora ' + parDe(e).nome.toLowerCase() + ', sem pausa.');
-        if (quantos >= S(e)) { say(e.nome + ' concluído.'); fecharDepois(exId); }
-      }
+        if (quantos >= S(e)) { atualizarOrdemConcluidos(exId); say(e.nome + ' concluído.'); fecharDepois(exId); }
+      } else devolverPendente(e);
       commit();
       progressText();
       return;
     }
   });
+  $('workout').addEventListener('toggle', ev => {
+    if (!ev.target.matches('.feedback,.serie-notas,.aquec-opcoes') || ev.target.open) return;
+    const card = ev.target.closest('.card.ex:not([data-concluido])'), id = card?.id.slice(3);
+    if (id && estaCompleto(id)) fecharDepois(id);
+  }, true);
   $('workout').addEventListener('change', ev => {
     const descansoAquec = ev.target.closest('[data-aquec-campo="rest"]');
     if (descansoAquec) {

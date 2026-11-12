@@ -12,6 +12,7 @@ const URL_APP = 'http://127.0.0.1:8766/treino-app/';
   await p.goto(URL_APP); await p.evaluate(() => localStorage.clear()); await p.reload();
   await p.evaluate(() => { const s = JSON.parse(localStorage.getItem('treino-renan-v1')); ['A','B','C','D'].forEach((w, i) => s.hist.push({ id:'f2' + w, wid:w, ficha:2, manual:true, start:Date.UTC(2026,8,20+i,12), end:Date.UTC(2026,8,20+i,12), sets:{} })); s.hist.sort((a,b)=>a.start-b.start); localStorage.setItem('treino-renan-v1', JSON.stringify(s)); }); await p.reload(); // ciclo da ficha 2 já feito: séries da tabela
   const mini = id => p.evaluate(id => { const c = document.getElementById('ex-' + id); return c ? c.classList.contains('mini') : null; }, id);
+  const ordem = () => p.locator('#workout .exlist > .ex').evaluateAll(cs => cs.map(c => c.id.slice(3)));
   const marcar = (id, i) => p.click(`.setrow[data-ex="${id}"][data-i="${i}"] [data-done]`);
 
   await p.click('[data-tab="C"]');
@@ -38,6 +39,8 @@ const URL_APP = 'http://127.0.0.1:8766/treino-app/';
   console.log('logo após a 3ª -> minimizado?', await mini('d1'));
   await p.waitForTimeout(1200);
   assert.equal(await mini('d1'), true);
+  assert.equal((await ordem()).at(-1),'d1','Concluído vai para o fim');
+  assert.equal((await ordem())[0],'d2','Pendente assume o primeiro lugar');
   console.log('0,7 s depois -> minimizado?', await mini('d1'), '|', (await p.textContent('#ex-d1')).replace(/\s+/g, ' ').trim());
   const pos = await p.evaluate(() => { const t = document.getElementById('tabs').getBoundingClientRect(); const c = document.getElementById('ex-d1').getBoundingClientRect(); const n = document.getElementById('ex-d2').getBoundingClientRect(); return { abas: Math.round(t.bottom), card: Math.round(c.top), proximo: Math.round(n.top), tela: innerHeight }; });
   console.log('rolagem: fim das abas', pos.abas, '| card minimizado em', pos.card, '| próximo exercício em', pos.proximo, 'de', pos.tela);
@@ -64,13 +67,18 @@ const URL_APP = 'http://127.0.0.1:8766/treino-app/';
   // Trocar de aba e voltar mantém.
   await p.click('[data-tab="A"]'); await p.click('[data-tab="C"]');
   assert.equal(await mini('d1'), true); assert.equal(await mini('d2'), true); assert.equal(await mini('d3'), false);
+  assert.deepEqual((await ordem()).slice(-2),['d1','d2'],'Mantém ordem de conclusão');
+  await p.reload();
+  assert.deepEqual((await ordem()).slice(-2),['d1','d2'],'Mantém ordem ao recarregar');
   console.log('trocou de aba e voltou:', await mini('d1'), await mini('d2'), '| outros abertos:', await mini('d3'), await mini('d4'));
 
   // Desmarcar uma série de um card aberto: fica aberto; marcar de novo: fecha.
   await p.click('#ex-d1 .minirow'); await marcar('d1', 2);
   await p.waitForTimeout(900);
+  assert.equal((await ordem())[0],'d1','Desmarcar devolve o exercício aos pendentes');
   console.log('desmarcou 1 série -> minimizado?', await mini('d1'), '| botão Minimizar some depois de redesenhar:', true);
   await marcar('d1', 2); await p.waitForTimeout(900);
+  assert.deepEqual((await ordem()).slice(-2),['d2','d1'],'Ao refazer, o exercício vai para o fim da fila');
   console.log('marcou de novo -> minimizado?', await mini('d1'));
 
   // Finalizar: tudo volta ao normal.

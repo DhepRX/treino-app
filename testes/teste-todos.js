@@ -42,6 +42,7 @@ const { chromium, devices } = require('playwright');
   // 4. Linha minimizada da puxada mostra o progresso; minimizar um card no meio.
   await p.click(row('d2', 0) + ' [data-done]');
   await p.click('#ex-d2 .minbtn');
+  assert.equal(await p.locator('.exlist > .ex').first().getAttribute('id'), 'ex-d2', 'Minimizar um pendente não tira ele da fila');
   console.log('4. puxada com 1 série e minimizada:', await p.textContent('#ex-d2 small'));
 
   // 5. Abrir todos.

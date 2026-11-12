@@ -58,7 +58,7 @@ const linha = (id, i) => '.setrow[data-ex="' + id + '"][data-i="' + i + '"]';
     // Remover A1 não reinicia nem cancela o descanso de A2, que passa a ser A1.
     await q.fill('#aquec-a1-0-kg', '10');
     await q.click('[data-aquec-feito="a1:1"]');
-    await q.click('[data-aquec-ajustes="a1:0"] summary');
+    await q.click('#ex-a1 [data-aquec-opcoes] summary');
     const antes = await q.textContent('#dockClock');
     await q.click('[data-aquec-remover="a1:0"]');
     assert.equal(await q.getAttribute('.restbtn.on', 'data-rs'), 'aquec-a1:0');
@@ -77,7 +77,7 @@ const linha = (id, i) => '.setrow[data-ex="' + id + '"][data-i="' + i + '"]';
       const d = base();
       d.cur = { wid, ficha:2, start:Date.now(), sets:{}, warm:{}, aquecimento:{ [ex]:[{kg:4,reps,done:true,rest:45}] } };
       const r = await pagina(d);
-      await r.click('[data-aquec-ajustes="' + ex + ':0"] summary');
+      await r.click('#ex-' + ex + ' [data-aquec-opcoes] summary');
       assert.equal(await r.inputValue('#aquec-' + ex + '-0-kg'), '4');
       await r.fill('#aquec-' + ex + '-0-kg', '2,5');
       assert.match(await r.textContent('[data-aquec-editar="' + ex + ':0"] span'), /2,5 kg/);
@@ -89,6 +89,16 @@ const linha = (id, i) => '.setrow[data-ex="' + id + '"][data-i="' + i + '"]';
       await r.click('[data-aquec-feito="' + ex + ':0"]');
       assert.equal((await ler(r)).cur.aquecimento[ex][0].reps, 12);
       assert.deepEqual((await ler(r)).cur.sets, {});
+      if (ex === 'd6') {
+        const row = '[data-aquec-linha="d6:0"]';
+        await r.click(row + ' [data-aquec-editar]');
+        await r.click(row + ' [data-hold]');
+        assert.match(await r.textContent(row + ' [data-hold]'), /Parar/);
+        await r.click(row + ' [data-hold]');
+        assert.match(await r.textContent(row + ' .setmini span'), /2,5 kg × [1-9]\d* s/);
+        assert.equal(await r.getAttribute('.restbtn.on', 'data-rs'), 'aquec-d6:0');
+        assert.deepEqual((await ler(r)).cur.sets, {});
+      }
       await r.context().close();
     }
 
