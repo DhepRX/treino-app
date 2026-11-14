@@ -23,8 +23,8 @@ const D26 = { id: 'd26', wid: 'D', start: H(17), end: H(18), sets: {
   const cards = () => p.$$eval('#workout .card.ex', cs => cs.map(c => c.id.slice(3) + ':' + c.querySelectorAll('.setrow[data-ex]').length).join(' '));
   const sugestao = async id => { const v = await p.inputValue(`.setrow[data-ex="${id}"][data-i="0"] [data-f="kg"]`).catch(() => '—'); return v; };
 
-  // 1. Próximo treino depois do D de 26/09.
-  assert.match(await p.textContent('#today'), /Próximo( treino)?: A \(Superiores 1\)/);
+  // 1. Abre o A para conferir a tabela, independente do dia da agenda.
+  await p.click('[data-tab="A"]');
   console.log('1. cabeçalho:', await p.textContent('#today'), '| aba aberta:', await p.textContent('#tabs [aria-pressed="true"]'));
   console.log('   título:', await p.textContent('.whead h2'), '| foco:', await p.textContent('.whead p'));
   // 2. Adaptação: 2 séries em tudo e aviso.
@@ -100,11 +100,11 @@ const D26 = { id: 'd26', wid: 'D', start: H(17), end: H(18), sets: {
   await fazer('D', async () => { await p.fill('.setrow[data-ex="c1"][data-i="0"] [data-f="kg"]', '100'); await p.fill('.setrow[data-ex="c1"][data-i="0"] [data-f="reps"]', '15');
     await p.click('.setrow[data-ex="c1"][data-i="0"] [data-done]'); await p.click('.setrow[data-ex="c1"][data-i="1"] [data-done]'); });
   const s2 = await st();
-  console.log('   treinos salvos com ficha:', s2.hist.filter(h => h.ficha === 2).map(h => h.wid).join(','), '| ficha no antigo:', s2.hist.find(h => h.id === 'd26').ficha);
+  assert.deepEqual(s2.hist.filter(h => h.ficha === 3).map(h => h.wid), ['A','B','C','D']);
 
   // Depois da adaptação: séries das tabelas.
   await p.click('[data-tab="B"]');
-  assert.equal(await cards(), 'c1:3 c4:3 c5:2 c2:2 c6:3 a5:3 b6:2 e4:2');
+  assert.equal(await cards(), 'c1:3 c4:3 c5:2 c2:2 c6:3 e4:2');
   console.log('4. depois do ciclo, B:', await cards());
   console.log('   aviso:', await p.textContent('.aviso-treino'));
   assert.doesNotMatch(await p.textContent('.aviso-treino'), /Adaptação à ficha nova/);
@@ -156,7 +156,7 @@ const D26 = { id: 'd26', wid: 'D', start: H(17), end: H(18), sets: {
   await p.click('[data-tab="A"]');
   console.log('   A:', await cards(), '| aviso:', (await p.textContent('.aviso-treino')).slice(0, 70));
   await p.click('[data-tab="D"]');
-  assert.equal(await cards(), 'c4:3 c1:2 c2:2 c5:2 e3:2 c6:2 a5:3 a7:2 d6:2');
+  assert.equal(await cards(), 'c4:3 c1:2 c2:2 c5:2 e3:2 c6:2 d6:2');
   console.log('   D:', await cards());
   await p.screenshot({ path: __dirname + '/prints/ficha2-D.png' });
 
