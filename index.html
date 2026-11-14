@@ -57,6 +57,18 @@ h1{font-size:1.75rem;font-weight:800;font-stretch:78%;margin:8px 0 2px;line-heig
 .wkhead h3{margin:0;font-size:1.1rem;font-weight:800}
 .wkhead span{color:var(--muted);font-size:.9rem;white-space:nowrap}
 .wkcount{margin:2px 0 6px;color:var(--muted);font-size:.88rem}
+.agenda{margin-top:12px}
+.agenda-dias{list-style:none;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin:10px 0;padding:0}
+.agenda-dia{width:100%;min-height:54px;display:grid;place-content:center;gap:2px;text-align:center;background:var(--bg);border:1px solid var(--line);border-radius:8px;font-size:.78rem;padding:2px}
+button.agenda-dia{cursor:pointer}
+.agenda-dia strong{font-size:1rem}
+.agenda-dia[aria-current="date"]{border-color:var(--ink)}
+.agenda-dia.feito-dia{background:var(--soft)}
+.agenda-editar summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:700}
+.agenda-editar summary::after{content:"▾";margin-left:6px}
+.agenda-campos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:8px}
+.agenda-campos label{display:grid;gap:4px;font-size:.86rem}
+.agenda-campos select{width:100%;min-width:0;min-height:44px;font:inherit;font-size:16px;padding:4px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
 .days{list-style:none;margin:0;padding:0}
 .day{width:100%;display:grid;grid-template-columns:5.4rem minmax(0,1fr) auto;align-items:center;gap:8px;min-height:50px;border:0;border-top:1px solid var(--line);background:transparent;text-align:left;cursor:pointer;padding:6px 4px}
 .days li:first-child .day{border-top:0}
@@ -356,7 +368,7 @@ details.how .lbl{font-weight:700}
   </section>
   <nav class="views" id="views" aria-label="Telas">
     <button type="button" data-view="treino" aria-pressed="true">Treino</button>
-    <button type="button" data-view="semanas" aria-pressed="false">Sequência</button>
+    <button type="button" data-view="semanas" aria-pressed="false">Agenda</button>
     <button type="button" data-view="cal" aria-pressed="false">Calendário</button>
     <button type="button" data-view="progresso" aria-pressed="false">Progresso</button>
     <button type="button" data-view="rotina" aria-pressed="false">Rotina</button>
@@ -364,6 +376,7 @@ details.how .lbl{font-weight:700}
   <div class="bkrow"><button type="button" class="btn quiet" id="somAvisos" aria-pressed="false" aria-describedby="somAvisosNota">Apitos: desligados</button></div>
   <p class="fine" id="somAvisosNota">Descanso com aviso na tela, para acompanhar sua música.</p>
   <div id="vTreino">
+    <section id="agendaInicio" aria-label="Agenda desta semana"></section>
     <nav class="tabs" id="tabs" aria-label="Treinos da semana"></nav>
     <section id="workout" aria-live="polite"></section>
     <section class="hist" id="hist" aria-labelledby="histTitle"></section>
@@ -596,19 +609,24 @@ details.how .lbl{font-weight:700}
     { id:'D', nome:'Pernas 2 + tronco', curto:'Pernas 2', foco:'coxa, glúteo e panturrilha, com ombro, tríceps e tronco', min:65,
       ex:[['c4',3],['c1',2],['c2',2],['c5',2],['e3',2],['c6',2],['a5',3],['a7',2],['d6',2]] },
   ];
-  W2.forEach(w => { w.ex = w.ex.map(([id, s]) => Object.assign({}, X2[id], { id, s })); });
+  // Ficha 3: mantém as prescrições e concentra ombro e braços nos dias de superiores.
+  const W3 = W2.map(w => {
+    if (w.sup) return { ...w };
+    const tirar = w.id === 'B' ? ['a5','b6'] : ['a5','a7'];
+    return { ...w, foco:'coxa, glúteo, panturrilha e tronco', ex:w.ex.filter(([id]) => !tirar.includes(id)) };
+  });
+  for (const ficha of [W2,W3]) ficha.forEach(w => { w.ex = w.ex.map(([id, s]) => Object.assign({}, X2[id], { id, s })); });
 
   // Cada exercício sabe o treino (w) e a ficha (f) de onde veio.
   function montar(f, treinos){
     treinos.forEach(w => { w.f = f; w.porEx = {}; w.ex.forEach(e => { e.w = w.id; e.f = f; w.porEx[e.id] = e; }); });
     return { treinos, porId:Object.fromEntries(treinos.map(w => [w.id, w])) };
   }
-  const FICHAS = { 1:montar(1, W1), 2:montar(2, W2) };
-  const ATUAL = 2;
+  const FICHAS = { 1:montar(1, W1), 2:montar(2, W2), 3:montar(3, W3) };
+  const ATUAL = 3;
   // Ficha de um treino marcado à mão: hoje, a atual (igual a um treino feito pelo app);
-  // num dia antigo, a que valia na data (a ficha 2 começou em 28/09/2026).
-  const INICIO_ATUAL = new Date(2026, 8, 28).getTime();
-  const fichaDoDia = k => k === ymd(new Date()) || parseKey(k).getTime() >= INICIO_ATUAL ? ATUAL : 1;
+  // Num dia antigo, usa a ficha que valia na data.
+  const fichaDoDia = k => k === ymd(new Date()) || k >= '2026-11-13' ? ATUAL : k >= '2026-09-28' ? 2 : 1;
   const W = FICHAS[ATUAL].treinos, WB = FICHAS[ATUAL].porId;
   const CONHECIDOS = new Set();
   Object.values(FICHAS).forEach(f => f.treinos.forEach(w => w.ex.forEach(e => CONHECIDOS.add(e.id))));
@@ -626,6 +644,8 @@ details.how .lbl{font-weight:700}
   const ymd = d => d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
   const dm = d => pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1);
   const ORDEM = ['A', 'B', 'C', 'D'];
+  const SEMANA_PADRAO = { A:0, B:1, C:3, D:4 };
+  const DIAS_SEMANA = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
   const diasEntre = (a, b) => Math.round((new Date(b.getFullYear(), b.getMonth(), b.getDate()) - new Date(a.getFullYear(), a.getMonth(), a.getDate())) / 86400000);
   let view = 'treino';
   let calY = new Date().getFullYear(), calM = new Date().getMonth(), calSel = ymd(new Date()), regOpen = false;
@@ -703,10 +723,25 @@ details.how .lbl{font-weight:700}
   }
   const aquecimentoRegistrado = s => !!s && (s.done || s.kg != null || s.reps != null);
   const temAquecimento = c => Object.values(c.aquecimento || {}).some(series => series.some(aquecimentoRegistrado));
+  function limparAgenda(agenda){
+    const semanas = {};
+    if (!agenda || typeof agenda !== 'object' || Array.isArray(agenda)) return semanas;
+    for (const [data, dias] of Object.entries(agenda)) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(data) || !dias || typeof dias !== 'object') continue;
+      const segundaDaSemana = parseKey(data);
+      if (ymd(segundaDaSemana) !== data || segundaDaSemana.getDay() !== 1) continue;
+      const posicoes = ORDEM.map(id => dias[id]);
+      if (posicoes.some(dia => !Number.isInteger(dia) || dia < 0 || dia > 6) || new Set(posicoes).size !== ORDEM.length) continue;
+      semanas[data] = Object.fromEntries(ORDEM.map((id, i) => [id,posicoes[i]]));
+    }
+    return semanas;
+  }
   function sanitize(d){
     const out = { v:1, cur:null, hist:[], upd:Number(d && d.upd) || 0 };
     const rotina = cleanRotina(d && d.rotina);
     if (rotina) out.rotina = rotina;
+    const agenda = limparAgenda(d?.agendaTreino);
+    if (Object.keys(agenda).length) out.agendaTreino = agenda;
     if (d && d.preferenciasTreino && d.preferenciasTreino.adaptacaoConcluida === true) out.preferenciasTreino = { adaptacaoConcluida:true };
     const cleanSets = sets => {
       const o = {};
@@ -1030,12 +1065,14 @@ details.how .lbl{font-weight:700}
 
   // ---------------- histórico e sugestão ----------------
   // Sem ficha explícita, preserva a última carga como referência na migração da ficha antiga.
-  // A interpretação usa somente a mesma ficha e também vê exercícios interrompidos com relato.
+  // A ficha 3 pode usar registros da ficha 2 para movimentos mantidos no mesmo treino.
+  const fichaComparavel = (origem, destino) => origem === destino || (origem === 2 && destino === 3);
   function sessoes(exId, n, ficha = null, relatos = false){
     const out = [];
     for (let i = state.hist.length - 1; i >= 0 && out.length < n; i--) {
       const h = state.hist[i];
-      if ((ficha !== null && (h.ficha || 1) !== ficha) || h.start > Date.now()) continue;
+      if ((ficha !== null && !fichaComparavel(h.ficha || 1, ficha)) || h.start > Date.now()) continue;
+      if (ficha === 3 && !treinoDe(3, h.wid)?.porEx[exId]) continue;
       const sets = (h.sets[exId] || []).filter(s => s && s.done);
       const feedback = h.feedback && h.feedback[exId] || {};
       if (sets.length || (relatos && Object.keys(feedback).length)) {
@@ -1054,7 +1091,7 @@ details.how .lbl{font-weight:700}
   };
   const completa = sessao => !!(sessao && sessao.ex && !sessao.h.interrompido && (!sessao.h.encerramento || sessao.h.encerramento === 'completo') && sessao.h.modo !== 'curto' && sessao.h.modo !== 'adaptacao' &&
     sessao.sets.length >= ((sessao.h.plano && sessao.h.plano[sessao.ex.id]) || sessao.ex.s));
-  const bateuTopo = (e, sessao) => !!(completa(sessao) && sessao.ex.f === e.f &&
+  const bateuTopo = (e, sessao) => !!(completa(sessao) && fichaComparavel(sessao.ex.f, e.f) &&
     sessao.sets.every(s => s.reps !== null && s.reps >= e.r[1]));
   function tendenciaExercicio(e, atual, antes){
     if (!atual || !antes || !atual.sets.length || !antes.sets.length) return 'Ainda falta outra sessão com séries anotadas para comparar.';
@@ -1075,23 +1112,25 @@ details.how .lbl{font-weight:700}
     const tendencia = tendenciaExercicio(e, atual, antes);
     const resposta = (status, titulo, texto, pronto = false) => ({ sessoes:registros, status, titulo, texto, tendencia, pronto });
     const relatos = registros.map(s => s.feedback);
-    const corrente = state.cur && state.cur.ficha === e.f && state.cur.feedback && state.cur.feedback[e.id];
+    const c = state.cur;
+    const compativel = c && fichaComparavel(c.ficha, e.f) && treinoDe(e.f, c.wid)?.porEx[e.id];
+    const corrente = compativel && c.feedback?.[e.id];
     if (corrente) relatos.unshift(corrente);
     if (relatos.some(f => f.dor === 'sim')) return resposta('revisar', 'Rever antes de progredir', 'Há relato recente de dor ou desconforto. Não aumente a carga com base nestes números; confira a execução e a tolerância com seu professor ou fisioterapeuta.');
     if (relatos.some(f => f.tecnica === 'ajustar')) return resposta('revisar', 'Conferir a execução', 'Você marcou dificuldade para manter a técnica. Revise a execução antes de considerar aumento de carga.');
-    const reserva = e.f === ATUAL || e.pernas ? 2 : 1;
-    const seriesRelatadas = registros.flatMap(s => s.sets).concat(state.cur && state.cur.ficha === e.f ? state.cur.sets[e.id] || [] : []);
+    const reserva = e.f >= 2 || e.pernas ? 2 : 1;
+    const seriesRelatadas = registros.flatMap(s => s.sets).concat(compativel ? c.sets[e.id] || [] : []);
     if (!e.tempo && seriesRelatadas.some(s => s && Number.isInteger(s.rir) && s.rir < reserva)) return resposta('reserva', 'Preservar a reserva', 'Há uma série com menos de ' + reserva + ' repetições em reserva registradas. Confira o esforço antes de considerar aumento de carga.');
     if (!e.tempo && relatos.some(f => Number.isInteger(f.rir) && f.rir < reserva)) return resposta('reserva', 'Preservar a reserva', 'O relato indica menos de ' + reserva + (reserva === 1 ? ' repetição possível' : ' repetições possíveis') + ' ao terminar. Evite aumentar agora; ajuste o esforço para manter a reserva prevista.');
     if (!atual || !atual.sets.length) return resposta('dados', 'Começar o acompanhamento', 'Registre carga, repetições e como foi o exercício. Um treino marcado só no calendário conta para a frequência, mas não permite avaliar desempenho.');
-    if (!antes || !antes.sets.length) return resposta('dados', 'Primeira referência registrada', 'Ainda falta outra sessão deste exercício na mesma ficha. Use a última carga apenas como referência, conforme a tolerância do dia.');
+    if (!antes || !antes.sets.length) return resposta('dados', 'Primeira referência registrada', 'Ainda falta outra sessão comparável deste exercício. Use a última carga apenas como referência, conforme a tolerância do dia.');
     if (e.tempo || e.semPeso) return resposta('manter', 'Acompanhar o controle', 'Compare as séries e preserve a execução. O app não aumenta automaticamente o tempo ou a dificuldade deste exercício.');
     if (!completa(atual) || !completa(antes)) return resposta('manter', 'Manter a referência', 'Há uma sessão curta, de adaptação ou com menos séries que as previstas. Ela conta como treino; aguarde duas sessões completas para avaliar aumento de carga.');
     const topo = bateuTopo(e, atual) && bateuTopo(e, antes);
     if (!topo) return resposta('manter', 'Construir repetições', 'O topo da faixa ainda não apareceu em todas as séries de duas sessões. Mantenha a carga se estiver confortável e avance nas repetições dentro da faixa, preservando técnica e reserva.');
     if (cargaUnica(atual) === null || cargaUnica(atual) !== cargaUnica(antes)) return resposta('manter', 'Confirmar a mesma carga', 'Você chegou ao topo da faixa, mas as cargas diferem. Avalie duas sessões completas com a mesma carga antes de considerar um aumento.');
-    const c = state.cur;
-    const reduzido = e.f === ATUAL && (adaptacao() || curtaAtiva(e.w) || !!(c && c.ficha === e.f && c.wid === e.w && ['curto','adaptacao'].includes(c.modo)));
+    const sessaoReduzida = compativel && c.wid === e.w && ['curto','adaptacao'].includes(c.modo);
+    const reduzido = (e.f === ATUAL && adaptacao()) || curtaAtiva(e.w) || sessaoReduzida;
     if (reduzido) return resposta('manter', 'Focar na sessão reduzida', 'Durante a adaptação ou versão curta, mantenha a referência conforme a tolerância do dia. Deixe a avaliação de aumento para uma sessão completa.');
     const confirmado = registros.every(s => s.feedback.dor === 'nao' && s.feedback.tecnica === 'boa' && Number.isInteger(s.feedback.rir) && s.feedback.rir >= reserva);
     if (!confirmado) return resposta('relato', 'Completar o relato', 'Os números atingiram o critério de duas sessões no topo. Ainda faltam relatos de técnica, reserva ou desconforto; não dá para concluir que aumentar é adequado. Preencha esses dados nos próximos treinos.');
@@ -1115,7 +1154,8 @@ details.how .lbl{font-weight:700}
   function faltamAdaptacao(){
     const h = state.hist;
     if (adaptMemo && adaptMemo.h === h && adaptMemo.n === h.length) return adaptMemo.v;
-    const feitos = new Set(h.filter(x => !x.interrompido && x.ficha === ATUAL).map(x => x.wid));
+    // A ficha de quatro dias reaproveita a adaptação aos mesmos movimentos.
+    const feitos = new Set(h.filter(x => !x.interrompido && x.ficha >= 2).map(x => x.wid));
     adaptMemo = { h, n:h.length, v:ORDEM.filter(l => !feitos.has(l)) };
     return adaptMemo.v;
   }
@@ -1140,7 +1180,7 @@ details.how .lbl{font-weight:700}
   const exibidos = w => curtaAtiva(w.id) ? w.ex.filter((e, i) => i < 4 || (curta.tronco && e.tronco)) : w.ex;
   // Séries que valem hoje.
   const S = e => state.cur && state.cur.wid === e.w && state.cur.ficha === e.f && state.cur.plano && state.cur.plano[e.id]
-    || (e.f === ATUAL && (adaptacao() || curtaAtiva(e.w)) ? Math.min(2, e.s) : e.s);
+    || ((e.f === ATUAL && adaptacao()) || (e.f >= 2 && curtaAtiva(e.w)) ? Math.min(2, e.s) : e.s);
   function registrarPlanoAtual(){
     const c = state.cur;
     if (!c) return;
@@ -1161,14 +1201,17 @@ details.how .lbl{font-weight:700}
   function joinPt(xs){ return xs.length <= 1 ? xs.join('') : xs.slice(0, -1).join(', ') + ' e ' + xs[xs.length - 1]; }
 
   // ---------------- render ----------------
+  function ultimoTreinoDaFicha(){
+    for (let i = state.hist.length - 1; i >= 0; i--) {
+      const h = state.hist[i];
+      if (!h.interrompido && ORDEM.includes(h.wid) && h.start <= Date.now()) return h;
+    }
+    return null;
+  }
   function proximo(){
     if (state.cur) return state.cur.wid;
-    for (let i = state.hist.length - 1; i >= 0; i--) {
-      if (state.hist[i].interrompido) continue;
-      const k = ORDEM.indexOf(state.hist[i].wid);
-      if (k >= 0) return state.hist[i].proximo || ORDEM[(k + 1) % ORDEM.length];
-    }
-    return 'A';
+    const h = ultimoTreinoDaFicha();
+    return h ? h.proximo || ORDEM[(ORDEM.indexOf(h.wid) + 1) % ORDEM.length] : 'A';
   }
   function diasTreinados(){
     const d = new Set();
@@ -1181,24 +1224,63 @@ details.how .lbl{font-weight:700}
     for (let i = 0; i < n; i++) { const d = new Date(now); d.setDate(now.getDate() - i); if (feitos.has(ymd(d))) c++; }
     return c;
   }
+  function planoSemana(data = new Date()){
+    const inicio = segunda(data), chave = ymd(inicio);
+    const dias = state.agendaTreino?.[chave] || SEMANA_PADRAO;
+    const feitos = {};
+    for (const h of state.hist) {
+      if (h.interrompido || !ORDEM.includes(h.wid) || h.start > Date.now()) continue;
+      const dia = diasEntre(inicio, new Date(h.start));
+      if (dia >= 0 && dia < 7) feitos[h.wid] = dia;
+    }
+    return { chave, inicio, dias, feitos, hoje:diasEntre(inicio, data) };
+  }
+  function sugestaoSemana(semana, de = semana.hoje){
+    return ORDEM.filter(id => !Object.hasOwn(semana.feitos, id) && semana.dias[id] >= de)
+      .sort((a, b) => semana.dias[a] - semana.dias[b])[0] || null;
+  }
   function todayInfo(){
     const now = new Date(), k = ymd(now);
-    const nx = proximo(), nome = nx + ' (' + WB[nx].nome + ')';
-    const feitos = diasTreinados();
     if (state.cur) return { txt:'Treino ' + state.cur.wid + (esquecido(state.cur) ? ' ficou aberto: finalize ou descarte.' : ' em andamento.'), wid:state.cur.wid };
-    if (feitos.has(k)) return { txt:'Treino de hoje feito. Próximo: ' + nome + '.', wid:nx };
-    const d1 = new Date(now); d1.setDate(now.getDate() - 1);
-    const d2 = new Date(now); d2.setDate(now.getDate() - 2);
-    if (feitos.has(ymd(d1)) && feitos.has(ymd(d2))) return { txt:'Você treinou 2 dias seguidos: hoje é dia de descanso. Próximo: ' + nome + '.', wid:nx };
-    const sem = recentes(7);
-    if (sem >= 4) return { txt:'Já foram ' + sem + ' treinos nos últimos 7 dias: pode descansar. Próximo: ' + nome + '.', wid:nx };
-    return { txt:'Próximo treino: ' + nome + '.', wid:nx };
+    const jaFez = diasTreinados().has(k);
+    const ultimo = ultimoTreinoDaFicha();
+    if (ultimo?.proximo && ultimo.proximo === ultimo.wid) {
+      return { txt:(jaFez ? 'Treino de hoje feito. ' : '') + 'Você escolheu repetir o Treino ' + ultimo.wid + ' na próxima sessão.', wid:ultimo.wid };
+    }
+    const semana = planoSemana(now), nx = sugestaoSemana(semana, semana.hoje + (jaFez ? 1 : 0));
+    const nome = nx && nx + ' (' + WB[nx].nome + ')';
+    if (jaFez) return { txt:'Treino de hoje feito.' + (nx ? ' Próximo na agenda: ' + nome + '.' : ''), wid:nx || proximo() };
+    if (nx && semana.dias[nx] === semana.hoje) return { txt:'Hoje na agenda: Treino ' + nome + '.', wid:nx };
+    return { txt:nx ? 'Hoje livre. Próximo na agenda: ' + nome + ' · ' + DIAS_SEMANA[semana.dias[nx]].toLowerCase() + '.' : 'Hoje livre. Confira a agenda da semana.', wid:nx || proximo() };
+  }
+
+  function agendaHTML(semana, editar = false){
+    const { dias, feitos, hoje, inicio } = semana;
+    const letras = Object.fromEntries(ORDEM.map(id => [dias[id], id]));
+    const fim = new Date(inicio); fim.setDate(inicio.getDate() + 6);
+    let html = '<div class="card agenda"><div class="wkhead"><h3>Esta semana</h3><span>' + dm(inicio) + ' a ' + dm(fim) + '</span></div>' +
+      '<p class="wkcount" data-agenda-contagem>' + Object.keys(feitos).length + ' de 4 treinos feitos</p><ul class="agenda-dias">';
+    html += DIAS_SEMANA.map((nome, i) => {
+      const id = letras[i], feito = id && Object.hasOwn(feitos, id);
+      const classe = ' class="agenda-dia' + (feito ? ' feito-dia' : '') + '"' + (hoje === i ? ' aria-current="date"' : '');
+      const feitoOutroDia = feito && feitos[id] !== i ? '<small>' + DIAS_SEMANA[feitos[id]].slice(0,3) + '</small>' : '';
+      const conteudo = '<span>' + nome.slice(0,3) + '</span><strong>' + (id ? id + (feito ? ' ✓' : '') : '–') + '</strong>' + feitoOutroDia;
+      const rotulo = nome + (id ? ', treino ' + id + (feito ? ', feito ' + DIAS_SEMANA[feitos[id]].toLowerCase() : ', planejado') : ', dia livre');
+      return '<li>' + (id ? '<button type="button" data-open="' + id + '"' + classe + ' aria-label="' + rotulo + '">' + conteudo + '</button>'
+        : '<div' + classe + ' aria-label="' + rotulo + '">' + conteudo + '</div>') + '</li>';
+    }).join('') + '</ul>';
+    if (!editar) return html + '<button type="button" class="minbtn" data-editar-agenda>Trocar dia</button></div>';
+    html += '<details class="agenda-editar"><summary>Trocar dia</summary><p class="wkcount">A troca vale para esta semana. Escolher um dia ocupado troca os dois treinos.</p><div class="agenda-campos">';
+    html += ORDEM.map(id => '<label>Treino ' + id + '<select data-agenda-troca="' + id + '">' +
+      DIAS_SEMANA.map((nome, i) => '<option value="' + i + '"' + (dias[id] === i ? ' selected' : '') + '>' + nome + '</option>').join('') + '</select></label>').join('');
+    return html + '</div></details></div>';
   }
 
   function renderSemanas(){
-    const now = new Date(), nx = proximo(), ult = {};
+    const now = new Date(), nx = todayInfo().wid, ult = {};
     state.hist.forEach(h => { if (!h.interrompido) ult[h.wid] = h.start; });
-    let html = '<h2 class="vt">Sua sequência</h2><p class="vsub">Sem dia fixo: treine nos dias que der, sempre nesta ordem. Toque num treino para abrir.</p><ul class="days seq">';
+    let html = '<h2 class="vt">Agenda de treino</h2>' + agendaHTML(planoSemana(now), true) +
+      '<p class="vsub">Toque em um treino para abrir. Nos dias livres, faça descanso ou atividade leve.</p><ul class="days seq">';
     html += ORDEM.map(id => {
       const w = WB[id];
       let st;
@@ -1210,9 +1292,22 @@ details.how .lbl{font-weight:700}
       } else st = '<span class="st">Ainda não feito</span>';
       return '<li><button type="button" class="day seqrow' + (id === nx ? ' is-today' : '') + '" data-open="' + id + '"><span class="dw"><b>' + id + '</b>' + esc(w.nome) + '</span><span class="foco">' + esc(w.foco) + '</span>' + st + '</button></li>';
     }).join('') + '</ul>';
-    html += '<section class="wk"><h3>Organização da rotina</h3><ul class="rules"><li>Ficha atual: A e C são superiores; B e D são pernas e tronco.</li><li>Referência: 3 sessões por semana; uma quarta quando houver tempo e recuperação.</li><li>Se fizer só 3 numa semana, continue a ordem na seguinte, sem recomeçar pelo A. Não compense falta dobrando treino.</li><li>A proposta organiza até 2 dias seguidos antes de descansar; isso não é uma proibição universal.</li></ul></section>';
-    html += '<section class="wk"><h3>Frequência</h3><p class="wkcount">Últimos 7 dias: <b>' + recentes(7) + '</b> treinos (meta: 3 a 4).</p><p class="wkcount">Treinos registrados aqui: <b>' + state.hist.filter(h => !h.interrompido).length + '</b>.</p><button type="button" class="btn" data-gocal>Ver calendário</button></section>';
+    html += '<section class="wk"><h3>Frequência</h3><p class="wkcount">Últimos 7 dias: <b>' + recentes(7) + '</b> treinos.</p><p class="wkcount">Meta da agenda: 4 treinos por semana.</p><button type="button" class="btn" data-gocal>Ver calendário</button></section>';
     $('vSemanas').innerHTML = html;
+  }
+  function trocarDiaAgenda(campo){
+    const semana = planoSemana(), id = campo.dataset.agendaTroca, dia = Number(campo.value);
+    if (!ORDEM.includes(id) || !Number.isInteger(dia) || dia < 0 || dia > 6 || semana.dias[id] === dia) return;
+    const dias = { ...semana.dias };
+    const ocupado = ORDEM.find(letra => dias[letra] === dia);
+    if (ocupado) dias[ocupado] = dias[id];
+    dias[id] = dia;
+    state.agendaTreino = { ...state.agendaTreino, [semana.chave]:dias };
+    if (!state.cur) sel = todayInfo().wid;
+    commit(); nuvemAgendar(); renderAll();
+    $('vSemanas').querySelector('.agenda-editar').open = true;
+    $('vSemanas').querySelector('[data-agenda-troca="' + id + '"]').focus({ preventScroll:true });
+    say('Agenda atualizada. Treino ' + id + ' na ' + DIAS_SEMANA[dia].toLowerCase() + '.');
   }
 
   // ---------------- registros e calendário ----------------
@@ -1538,7 +1633,7 @@ details.how .lbl{font-weight:700}
         '<span class="abrir">Abrir</span></button></li>';
     }
     const sg = suggest(e);
-    const sobram = e.f === ATUAL && adaptacao() ? '3' : e.f === ATUAL || e.pernas ? '2 ou 3' : '1 ou 2';
+    const sobram = e.f === ATUAL && adaptacao() ? '3' : e.f >= 2 || e.pernas ? '2 ou 3' : '1 ou 2';
     let info = '';
     if (sg.last) info += '<p class="last">' + esc(lastTxt(e, sg.last)) + '</p>';
     else if (e.kg) info += '<p class="last">Referência cadastrada: ' + fmt(e.kg) + ' kg. Confira sua carga atual e a tolerância de hoje.</p>';
@@ -1670,7 +1765,7 @@ details.how .lbl{font-weight:700}
       '<p class="dnote">Dá para ver os exercícios abaixo, mas os campos ficam travados até amanhã.</p></div>';
   }
   function concluidoHTML(h){
-    const nx = proximo();
+    const nx = todayInfo().wid;
     let html = '<div class="feito"><p class="feito-t">' + CHECK + '<b>Treino ' + h.wid + (h.manual ? ' marcado como feito hoje' : ' concluído hoje') + '</b></p>';
     if (!(lastSummary && lastSummary.wid === h.wid)) html += '<p>' + esc(h.manual ? 'Marcado no calendário, sem as séries.' : cap(entryMeta(h)) + '.') + '</p>';
     html += '<div class="bkrow">' + (nx !== h.wid ? '<button type="button" class="btn primary" data-go="' + nx + '">Ir para o Treino ' + nx + '</button>' : '') +
@@ -1709,11 +1804,11 @@ details.how .lbl{font-weight:700}
         '<button type="button" class="btn primary" data-act="finish">Finalizar treino</button><button type="button" class="btn quiet" data-act="discard">Descartar</button>';
     } else if (ativo) {
       html += '<p id="progresso"></p>';
-      if (nova && curtaAtiva(w.id)) {
+      if (w.f >= 2 && curtaAtiva(w.id)) {
         html += '<p class="curta-on">Versão curta: ' + exibidos(w).length + ' exercícios, 2 séries. Reserve cerca de 30 a 40 min; use de vez em quando, quando faltar tempo ou disposição.</p>' +
           (temTronco(w) ? '<button type="button" class="minbtn" data-curta="tronco">' + (curta.tronco ? 'Tirar o tronco' : 'Incluir o tronco') + '</button>' : '') +
           '<button type="button" class="minbtn" data-curta="sair">Voltar ao treino completo</button>';
-      } else if (nova) html += '<button type="button" class="minbtn" data-curta="ligar">Versão curta</button>';
+      } else if (w.f >= 2) html += '<button type="button" class="minbtn" data-curta="ligar">Versão curta</button>';
     } else if (outro) {
       html += '<p>O Treino ' + c.wid + ' está em andamento. Termine ou descarte ele para começar este.</p><button type="button" class="btn" data-go="' + c.wid + '">Voltar para o Treino ' + c.wid + '</button>';
     } else if (hoje && hoje.wid === w.id) {
@@ -1739,7 +1834,7 @@ details.how .lbl{font-weight:700}
         '</select></label><p class="fine">Só as séries feitas serão contadas. Sem séries de trabalho, a fila fica onde estava. Não há séries para compensar depois.</p></details>';
       html += '<div class="finish"><button type="button" class="btn primary" data-act="finish">Finalizar treino</button><button type="button" class="btn quiet" data-act="discard">Descartar</button></div>';
     }
-    html += '<p class="note">Perdeu um dia? Continue a sequência, sem compensar faltas dobrando treino. A proposta organiza até dois dias seguidos antes de descansar.</p>';
+    html += '<p class="note">Perdeu um dia? Ajuste a agenda da semana sem dobrar o treino.</p>';
     $('workout').innerHTML = html;
     progressText();
   }
@@ -1785,7 +1880,7 @@ details.how .lbl{font-weight:700}
     const dias7 = recentes(7), dias28 = recentes(28);
     let html = '<h2 class="vt" id="progressoTitle">Seu progresso</h2><p class="vsub">Atualizado com os treinos salvos neste aparelho e os backups que você restaurar.</p>';
     html += '<div class="cal-stats"><div class="stat"><b data-frequencia="7">' + dias7 + '</b><span>dias treinados nos últimos 7 dias</span></div><div class="stat"><b data-frequencia="28">' + dias28 + '</b><span>dias treinados nos últimos 28 dias</span></div></div>';
-    html += '<p class="note">Referência: 3 sessões por semana, com uma quarta quando houver tempo e recuperação. A sequência continua de onde você parou; não precisa compensar faltas.</p>';
+    html += '<p class="note">Meta da agenda: 4 treinos de musculação por semana.</p>';
     const iniVolume = new Date(); iniVolume.setHours(0, 0, 0, 0); iniVolume.setDate(iniVolume.getDate() - 6);
     const periodo = state.hist.filter(h => !h.interrompido && h.start >= +iniVolume && h.start <= Date.now());
     const detalhados = periodo.filter(h => !h.manual && Object.keys(h.sets || {}).length);
@@ -1796,13 +1891,13 @@ details.how .lbl{font-weight:700}
       '<p><b data-volume-sete>' + volume7 + '</b> séries efetivamente anotadas em detalhe nos últimos 7 dias, em todas as fichas.</p>' +
       '<p class="fine">Um ciclo pode durar mais de sete dias. Aquecimentos ficam fora; uma série unilateral não é dobrada por fazer os dois lados. O app não atribui séries indiretas a músculos.</p>' +
       (semDetalhe ? '<p class="fine">' + semDetalhe + ' registros manuais ou compactados sem detalhe ficam fora deste total; o volume real pode ser maior.</p>' : '') + '</section>';
-    html += '<p><b>' + (state.cur ? 'Em andamento: ' : 'Próximo da sequência: ') + 'Treino ' + proximo() + '.</b></p>';
+    html += '<p><b>' + esc(todayInfo().txt) + '</b></p>';
     html += '<p class="fine">A leitura abaixo usa regras de comparação, funciona offline e não altera as cargas sozinha. Mais peso ou repetições não confirma ganho de massa nem garante que uma carga seja adequada. Relatos ausentes continuam desconhecidos.</p>';
     const vistos = new Set(), lista = [];
     const registros = state.cur ? state.hist.concat(state.cur) : state.hist;
     for (let i = registros.length - 1; i >= 0; i--) {
       const h = registros[i];
-      if ((h.ficha || 1) !== ATUAL || h.start > Date.now()) continue;
+      if (!fichaComparavel(h.ficha || 1, ATUAL) || h.start > Date.now()) continue;
       const w = treinoDe(ATUAL, h.wid);
       if (!w) continue;
       for (const id of new Set(Object.keys(h.sets || {}).concat(Object.keys(h.feedback || {})))) {
@@ -1830,6 +1925,7 @@ details.how .lbl{font-weight:700}
     $('vCal').hidden = view !== 'cal';
     $('vProgresso').hidden = view !== 'progresso';
     $('rotinaView').hidden = view !== 'rotina';
+    $('agendaInicio').innerHTML = agendaHTML(planoSemana());
     renderTabs();
     renderWorkout();
     renderHist();
@@ -1906,7 +2002,7 @@ details.how .lbl{font-weight:700}
     const resumoSeries = feitas === noPlano ? feitas + ' de ' + total + ' séries de trabalho.' :
       feitas + (feitas === 1 ? ' série de trabalho no total. ' : ' séries de trabalho no total. ') + noPlano + ' de ' + total + ' no plano atual.';
     let html = '<div class="summary"><h3>' + (interrompido ? (soAquecimento ? 'Aquecimento salvo · treino interrompido' : 'Relato salvo · treino interrompido') : 'Treino ' + w.id + ' salvo') + '</h3><p>' + (interrompido ? (soAquecimento ? 'Aquecimentos preservados, sem séries de trabalho. A sequência e a frequência não mudaram.' : 'Sem séries concluídas. Seu relato foi guardado; a sequência e a frequência não mudaram.') : min + ' min e ' + resumoSeries) + '</p>';
-    if (salvar) html += '<p>Próximo da sequência: <b>Treino ' + esc(proximo()) + '</b>.</p>';
+    if (salvar) html += '<p>' + esc(todayInfo().txt) + '</p>';
     const respostas = Object.values(c.feedback || {});
     if (respostas.some(f => f.dor === 'sim')) html += '<p>Você registrou desconforto. Reveja os exercícios indicados em Progresso antes de repetir ou aumentar a carga.</p>';
     else if (respostas.some(f => f.tecnica === 'ajustar' || f.rir === 0)) html += '<p>Revise a execução e o esforço em Progresso antes de aumentar carga ou repetições.</p>';
@@ -2227,6 +2323,13 @@ details.how .lbl{font-weight:700}
     window.scrollTo({ top:0 });
   });
   document.addEventListener('click', ev => {
+    if (ev.target.closest('[data-editar-agenda]')) {
+      view = 'semanas'; renderAll();
+      const editor = $('vSemanas').querySelector('.agenda-editar');
+      editor.open = true; editor.querySelector('summary').focus({ preventScroll:true });
+      window.scrollTo({ top:0 });
+      return;
+    }
     const gc = ev.target.closest('[data-gocal]');
     if (gc) { const n = new Date(); calY = n.getFullYear(); calM = n.getMonth(); calSel = ymd(n); regOpen = false; view = 'cal'; renderAll(); window.scrollTo({ top:0 }); return; }
     const cm = ev.target.closest('[data-cm]');
@@ -2247,6 +2350,9 @@ details.how .lbl{font-weight:700}
     if (go) { sel = go.dataset.go; view = 'treino'; renderAll(); window.scrollTo({ top:0 }); return; }
     const r = ev.target.closest('[data-rest]');
     if (r && rest) { if (r.dataset.rest === 'skip') { rest = null; fecharAudio(); } else { rest.end += 30000; rest.total += 30; } updateDock(); return; }
+  });
+  $('vSemanas').addEventListener('change', ev => {
+    if (ev.target.matches('[data-agenda-troca]')) trocarDiaAgenda(ev.target);
   });
   $('workout').addEventListener('click', ev => {
     const adapt = ev.target.closest('[data-adaptacao-concluida]');
@@ -2728,6 +2834,9 @@ details.how .lbl{font-weight:700}
     const rotinaMudou = antesRotina !== JSON.stringify(state.rotina || null);
     const preferenciasMudou = !!(extras && extras.preferenciasTreino && !state.preferenciasTreino);
     if (preferenciasMudou) state.preferenciasTreino = extras.preferenciasTreino;
+    const antesAgenda = state.agendaTreino || {};
+    const agendaMudou = !!extras?.agendaTreino && Object.keys(extras.agendaTreino).some(semana => !Object.hasOwn(antesAgenda, semana));
+    if (agendaMudou) state.agendaTreino = { ...extras.agendaTreino, ...antesAgenda };
     const ids = new Set(state.hist.map(h => h.id));
     const novos = hist.filter(h => !ids.has(h.id) && ids.add(h.id));
     novos.forEach(h => state.hist.push(h));
@@ -2743,17 +2852,17 @@ details.how .lbl{font-weight:700}
     compact();
     commit();
     renderAll();
-    return { novos:novos.length, retomado, rotinaMudou, preferenciasMudou };
+    return { novos:novos.length, retomado, rotinaMudou, preferenciasMudou, agendaMudou };
   }
   function juntarBackup(txt, avisar){
     try {
       const dados = JSON.parse(txt);
       if (!dados || dados.v !== 1 || !Array.isArray(dados.hist)) throw new Error('backup-invalido');
       const limpo = sanitize(dados);
-      const { novos:n, retomado, rotinaMudou, preferenciasMudou } = juntarHist(limpo.hist, limpo.cur, limpo);
-      if (n || retomado || rotinaMudou || preferenciasMudou) nuvemAgendar();
+      const { novos:n, retomado, rotinaMudou, preferenciasMudou, agendaMudou } = juntarHist(limpo.hist, limpo.cur, limpo);
+      if (n || retomado || rotinaMudou || preferenciasMudou || agendaMudou) nuvemAgendar();
       const mensagem = n ? n + (n > 1 ? ' registros restaurados.' : ' registro restaurado.') : '';
-      avisar((mensagem + (retomado ? ' Treino em andamento restaurado.' : '') + (rotinaMudou ? ' Rotina e medidas restauradas.' : '') + (preferenciasMudou ? ' Preferências restauradas.' : '')).trim() || 'Esse backup não tinha treinos novos.');
+      avisar((mensagem + (retomado ? ' Treino em andamento restaurado.' : '') + (rotinaMudou ? ' Rotina e medidas restauradas.' : '') + (preferenciasMudou ? ' Preferências restauradas.' : '') + (agendaMudou ? ' Agenda restaurada.' : '')).trim() || 'Esse backup não tinha treinos novos.');
     } catch (e) { avisar('Esse arquivo não é um backup do app de treino.'); }
   }
   async function restaurarBackup(file){
@@ -2958,6 +3067,7 @@ details.how .lbl{font-weight:700}
       const difere = state.hist.some(h => !igualNv(h, remotos.get(h.id))) ||
         !!(state.rotina && !igualNv(mergeRotina(state.rotina, existente.rotina), existente.rotina)) ||
         !!(state.preferenciasTreino && !igualNv(state.preferenciasTreino, existente.preferenciasTreino)) ||
+        Object.entries(state.agendaTreino || {}).some(([semana,dias]) => !igualNv(dias, existente.agendaTreino?.[semana])) ||
         !!(state.cur && existente.cur && !igualNv(state.cur, existente.cur)) ||
         !!(mesma && antes.pendente);
       nv.pendente = difere; nv.conflito = difere; nv.erro = difere ? CONFLITO_NV : '';

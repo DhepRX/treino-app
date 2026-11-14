@@ -36,19 +36,19 @@ No celular, se algum botão não aparecer, toque em **aA** na barra do Safari e 
 4. Adicione de novo pelo Safari (passo 2 acima).
 5. Abra pelo ícone novo e toque em **Restaurar backup**, escolhendo o arquivo.
 
-## 3. A ficha (desde 28/09/2026)
+## 3. A ficha de quatro dias
 
-Ordem A → B → C → D, sem dia fixo, 3 a 4 vezes por semana. A e C são superiores; B e D são pernas e tronco.
+Faça A na segunda, B na terça, C na quinta e D na sexta. Quarta e sábado ficam livres para descanso ou atividade leve. Domingo fica livre para descanso. Use **Trocar dia** para ajustar a semana conforme sua disponibilidade.
 A ficha tira carga direta da coluna (sem afundo com carga, abdominal com carga nem serrote) e divide as pernas em dois dias mais leves.
 
 | Treino | Exercícios |
 | --- | --- |
 | **A · Superiores 1** | supino reto com halteres, puxada frontal, remada com halteres no banco inclinado, supino inclinado articulado, elevação lateral sentado, tríceps barra V, rosca direta barra W |
-| **B · Pernas 1 + tronco** | leg press 45°, cadeira flexora, elevação pélvica, cadeira extensora, panturrilha no leg press, elevação lateral sentado, rosca martelo sentado, bird-dog |
+| **B · Pernas 1 + tronco** | leg press 45°, cadeira flexora, elevação pélvica, cadeira extensora, panturrilha no leg press, bird-dog |
 | **C · Superiores 2** | supino inclinado com halteres, puxada com triângulo, remada com halteres no banco inclinado, crucifixo na polia, crucifixo invertido na polia, elevação lateral na polia, rosca Scott alternada, tríceps corda |
-| **D · Pernas 2 + tronco** | cadeira flexora, leg press 45°, cadeira extensora, elevação pélvica, cadeira abdutora, panturrilha no leg press, elevação lateral sentado, tríceps barra V, prancha |
+| **D · Pernas 2 + tronco** | cadeira flexora, leg press 45°, cadeira extensora, elevação pélvica, cadeira abdutora, panturrilha no leg press, prancha |
 
-- **Adaptação:** até fazer A, B, C e D uma vez na ficha nova, todos os exercícios aparecem com 2 séries, terminando com umas 3 repetições sobrando. Essa etapa é inicial e não recomeça a cada semana.
+- **Adaptação:** o primeiro ciclo usa 2 séries por exercício, com umas 3 repetições sobrando. O app aproveita o ciclo já feito na ficha 2.
 - **Esforço depois disso:** referência proposta de 2 a 3 repetições sobrando, preservando a execução. Não precisa ir até a falha. As cargas antigas de perna (160 kg no leg press, 90 kg na extensora) não são meta.
 - **Subir carga:** nos superiores e nas pernas, só considere um aumento depois de duas sessões completas do mesmo exercício, na mesma carga e no topo da faixa em todas as séries previstas. Para sugerir o menor incremento disponível, o app também pede seu registro de execução controlada, ausência de desconforto e repetições sobrando nas duas sessões. Ele mantém os pesos preenchidos; a decisão continua sendo sua, com o professor. Sem essas respostas, informa o que falta. Treinos curtos e de adaptação continuam registrados, mas não geram esse aviso de progressão.
 - **Um treino por dia:** depois de salvar, o treino fica concluído e os outros travam até o dia seguinte. Finalizou sem querer? "Reabrir o treino" volta com as séries marcadas.
@@ -57,7 +57,7 @@ A ficha tira carga direta da coluna (sem afundo com carga, abdominal com carga n
 - **Aquecimento com registro:** A1 e A2 aparecem na mesma lista das séries do primeiro exercício. Use **+ Aquecimento** abaixo da lista para acrescentar mais ou aquecer em outro exercício. Digite a carga e as repetições e toque no ✓ para iniciar o descanso. Em **Ajustes do aquecimento**, dá para mudar os segundos ou remover a linha. O aquecimento fica no histórico e no backup, sem contar na progressão.
 - **Exercícios concluídos:** ao marcar a última série de trabalho, o exercício recolhe e vai para o fim da lista. Abra o card no fim para corrigir. Se desmarcar uma série, o exercício volta para os pendentes.
 - **Encerramento:** antes de finalizar, é possível identificar a sessão como concluída, reduzida ou interrompida e escolher continuar a fila ou repetir a sessão na próxima ida. O app sempre conserva apenas as séries realmente feitas; uma sessão só com aquecimento não avança a fila.
-- Os treinos antigos (ficha 1: A Empurrar, B Puxar, C Pernas e abdômen, D Superior) continuam no calendário com os nomes da época.
+- Os treinos das fichas 1 e 2 continuam no calendário como foram registrados. O app usa as cargas anteriores dos exercícios que continuam na ficha.
 
 ## Alimentação, compras e medidas
 
